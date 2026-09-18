@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="az" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Kassa İdarəetmə Paneli</title>
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#4f46e5" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Kassa Panel" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Supabase JS Client v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- SheetJS (Excel Çıxarışı) -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pulse-dot {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .4; }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .shake-animation {
+      animation: shake 0.4s ease-in-out;
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .toast-anim {
+      animation: slideDown 0.3s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen pb-16 transition-colors duration-300">
+
+  <!-- ========================================== -->
+  <!-- 1. ŞİFRƏ / LOGİN EKRANI                    -->
+  <!-- ========================================== -->
+  <div id="authScreen" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div id="authBox" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-5 text-center">
+      <div class="w-16 h-16 bg-indigo-600/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-inner">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+      <div>
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Kassa İdarəetmə Paneli</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sistemə daxil olmaq üçün şifrəni daxil edin</p>
+      </div>
+
+      <div class="space-y-3">
+        <div class="relative">
+          <input type="password" id="passwordInput" placeholder="Şifrəni yazın..." 
+                 class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm text-center font-mono tracking-widest text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                 onkeydown="if(event.key==='Enter') verifyPassword()" />
+          <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xs">
+            <i id="pwdToggleIcon" class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+
+        <div id="authError" class="text-xs text-rose-500 font-medium hidden">
+          Şifrə yanlışdır! Yenidən cəhd edin.
+        </div>
+
+        <button onclick="verifyPassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl text-sm shadow-lg shadow-indigo-500/25 transition active:scale-95">
+          Daxil Ol <i class="fa-solid fa-arrow-right ml-1"></i>
+        </button>
+      </div>
+
+      <div class="text-[11px] text-slate-400 dark:text-slate-500 flex items-center justify-between pt-1">
+        <span>Təhlükəsizlik şifrəsi ilə qorunur</span>
+        <button type="button" onclick="openSettingsModal()" class="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 text-xs">
+          <i class="fa-solid fa-gear"></i>
+          <span>Ayarlar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Canlı Bildiriş Toast (Yuxarıda üzən bildiriş) -->
+  <div id="toastNotification" class="fixed top-3 left-1/2 -translate-x-1/2 z-40 max-w-sm w-11/12 bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 dark:border-slate-200 hidden toast-anim flex items-center space-x-3">
+    <div id="toastIcon" class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm">
+      <i class="fa-solid fa-cart-shopping"></i>
+    </div>
+    <div class="flex-1 text-left min-w-0">
+      <div id="toastTitle" class="text-xs font-bold truncate">Yeni Əməliyyat</div>
+      <div id="toastMsg" class="text-[11px] text-slate-300 dark:text-slate-600 truncate">Məlumat</div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-indigo-600 dark:bg-slate-900 text-white sticky top-0 z-30 shadow-md border-b border-indigo-700/50 dark:border-slate-800">
+    <div class="max-w-4xl mx-auto px-4 py-2.5 flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white text-base shadow-inner">
+          <i class="fa-solid fa-cash-register"></i>
+        </div>
+        <div>
+          <h1 id="headerStoreTitle" class="text-sm font-bold leading-tight">Canlı Kassa Paneli</h1>
+          <div class="flex items-center space-x-1.5 text-[11px] text-indigo-100 dark:text-slate-400">
+            <span id="connectionDot" class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
+            <span id="connectionStatus">Qoşulur...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alətlər Düymələri -->
+      <div class="flex items-center space-x-1.5">
+        <!-- Ayarlar -->
+        <button onclick="openSettingsModal()" id="settingsBtn" class="p-2 rounded-xl bg-indigo-700/80 dark:bg-slate-800 text-white transition active:scale-95 text-xs" title="Ayarlar">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+
+        <!-- Səs Aç/Bağla -->
+        <button onclick="toggleSound()" id="soundBtn" class="p-2 rounded-xl bg-indigo-700/80 dark:bg-slate-800 text-white transition active:scale-95 text-xs" title="Səsi Aç/Bağla">
+          <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+        </button>
+
+        <!-- Dark/Light Mode -->
+        <button onclick="toggleTheme()" id="themeBtn" class="p-2 rounded-xl bg-indigo-700/80 dark:bg-slate-800 text-white transition active:scale-95 text-xs" title="Gecə/Gündüz Rejimi">
+          <i id="themeIcon" class="fa-solid fa-moon"></i>
+        </button>
+
+        <!-- Yenilə -->
+        <button onclick="refreshData()" class="p-2 rounded-xl bg-indigo-700/80 dark:bg-slate-800 text-white transition active:scale-95 text-xs" title="Məlumatları Yenilə">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+
+        <!-- Çıxış (Logout) -->
+        <button onclick="logout()" class="p-2 rounded-xl bg-rose-600/80 dark:bg-rose-900/40 text-white transition active:scale-95 text-xs" title="Çıxış">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Əsas Konteyner -->
+  <main class="max-w-4xl mx-auto px-3.5 pt-3.5 space-y-3.5">
+
+    <!-- Tarix Filtrləri -->
+    <div class="bg-white dark:bg-slate-900 p-3 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-2">
+      <div class="grid grid-cols-4 gap-1.5">
+        <button onclick="setDateFilter('today')" id="btn-today" class="date-filter-btn py-1.5 text-xs font-semibold rounded-xl bg-indigo-600 text-white transition">Bu gün</button>
+        <button onclick="setDateFilter('yesterday')" id="btn-yesterday" class="date-filter-btn py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">Dünən</button>
+        <button onclick="setDateFilter('month')" id="btn-month" class="date-filter-btn py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">Bu ay</button>
+        <button onclick="setDateFilter('all')" id="btn-all" class="date-filter-btn py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">Hamısı</button>
+      </div>
+
+      <!-- Xüsusi Tarix Aralığı -->
+      <div class="flex items-center space-x-2 pt-1.5 border-t border-slate-100 dark:border-slate-800">
+        <div class="flex-1">
+          <label class="block text-[10px] text-slate-500 dark:text-slate-400 font-medium mb-0.5">Başlanğıc</label>
+          <input type="date" id="startDate" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 py-1 text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500" onchange="applyCustomDate()" />
+        </div>
+        <div class="flex-1">
+          <label class="block text-[10px] text-slate-500 dark:text-slate-400 font-medium mb-0.5">Bitiş</label>
+          <input type="date" id="endDate" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 py-1 text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500" onchange="applyCustomDate()" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Əsas Dövriyyə Kartları (2x2 Grid) -->
+    <div class="grid grid-cols-2 gap-2.5">
+      <!-- Nağd Satış -->
+      <div class="bg-white dark:bg-slate-900 p-3.5 rounded-2xl shadow-sm border border-emerald-100 dark:border-emerald-950/50 relative overflow-hidden">
+        <div class="flex items-center justify-between text-emerald-600 dark:text-emerald-400 mb-1">
+          <span class="text-xs font-semibold">Nağd Satış</span>
+          <div class="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-wallet"></i>
+          </div>
+        </div>
+        <div class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white" id="cardNeqd">0.00 ₼</div>
+        <div class="text-[11px] text-slate-400 dark:text-slate-500" id="cardNeqdCount">0 əməliyyat</div>
+      </div>
+
+      <!-- Nisyə Satış -->
+      <div class="bg-white dark:bg-slate-900 p-3.5 rounded-2xl shadow-sm border border-amber-100 dark:border-amber-950/50 relative overflow-hidden">
+        <div class="flex items-center justify-between text-amber-600 dark:text-amber-400 mb-1">
+          <span class="text-xs font-semibold">Nisyə (Borc)</span>
+          <div class="w-7 h-7 rounded-full bg-amber-50 dark:bg-amber-950/60 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+          </div>
+        </div>
+        <div class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white" id="cardNisye">0.00 ₼</div>
+        <div class="text-[11px] text-slate-400 dark:text-slate-500" id="cardNisyeCount">0 əməliyyat</div>
+      </div>
+
+      <!-- Qaytarılmalar -->
+      <div class="bg-white dark:bg-slate-900 p-3.5 rounded-2xl shadow-sm border border-rose-100 dark:border-rose-950/50 relative overflow-hidden">
+        <div class="flex items-center justify-between text-rose-600 dark:text-rose-400 mb-1">
+          <span class="text-xs font-semibold">Qaytarılan</span>
+          <div class="w-7 h-7 rounded-full bg-rose-50 dark:bg-rose-950/60 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-arrow-rotate-left"></i>
+          </div>
+        </div>
+        <div class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white" id="cardQaytarma">0.00 ₼</div>
+        <div class="text-[11px] text-slate-400 dark:text-slate-500" id="cardQaytarmaCount">0 qaytarılma</div>
+      </div>
+
+      <!-- Xalis Dövriyyə -->
+      <div class="bg-white dark:bg-slate-900 p-3.5 rounded-2xl shadow-sm border border-indigo-100 dark:border-indigo-950/50 relative overflow-hidden">
+        <div class="flex items-center justify-between text-indigo-600 dark:text-indigo-400 mb-1">
+          <span class="text-xs font-semibold">Xalis Dövriyyə</span>
+          <div class="w-7 h-7 rounded-full bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+        </div>
+        <div class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white" id="cardXalis">0.00 ₼</div>
+        <div class="text-[11px] text-slate-400 dark:text-slate-500" id="cardXalisDesc">Nağd + Nisyə - Qaytarma</div>
+      </div>
+    </div>
+
+    <!-- XÜSUSİ MƏNFƏƏT VƏ MAYA KARTLARI (Tarix aralığı üzrə cəmi) -->
+    <div class="grid grid-cols-2 gap-2.5">
+      <!-- Cəmi Maya Dəyəri -->
+      <div class="bg-slate-100 dark:bg-slate-900 p-3.5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-600 dark:text-slate-400 mb-1">
+          <span class="text-xs font-semibold">Cəmi Maya Dəyəri</span>
+          <div class="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-xs text-slate-500 dark:text-slate-300">
+            <i class="fa-solid fa-boxes-stacked"></i>
+          </div>
+        </div>
+        <div class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-200" id="cardMaya">0.00 ₼</div>
+        <div class="text-[11px] text-slate-500 dark:text-slate-500">Malların alış maya cəmi</div>
+      </div>
+
+      <!-- Cəmi Xalis Qazanc (Mənfəət) -->
+      <div class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-3.5 rounded-2xl shadow-md relative overflow-hidden">
+        <div class="flex items-center justify-between text-emerald-100 mb-1">
+          <span class="text-xs font-bold uppercase tracking-wider">Xalis Qazanc</span>
+          <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs text-white">
+            <i class="fa-solid fa-sack-dollar"></i>
+          </div>
+        </div>
+        <div class="text-xl sm:text-2xl font-black text-white" id="cardQazanc">0.00 ₼</div>
+        <div class="text-[11px] text-emerald-100" id="cardRentabellik">Rentabellik: 0%</div>
+      </div>
+    </div>
+
+    <!-- Top Məhsullar Qrafiki (Rejim keçidi ilə) -->
+    <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-2">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-trophy text-amber-500"></i>
+          <h2 class="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Top 5 Məhsul</h2>
+        </div>
+        <!-- Say / Qazanc keçidi -->
+        <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 text-[10px]">
+          <button onclick="setChartMode('qty')" id="btnChartQty" class="px-2 py-0.5 rounded-md bg-indigo-600 text-white font-semibold transition">Say üzrə</button>
+          <button onclick="setChartMode('profit')" id="btnChartProfit" class="px-2 py-0.5 rounded-md text-slate-600 dark:text-slate-300 font-semibold transition">Qazanc üzrə</button>
+        </div>
+      </div>
+      <div class="relative h-44 w-full">
+        <canvas id="topProductsChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Əməliyyat Tipi Süzgəcləri (Bütün, Nağd, Nisyə, Qaytarılma) -->
+    <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
+      <button onclick="setTypeFilter('all')" id="type-all" class="type-btn px-3 py-1.5 rounded-xl font-semibold bg-indigo-600 text-white shrink-0 transition">Bütün Əməliyyatlar</button>
+      <button onclick="setTypeFilter('Nağd')" id="type-neqd" class="type-btn px-3 py-1.5 rounded-xl font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 shrink-0 transition">Nağd Satışlar</button>
+      <button onclick="setTypeFilter('Nisyə')" id="type-nisye" class="type-btn px-3 py-1.5 rounded-xl font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 shrink-0 transition">Nisyə Satışlar</button>
+      <button onclick="setTypeFilter('QAYTARILMA')" id="type-qaytarma" class="type-btn px-3 py-1.5 rounded-xl font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 shrink-0 transition">Qaytarılmalar</button>
+    </div>
+
+    <!-- Axtarış və Excel Düyməsi -->
+    <div class="bg-white dark:bg-slate-900 p-3 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+      <div class="flex items-center space-x-2">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="searchInput" placeholder="Məhsul və ya müştəri axtar..." 
+                 class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-8 pr-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 placeholder-slate-400"
+                 oninput="filterTransactions()" />
+        </div>
+        <button onclick="exportToExcel()" class="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-semibold shadow-sm transition active:scale-95">
+          <i class="fa-solid fa-file-excel"></i>
+          <span>Excel</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Əməliyyatlar Siyahısı -->
+    <div class="space-y-2">
+      <div class="flex items-center justify-between px-1">
+        <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Əməliyyatlar (<span id="recordCount">0</span>)</h3>
+        <span class="text-[11px] text-slate-400 dark:text-slate-500">Canlı yenilənir</span>
+      </div>
+
+      <div id="transactionsList" class="space-y-2">
+        <!-- Dinamik sətirlər bura düşəcək -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- AYARLAR MODALI (KÖKLƏMƏLƏR)                 -->
+  <!-- ========================================== -->
+  <div id="settingsModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-lg rounded-3xl p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Modal Başlıq -->
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-600/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-gear"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white leading-tight">Panel Ayarları</h3>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500">Supabase, mağaza və təhlükəsizlik kökləmələri</p>
+          </div>
+        </div>
+        <button onclick="closeSettingsModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Ayar Formu -->
+      <div class="space-y-3.5 text-xs">
+
+        <!-- 1. Mağaza Adı -->
+        <div class="space-y-1">
+          <label class="block font-semibold text-slate-700 dark:text-slate-200">
+            <i class="fa-solid fa-store mr-1 text-indigo-500"></i> Mağaza / Filial Adı
+          </label>
+          <input type="text" id="settingStoreName" placeholder="Məs: Papatya Mağazası və ya Filial 1"
+                 class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          <p class="text-[10px] text-slate-400">Paneldə və başlıqda görünəcək mağaza adı.</p>
+        </div>
+
+        <!-- 2. Supabase Layihə URL -->
+        <div class="space-y-1">
+          <label class="block font-semibold text-slate-700 dark:text-slate-200">
+            <i class="fa-solid fa-cloud mr-1 text-indigo-500"></i> Supabase Layihə URL (Project URL)
+          </label>
+          <input type="text" id="settingSupabaseUrl" placeholder="https://xxxx.supabase.co"
+                 class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 font-mono text-[11px] text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+
+        <!-- 3. Supabase Anon Key -->
+        <div class="space-y-1">
+          <label class="block font-semibold text-slate-700 dark:text-slate-200">
+            <i class="fa-solid fa-key mr-1 text-indigo-500"></i> Supabase Anon Key
+          </label>
+          <textarea id="settingSupabaseKey" rows="3" placeholder="eyJhbGci..."
+                    class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-mono text-[10px] text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 break-all"></textarea>
+        </div>
+
+        <!-- Bağlantını Yoxla Düyməsi & Nəticə -->
+        <div class="space-y-2 pt-1">
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="testSupabaseInHtml()" id="btnTestConn"
+                    class="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 px-3 rounded-xl transition flex items-center justify-center space-x-1.5 active:scale-95">
+              <i class="fa-solid fa-network-wired text-indigo-500"></i>
+              <span>Bağlantını Yoxla</span>
+            </button>
+            <button type="button" onclick="resetDefaultCredentials()"
+                    class="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl transition text-[11px] active:scale-95" title="Standart açarlara qaytar">
+              <i class="fa-solid fa-rotate-left"></i> Sıfırla
+            </button>
+          </div>
+          <div id="testConnResult" class="hidden p-2.5 rounded-xl text-[11px] border"></div>
+        </div>
+
+        <!-- 4. Giriş Şifrəsi -->
+        <div class="space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <label class="block font-semibold text-slate-700 dark:text-slate-200">
+            <i class="fa-solid fa-lock mr-1 text-indigo-500"></i> Giriş Şifrəsi
+          </label>
+          <div class="relative">
+            <input type="text" id="settingPassword" placeholder="Giriş şifrəsi"
+                   class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+          <p class="text-[10px] text-slate-400">Sayta daxil olarkən tələb olunan şifrəni dəyişə bilərsiniz.</p>
+        </div>
+
+        <!-- 5. Səs Testi & Ayarları -->
+        <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <label class="block font-semibold text-slate-700 dark:text-slate-200">
+            <i class="fa-solid fa-volume-high mr-1 text-indigo-500"></i> Səs Bildirişi
+          </label>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-600 dark:text-slate-300">Yeni satış zamanı səs çıxar:</span>
+            <button type="button" onclick="testSoundInSettings()" class="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold text-[11px] hover:bg-indigo-100 transition">
+              <i class="fa-solid fa-play mr-1"></i> Səsi Yoxla
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Düymələr -->
+      <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center space-x-2">
+        <button onclick="closeSettingsModal()" class="w-1/3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+          Bağla
+        </button>
+        <button onclick="saveSettingsFromModal()" class="w-2/3 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg shadow-indigo-500/25 transition active:scale-95 flex items-center justify-center space-x-1.5">
+          <i class="fa-solid fa-check"></i>
+          <span>Yadda Saxla & Tətbiq Et</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- JAVASCRIPT KODLARI                         -->
+  <!-- ========================================== -->
+  <script>
+    // Standart Defolt Dəyərlər
+    const DEFAULT_APP_PASSWORD = "Elsen0123456789-";
+    const DEFAULT_SUPABASE_URL = "https://zcjthobakvppowerkxmv.supabase.co";
+    const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjanRob2Jha3ZwcG93ZXJreG12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MTQyNzMsImV4cCI6MjEwNTI5MDI3M30.ZLaSVPvowhwv50cv6W6d8AFYmPpPZ7oS5eZAxZzHI1U";
+    const DEFAULT_STORE_NAME = "Canlı Kassa Paneli";
+
+    function getActiveSupabaseUrl() {
+      return (localStorage.getItem('kassa_supabase_url') || DEFAULT_SUPABASE_URL).trim().replace(/\/+$/, '');
+    }
+    function getActiveSupabaseKey() {
+      return (localStorage.getItem('kassa_supabase_key') || DEFAULT_SUPABASE_KEY).trim();
+    }
+    function getActivePassword() {
+      return localStorage.getItem('kassa_custom_password') || DEFAULT_APP_PASSWORD;
+    }
+    function getActiveStoreName() {
+      return localStorage.getItem('kassa_store_name') || DEFAULT_STORE_NAME;
+    }
+
+    function updateStoreTitle() {
+      const name = getActiveStoreName();
+      const el = document.getElementById('headerStoreTitle');
+      if (el) el.innerText = name;
+      document.title = name;
+    }
+
+    let supabaseClient = null;
+    let realtimeChannel = null;
+    let allRecords = [];
+    let filteredRecords = [];
+    let currentFilter = 'today';
+    let currentTypeFilter = 'all';
+    let chartMode = 'qty'; // 'qty' və ya 'profit'
+    let myChart = null;
+    let isSoundMuted = false;
+    let isFirstLoad = true;
+
+    // -------------------------------------------------------------
+    // 1. ŞİFRƏ VƏ AUTH İDARƏETMƏSİ
+    // -------------------------------------------------------------
+    function checkAuth() {
+      updateStoreTitle();
+      const currentPassword = getActivePassword();
+      const savedAuth = localStorage.getItem('kassa_auth_token');
+      if (savedAuth === currentPassword) {
+        document.getElementById('authScreen').classList.add('hidden');
+        initApp();
+      } else {
+        document.getElementById('authScreen').classList.remove('hidden');
+        setTimeout(() => document.getElementById('passwordInput').focus(), 150);
+      }
+    }
+
+    function verifyPassword() {
+      const entered = document.getElementById('passwordInput').value;
+      const errorEl = document.getElementById('authError');
+      const box = document.getElementById('authBox');
+      const currentPassword = getActivePassword();
+
+      if (entered === currentPassword) {
+        localStorage.setItem('kassa_auth_token', currentPassword);
+        document.getElementById('authScreen').classList.add('hidden');
+        errorEl.classList.add('hidden');
+        initApp();
+      } else {
+        errorEl.classList.remove('hidden');
+        box.classList.remove('shake-animation');
+        void box.offsetWidth;
+        box.classList.add('shake-animation');
+      }
+    }
+
+    // -------------------------------------------------------------
+    // AYARLAR MODALI VƏ ƏMƏLİYYATLAR
+    // -------------------------------------------------------------
+    function openSettingsModal() {
+      document.getElementById('settingStoreName').value = getActiveStoreName();
+      document.getElementById('settingSupabaseUrl').value = getActiveSupabaseUrl();
+      document.getElementById('settingSupabaseKey').value = getActiveSupabaseKey();
+      document.getElementById('settingPassword').value = getActivePassword();
+
+      const resDiv = document.getElementById('testConnResult');
+      resDiv.classList.add('hidden');
+      resDiv.innerHTML = '';
+
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    function resetDefaultCredentials() {
+      if (confirm("Bütün ayarları standart vəziyyətə qaytarmaq istəyirsiniz?")) {
+        document.getElementById('settingStoreName').value = DEFAULT_STORE_NAME;
+        document.getElementById('settingSupabaseUrl').value = DEFAULT_SUPABASE_URL;
+        document.getElementById('settingSupabaseKey').value = DEFAULT_SUPABASE_KEY;
+        document.getElementById('settingPassword').value = DEFAULT_APP_PASSWORD;
+      }
+    }
+
+    function testSoundInSettings() {
+      playChime(true);
+    }
+
+    async function testSupabaseInHtml() {
+      const url = document.getElementById('settingSupabaseUrl').value.trim().replace(/\/+$/, '');
+      const key = document.getElementById('settingSupabaseKey').value.trim();
+      const resDiv = document.getElementById('testConnResult');
+
+      if (!url || !key) {
+        resDiv.className = 'p-2.5 rounded-xl text-[11px] border bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800';
+        resDiv.innerHTML = '❌ <b>Xəta:</b> Supabase URL və Anon Key daxil edilməlidir!';
+        resDiv.classList.remove('hidden');
+        return;
+      }
+
+      resDiv.className = 'p-2.5 rounded-xl text-[11px] border bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800';
+      resDiv.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Supabase ilə əlaqə yoxlanılır...';
+      resDiv.classList.remove('hidden');
+
+      try {
+        const resp = await fetch(`${url}/rest/v1/satislar?select=id,maya_deyeri,qazanc&limit=1`, {
+          headers: {
+            'apikey': key,
+            'Authorization': `Bearer ${key}`
+          }
+        });
+
+        if (resp.ok) {
+          resDiv.className = 'p-2.5 rounded-xl text-[11px] border bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
+          resDiv.innerHTML = '✅ <b>Bağlantı Uğurludur!</b> Supabase layihəsinə qoşuldu, `satislar` cədvəli və bütün sütunlar hazırdır.';
+        } else {
+          const errText = await resp.text();
+          if (errText.includes('maya_deyeri') || errText.includes('qazanc') || errText.includes('42703')) {
+            resDiv.className = 'p-2.5 rounded-xl text-[11px] border bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
+            resDiv.innerHTML = '⚠️ <b>Sütun Çatışmır!</b> `satislar` cədvəlində `maya_deyeri` sütunu yoxdur.<br>Zəhmət olmasa Supabase SQL Editor-da bu əmri icra edin:<br><code class="font-mono text-[10px] bg-amber-100 dark:bg-amber-900/60 p-1 rounded mt-1 inline-block">ALTER TABLE satislar ADD COLUMN IF NOT EXISTS maya_deyeri NUMERIC DEFAULT 0;</code>';
+          } else if (resp.status === 404) {
+            resDiv.className = 'p-2.5 rounded-xl text-[11px] border bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800';
+            resDiv.innerHTML = '❌ <b>Xəta (404):</b> `satislar` cədvəli tapılmadı! Supabase SQL Editor-da cədvəl yaratma skriptini icra edin.';
+          } else if (resp.status === 401 || resp.status === 403) {
+            resDiv.className = 'p-2.5 rounded-xl text-[11px] border bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800';
+            resDiv.innerHTML = `❌ <b>Xəta (${resp.status}):</b> Anon Key yanlışdır və ya oxuma icazəsi (RLS) verilməyib!`;
+          } else {
+            resDiv.className = 'p-2.5 rounded-xl text-[11px] border bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800';
+            resDiv.innerHTML = `❌ <b>Xəta (${resp.status}):</b> ${errText.substring(0, 120)}`;
+          }
+        }
+      } catch (err) {
+        resDiv.className = 'p-2.5 rounded-xl text-[11px] border bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800';
+        resDiv.innerHTML = `❌ <b>Şəbəkə Xətası:</b> URL-i və ya internet bağlantınızı yoxlayın (${err.message})`;
+      }
+    }
+
+    function saveSettingsFromModal() {
+      const storeName = document.getElementById('settingStoreName').value.trim() || DEFAULT_STORE_NAME;
+      const url = document.getElementById('settingSupabaseUrl').value.trim().replace(/\/+$/, '') || DEFAULT_SUPABASE_URL;
+      const key = document.getElementById('settingSupabaseKey').value.trim() || DEFAULT_SUPABASE_KEY;
+      const pwd = document.getElementById('settingPassword').value.trim() || DEFAULT_APP_PASSWORD;
+
+      localStorage.setItem('kassa_store_name', storeName);
+      localStorage.setItem('kassa_supabase_url', url);
+      localStorage.setItem('kassa_supabase_key', key);
+      localStorage.setItem('kassa_custom_password', pwd);
+      localStorage.setItem('kassa_auth_token', pwd); // istifadəçinin avtomatik girişdə qalması üçün
+
+      updateStoreTitle();
+      closeSettingsModal();
+
+      showToast("⚙️ Ayarlar Yeniləndi", "Yeni Supabase və mağaza ayarları tətbiq edildi!", true);
+
+      // Supabase tətbiqini yeni açarlarla yenidən başlat
+      initApp();
+    }
+
+    function togglePasswordVisibility() {
+      const input = document.getElementById('passwordInput');
+      const icon = document.getElementById('pwdToggleIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye';
+      }
+    }
+
+    function logout() {
+      if (confirm("Paneldən çıxmaq istəyirsiniz?")) {
+        localStorage.removeItem('kassa_auth_token');
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('authScreen').classList.remove('hidden');
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 2. DARK MODE VƏ SƏS AYARLARI
+    // -------------------------------------------------------------
+    function initTheme() {
+      const theme = localStorage.getItem('kassa_theme') || 'light';
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('themeIcon').className = 'fa-solid fa-sun';
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('themeIcon').className = 'fa-solid fa-moon';
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('kassa_theme', isDark ? 'dark' : 'light');
+      document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      if (myChart) updateChart();
+    }
+
+    function initSound() {
+      isSoundMuted = localStorage.getItem('kassa_sound_muted') === 'true';
+      updateSoundIcon();
+    }
+
+    function toggleSound() {
+      isSoundMuted = !isSoundMuted;
+      localStorage.setItem('kassa_sound_muted', isSoundMuted ? 'true' : 'false');
+      updateSoundIcon();
+      if (!isSoundMuted) playChime(true);
+    }
+
+    function updateSoundIcon() {
+      const icon = document.getElementById('soundIcon');
+      if (isSoundMuted) {
+        icon.className = 'fa-solid fa-volume-xmark text-rose-300';
+      } else {
+        icon.className = 'fa-solid fa-volume-high text-white';
+      }
+    }
+
+    // Səs Generatoru (Web Audio API - heç bir xarici audio faylı tələb etmir!)
+    function playChime(isSale = true) {
+      if (isSoundMuted) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+
+        if (isSale) {
+          // Kassada qazanclı "Ka-ching / Ding" akkordu
+          const notes = [587.33, 880, 1174.66]; // D5, A5, D6
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.08);
+
+            gain.gain.setValueAtTime(0.2, ctx.currentTime + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.08 + 0.35);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(ctx.currentTime + idx * 0.08);
+            osc.stop(ctx.currentTime + idx * 0.08 + 0.35);
+          });
+        } else {
+          // Qaytarılma zamanı daha alçaq xəbərdarlıq tonu
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(329.63, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(261.63, ctx.currentTime + 0.25);
+
+          gain.gain.setValueAtTime(0.25, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.3);
+        }
+      } catch (e) {
+        console.log("Audio play error:", e);
+      }
+    }
+
+    // Yuxarıda Bildiriş Toast göstər
+    function showToast(title, msg, isSale = true) {
+      const toast = document.getElementById('toastNotification');
+      const toastTitle = document.getElementById('toastTitle');
+      const toastMsg = document.getElementById('toastMsg');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastTitle.innerText = title;
+      toastMsg.innerText = msg;
+
+      if (isSale) {
+        toastIcon.className = 'w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm';
+        toastIcon.innerHTML = '<i class="fa-solid fa-cart-shopping"></i>';
+      } else {
+        toastIcon.className = 'w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm';
+        toastIcon.innerHTML = '<i class="fa-solid fa-arrow-rotate-left"></i>';
+      }
+
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 4000);
+    }
+
+    // -------------------------------------------------------------
+    // 3. TƏTBİQİN ƏSAS MƏNTİQİ VƏ SUPABASE
+    // -------------------------------------------------------------
+    function initDates() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('startDate').value = today;
+      document.getElementById('endDate').value = today;
+    }
+
+    function initApp() {
+      initDates();
+      updateStoreTitle();
+      const url = getActiveSupabaseUrl();
+      const key = getActiveSupabaseKey();
+
+      try {
+        supabaseClient = window.supabase.createClient(url, key);
+        document.getElementById('connectionStatus').innerText = "Canlı Qoşuldu";
+        document.getElementById('connectionDot').className = "w-2 h-2 rounded-full bg-emerald-400 pulse-dot";
+
+        fetchData();
+        setupRealtime();
+      } catch (err) {
+        console.error("Supabase init error:", err);
+        document.getElementById('connectionStatus').innerText = "Bağlantı xətası";
+        document.getElementById('connectionDot').className = "w-2 h-2 rounded-full bg-rose-500";
+      }
+    }
+
+    function setupRealtime() {
+      if (!supabaseClient) return;
+
+      if (realtimeChannel) {
+        supabaseClient.removeChannel(realtimeChannel);
+      }
+
+      realtimeChannel = supabaseClient
+        .channel('satislar-realtime-channel')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'satislar' },
+          (payload) => {
+            console.log('Realtime hadisəsi:', payload);
+
+            // Səs və Bildiriş effekti
+            if (payload.eventType === 'INSERT') {
+              const rec = payload.new;
+              const isSale = (rec.emeliyyat_tipi || '').toUpperCase() !== 'QAYTARILMA';
+              playChime(isSale);
+
+              const title = isSale ? `🛒 Satış: ${parseFloat(rec.mebleg).toFixed(2)} ₼` : `🔄 Qaytarılma: ${parseFloat(rec.mebleg).toFixed(2)} ₼`;
+              const msg = `${rec.mehsul_adi} (${rec.say} ədəd/kq)`;
+              showToast(title, msg, isSale);
+            } else if (payload.eventType === 'DELETE') {
+              playChime(false);
+              showToast("🗑️ Satış Silindi", "Hesabatdan bir element silindi", false);
+            }
+
+            fetchData(false);
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            document.getElementById('connectionStatus').innerText = "Canlı İzləmə Aktiv";
+          }
+        });
+    }
+
+    async function fetchData(showLoading = true) {
+      if (!supabaseClient) return;
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('satislar')
+          .select('*')
+          .order('tarix', { ascending: false });
+
+        if (error) throw error;
+
+        allRecords = data || [];
+        applyFilter();
+        isFirstLoad = false;
+      } catch (err) {
+        console.error("Məlumat çəkilərkən xəta:", err);
+      }
+    }
+
+    function setDateFilter(filterType) {
+      currentFilter = filterType;
+
+      document.querySelectorAll('.date-filter-btn').forEach(btn => {
+        btn.className = "date-filter-btn py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition";
+      });
+
+      const activeBtn = document.getElementById(`btn-${filterType}`);
+      if (activeBtn) {
+        activeBtn.className = "date-filter-btn py-1.5 text-xs font-semibold rounded-xl bg-indigo-600 text-white transition";
+      }
+
+      const now = new Date();
+      if (filterType === 'today') {
+        const todayStr = now.toISOString().split('T')[0];
+        document.getElementById('startDate').value = todayStr;
+        document.getElementById('endDate').value = todayStr;
+      } else if (filterType === 'yesterday') {
+        const yest = new Date(now);
+        yest.setDate(now.getDate() - 1);
+        const yestStr = yest.toISOString().split('T')[0];
+        document.getElementById('startDate').value = yestStr;
+        document.getElementById('endDate').value = yestStr;
+      } else if (filterType === 'month') {
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+        const lastDay = now.toISOString().split('T')[0];
+        document.getElementById('startDate').value = firstDay;
+        document.getElementById('endDate').value = lastDay;
+      }
+
+      applyFilter();
+    }
+
+    function applyCustomDate() {
+      document.querySelectorAll('.date-filter-btn').forEach(btn => {
+        btn.className = "date-filter-btn py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition";
+      });
+      currentFilter = 'custom';
+      applyFilter();
+    }
+
+    function setTypeFilter(type) {
+      currentTypeFilter = type;
+      document.querySelectorAll('.type-btn').forEach(b => {
+        b.className = "type-btn px-3 py-1.5 rounded-xl font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 shrink-0 transition";
+      });
+
+      let activeId = 'type-all';
+      if (type === 'Nağd') activeId = 'type-neqd';
+      else if (type === 'Nisyə') activeId = 'type-nisye';
+      else if (type === 'QAYTARILMA') activeId = 'type-qaytarma';
+
+      const activeEl = document.getElementById(activeId);
+      if (activeEl) {
+        activeEl.className = "type-btn px-3 py-1.5 rounded-xl font-semibold bg-indigo-600 text-white shrink-0 transition";
+      }
+
+      applyFilter();
+    }
+
+    function setChartMode(mode) {
+      chartMode = mode;
+      const btnQty = document.getElementById('btnChartQty');
+      const btnProfit = document.getElementById('btnChartProfit');
+
+      if (mode === 'qty') {
+        btnQty.className = "px-2 py-0.5 rounded-md bg-indigo-600 text-white font-semibold transition";
+        btnProfit.className = "px-2 py-0.5 rounded-md text-slate-600 dark:text-slate-300 font-semibold transition";
+      } else {
+        btnProfit.className = "px-2 py-0.5 rounded-md bg-indigo-600 text-white font-semibold transition";
+        btnQty.className = "px-2 py-0.5 rounded-md text-slate-600 dark:text-slate-300 font-semibold transition";
+      }
+
+      updateChart();
+    }
+
+    function applyFilter() {
+      const start = document.getElementById('startDate').value;
+      const end = document.getElementById('endDate').value;
+      const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+
+      filteredRecords = allRecords.filter(item => {
+        if (!item.tarix) return false;
+        const itemDateStr = item.tarix.split('T')[0];
+
+        if (currentFilter !== 'all') {
+          if (start && itemDateStr < start) return false;
+          if (end && itemDateStr > end) return false;
+        }
+
+        const tip = (item.emeliyyat_tipi || '').toUpperCase();
+        const odenis = item.odenis_novu || 'Nağd';
+
+        if (currentTypeFilter === 'QAYTARILMA' && tip !== 'QAYTARILMA') return false;
+        if (currentTypeFilter === 'Nağd' && (tip === 'QAYTARILMA' || odenis !== 'Nağd')) return false;
+        if (currentTypeFilter === 'Nisyə' && (tip === 'QAYTARILMA' || odenis !== 'Nisyə')) return false;
+
+        if (search) {
+          const mAd = (item.mehsul_adi || '').toLowerCase();
+          const musteri = (item.musteri_adi || '').toLowerCase();
+          if (!mAd.includes(search) && !musteri.includes(search)) return false;
+        }
+
+        return true;
+      });
+
+      updateStats();
+      renderTransactions();
+      updateChart();
+    }
+
+    function filterTransactions() {
+      applyFilter();
+    }
+
+    // Statistik Kartlar
+    function updateStats() {
+      let neqdTotal = 0;
+      let neqdCount = 0;
+      let nisyeTotal = 0;
+      let nisyeCount = 0;
+      let qaytarmaTotal = 0;
+      let qaytarmaCount = 0;
+
+      let cemiMaya = 0;
+      let cemiQazanc = 0;
+
+      filteredRecords.forEach(r => {
+        const mebleg = parseFloat(r.mebleg) || 0;
+        const maya = parseFloat(r.maya_deyeri) || 0;
+        const qazanc = (r.qazanc !== undefined && r.qazanc !== null) ? parseFloat(r.qazanc) : (mebleg - maya);
+        const tip = (r.emeliyyat_tipi || '').toUpperCase();
+        const odenis = r.odenis_novu || 'Nağd';
+
+        if (tip === 'QAYTARILMA') {
+          qaytarmaTotal += mebleg;
+          qaytarmaCount++;
+          cemiMaya -= maya;
+          cemiQazanc -= qazanc;
+        } else {
+          if (odenis === 'Nisyə') {
+            nisyeTotal += mebleg;
+            nisyeCount++;
+          } else {
+            neqdTotal += mebleg;
+            neqdCount++;
+          }
+          cemiMaya += maya;
+          cemiQazanc += qazanc;
+        }
+      });
+
+      const xalisTotal = neqdTotal + nisyeTotal - qaytarmaTotal;
+      const rentabellik = xalisTotal > 0 ? ((cemiQazanc / xalisTotal) * 100).toFixed(1) : 0;
+
+      document.getElementById('cardNeqd').innerText = neqdTotal.toFixed(2) + ' ₼';
+      document.getElementById('cardNeqdCount').innerText = `${neqdCount} satış`;
+
+      document.getElementById('cardNisye').innerText = nisyeTotal.toFixed(2) + ' ₼';
+      document.getElementById('cardNisyeCount').innerText = `${nisyeCount} nisyə`;
+
+      document.getElementById('cardQaytarma').innerText = qaytarmaTotal.toFixed(2) + ' ₼';
+      document.getElementById('cardQaytarmaCount').innerText = `${qaytarmaCount} qaytarılma`;
+
+      document.getElementById('cardXalis').innerText = xalisTotal.toFixed(2) + ' ₼';
+
+      // Maya və Qazanc Kartları
+      document.getElementById('cardMaya').innerText = cemiMaya.toFixed(2) + ' ₼';
+      document.getElementById('cardQazanc').innerText = (cemiQazanc >= 0 ? '+' : '') + cemiQazanc.toFixed(2) + ' ₼';
+      document.getElementById('cardRentabellik').innerText = `Rentabellik: ${rentabellik}%`;
+
+      document.getElementById('recordCount').innerText = filteredRecords.length;
+    }
+
+    // Əməliyyat Siyahısı
+    function renderTransactions() {
+      const container = document.getElementById('transactionsList');
+
+      if (filteredRecords.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white dark:bg-slate-900 p-8 rounded-2xl text-center border border-slate-200 dark:border-slate-800">
+            <i class="fa-regular fa-folder-open text-slate-300 dark:text-slate-600 text-3xl mb-2"></i>
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Seçilmiş filtr üzrə qeyd tapılmadı.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filteredRecords.map(item => {
+        const tip = (item.emeliyyat_tipi || 'SATIŞ').toUpperCase();
+        const isQaytarma = tip === 'QAYTARILMA';
+        const isNisye = item.odenis_novu === 'Nisyə';
+
+        let badgeClass = 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800';
+        let badgeText = 'Nağd Satış';
+
+        if (isQaytarma) {
+          badgeClass = 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800';
+          badgeText = 'Qaytarılma';
+        } else if (isNisye) {
+          badgeClass = 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800';
+          badgeText = `Nisyə: ${item.musteri_adi || 'Bilinməyən'}`;
+        }
+
+        const mebleg = parseFloat(item.mebleg || 0);
+        const maya = parseFloat(item.maya_deyeri || 0);
+        const qazanc = (item.qazanc !== undefined && item.qazanc !== null) ? parseFloat(item.qazanc) : (mebleg - maya);
+
+        const dateObj = new Date(item.tarix);
+        const dateStr = dateObj.toLocaleDateString('az-AZ', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const timeStr = dateObj.toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' });
+
+        return `
+          <div class="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 transition-all">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${badgeClass}">
+                  ${badgeText}
+                </span>
+                <span class="text-[10px] text-slate-400 dark:text-slate-500">${dateStr} ${timeStr}</span>
+              </div>
+              <div class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                ${item.qebz_id ? '#' + item.qebz_id.substring(0, 8) : ''}
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="flex-1 pr-2">
+                <h4 class="text-xs font-bold text-slate-800 dark:text-white leading-tight">${item.mehsul_adi || 'Naməlum Məhsul'}</h4>
+                <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Miqdar: <span class="font-semibold text-slate-700 dark:text-slate-200">${item.say}</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm font-bold ${isQaytarma ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'}">
+                  ${isQaytarma ? '-' : ''}${mebleg.toFixed(2)} ₼
+                </div>
+              </div>
+            </div>
+
+            <!-- MAYA DƏYƏRİ VƏ QAZANC MƏLUMATLARI -->
+            <div class="pt-1.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
+              <div class="text-slate-500 dark:text-slate-400">
+                <span>Maya:</span> <span class="font-semibold text-slate-700 dark:text-slate-300">${maya.toFixed(2)} ₼</span>
+              </div>
+              <div class="font-semibold ${isQaytarma ? 'text-rose-600 dark:text-rose-400' : (qazanc >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}">
+                <span>Qazanc:</span> <span>${qazanc >= 0 ? '+' : ''}${qazanc.toFixed(2)} ₼</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Chart.js Qrafiki
+    function updateChart() {
+      const productTotals = {};
+
+      filteredRecords.forEach(r => {
+        if ((r.emeliyyat_tipi || '').toUpperCase() === 'SATIŞ') {
+          const name = r.mehsul_adi || 'Naməlum';
+          const mebleg = parseFloat(r.mebleg) || 0;
+          const maya = parseFloat(r.maya_deyeri) || 0;
+          const qazanc = (r.qazanc !== undefined && r.qazanc !== null) ? parseFloat(r.qazanc) : (mebleg - maya);
+
+          if (chartMode === 'qty') {
+            productTotals[name] = (productTotals[name] || 0) + (parseFloat(r.say) || 0);
+          } else {
+            productTotals[name] = (productTotals[name] || 0) + qazanc;
+          }
+        }
+      });
+
+      const sorted = Object.entries(productTotals)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+      const labels = sorted.map(x => x[0].length > 14 ? x[0].substring(0, 14) + '...' : x[0]);
+      const data = sorted.map(x => parseFloat(x[1].toFixed(2)));
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#94a3b8' : '#64748b';
+      const gridColor = isDark ? '#1e293b' : '#f1f5f9';
+
+      const ctx = document.getElementById('topProductsChart').getContext('2d');
+
+      if (myChart) {
+        myChart.destroy();
+      }
+
+      if (sorted.length === 0) return;
+
+      myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: chartMode === 'qty' ? 'Satılan Miqdar' : 'Xalis Qazanc (₼)',
+            data: data,
+            backgroundColor: chartMode === 'qty' ? 'rgba(79, 70, 229, 0.85)' : 'rgba(16, 185, 129, 0.85)',
+            borderRadius: 6,
+            maxBarThickness: 28
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: gridColor },
+              ticks: { color: textColor, font: { size: 10 } }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: textColor, font: { size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    // Excel Çıxarış (WPF Hesabatı ilə 1-ə 1 eyni və A4 vərəqə tam sığan kompakt format)
+    function exportToExcel() {
+      if (filteredRecords.length === 0) {
+        alert("Çıxarış üçün heç bir qeyd mövcud deyil!");
+        return;
+      }
+
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+
+      // 1. Ümumi statistik göstəriciləri hesabla (WPF xülasəsi)
+      let toplamSatis = 0;
+      let toplamMaya = 0;
+      let toplamQazanc = 0;
+      let toplamMiqdar = 0;
+
+      filteredRecords.forEach(r => {
+        const mebleg = parseFloat(r.mebleg || 0);
+        const maya = parseFloat(r.maya_deyeri || 0);
+        const qazanc = (r.qazanc !== undefined && r.qazanc !== null) ? parseFloat(r.qazanc) : (mebleg - maya);
+        const say = parseFloat(r.say || 0);
+        const isQaytarma = (r.emeliyyat_tipi || '').toUpperCase() === 'QAYTARILMA';
+
+        if (isQaytarma) {
+          toplamSatis -= mebleg;
+          toplamMaya -= maya;
+          toplamQazanc -= qazanc;
+          toplamMiqdar -= say;
+        } else {
+          toplamSatis += mebleg;
+          toplamMaya += maya;
+          toplamQazanc += qazanc;
+          toplamMiqdar += say;
+        }
+      });
+
+      // 2. WPF stilində xülasə başlıqları və cədvəl sətirləri
+      const sheetData = [];
+
+      sheetData.push([`Hesabat Tarixi: ${startDate} - ${endDate}`]);
+      sheetData.push([`Toplam Satış Qiyməti: ${toplamSatis.toFixed(2)} AZN`]);
+      sheetData.push([`Toplam Məhsul Maya Dəyəri: ${toplamMaya.toFixed(2)} AZN`]);
+      sheetData.push([`Toplam Xalis Gəlir: ${toplamQazanc.toFixed(2)} AZN`]);
+      sheetData.push([`Toplam Satılan Miqdar: ${toplamMiqdar.toFixed(2)}`]);
+      sheetData.push([]); // Boş sətir
+
+      // 3. Cədvəl Sütun Başlıqları (WPF ilə eyni)
+      sheetData.push(["Tarix", "Məhsul", "Miqdar", "Satış (AZN)", "Maya (AZN)", "Gəlir (AZN)", "Ödəniş", "Müştəri"]);
+
+      // 4. Məlumat sətirləri (Kompakt və A4-ə uyğun)
+      filteredRecords.forEach(item => {
+        const isQaytarma = (item.emeliyyat_tipi || '').toUpperCase() === 'QAYTARILMA';
+        const dateObj = new Date(item.tarix);
+        const dateStr = dateObj.toLocaleDateString('az-AZ', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + 
+                        dateObj.toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' });
+
+        let mehsulAd = item.mehsul_adi || '';
+        if (mehsulAd.length > 25) {
+          mehsulAd = mehsulAd.substring(0, 23) + '...';
+        }
+
+        const miqdarText = isQaytarma ? `${item.say} (Qaytarma)` : `${item.say}`;
+        const mebleg = parseFloat(item.mebleg || 0);
+        const maya = parseFloat(item.maya_deyeri || 0);
+        const qazanc = (item.qazanc !== undefined && item.qazanc !== null) ? parseFloat(item.qazanc) : (mebleg - maya);
+
+        const satisDeyeri = isQaytarma ? -mebleg : mebleg;
+        const mayaDeyeri = isQaytarma ? -maya : maya;
+        const gelirDeyeri = isQaytarma ? -qazanc : qazanc;
+
+        sheetData.push([
+          dateStr,
+          mehsulAd,
+          miqdarText,
+          parseFloat(satisDeyeri.toFixed(2)),
+          parseFloat(mayaDeyeri.toFixed(2)),
+          parseFloat(gelirDeyeri.toFixed(2)),
+          item.odenis_novu || (isQaytarma ? 'Qaytarma' : 'Nağd'),
+          item.musteri_adi || ''
+        ]);
+      });
+
+      // 5. Excel vərəqi yarat
+      const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+      // Sütun enliklərini A4 vərəqə (Landscape) tam uyğunlaşdır
+      worksheet['!cols'] = [
+        { wch: 16 }, // Tarix
+        { wch: 25 }, // Məhsul
+        { wch: 13 }, // Miqdar
+        { wch: 11 }, // Satış
+        { wch: 11 }, // Maya
+        { wch: 11 }, // Gəlir
+        { wch: 10 }, // Ödəniş
+        { wch: 16 }  // Müştəri
+      ];
+
+      // A4 Albom (Landscape) və 1 səhifə eninə sığdırma
+      worksheet['!pageSetup'] = {
+        orientation: 'landscape',
+        paperSize: 9, // A4
+        fitToWidth: 1,
+        fitToHeight: 0
+      };
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Hesabat");
+
+      const fileName = `hesabat_${startDate}_${endDate}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+    }
+
+    function refreshData() {
+      fetchData();
+    }
+
+    // Səhifə Açıldıqda
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      initSound();
+      checkAuth();
+    });
+  </script>
+</body>
+</html>
