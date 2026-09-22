@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anbar &amp; Məhsullar — Canlı İdarəetmə</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Font Awesome İkonlar -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Supabase JS Client v2 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- SheetJS (Excel Çıxarışı) -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+<style>
+/* ============ BAZA STİLLƏRİ ============ */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05070f;
+  --line:rgba(255,255,255,.09);
+  --line-2:rgba(255,255,255,.055);
+  --text:#e9eefb;
+  --muted:#8892ab;
+  --cyan:#22d3ee;
+  --violet:#a855f7;
+  --indigo:#6366f1;
+  --green:#34d399;
+  --amber:#fbbf24;
+  --pink:#f472b6;
+  --red:#fb7185;
+  --blue:#60a5fa;
+  --card-bg:linear-gradient(165deg,rgba(18,24,42,.85),rgba(9,13,26,.92));
+}
+html,body{min-height:100%}
+body{
+  font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;
+  color:var(--text);
+  background:#05070f;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  position:relative;
+}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bg::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+  background-size:58px 58px;
+  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 30%,#000 30%,transparent 100%);
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 30%,#000 30%,transparent 100%);
+}
+.orb{position:absolute;border-radius:50%;filter:blur(130px);opacity:.45;will-change:transform}
+.o1{width:620px;height:620px;background:#6366f1;top:-260px;left:-160px;animation:drift1 24s ease-in-out infinite}
+.o2{width:540px;height:540px;background:#a855f7;top:-100px;right:-140px;animation:drift2 28s ease-in-out infinite;opacity:.35}
+.o3{width:580px;height:580px;background:#22d3ee;bottom:-300px;left:30%;animation:drift3 32s ease-in-out infinite;opacity:.28}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(110px,70px) scale(1.1)}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-90px,110px) scale(1.08)}}
+@keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(70px,-80px) scale(1.12)}}
+
+.wrap{position:relative;z-index:1;max-width:1680px;margin:0 auto;padding:26px 24px 70px}
+
+/* ============ HEADER ============ */
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:24px}
+.brand{display:flex;align-items:center;gap:16px}
+.logo{
+  width:52px;height:52px;border-radius:16px;display:grid;place-items:center;flex:none;
+  background:linear-gradient(140deg,#a855f7,#6366f1 55%,#22d3ee);
+  box-shadow:0 12px 34px -8px rgba(168,85,247,.75), inset 0 1px 0 rgba(255,255,255,.35);
+  position:relative;
+}
+.logo::after{
+  content:'';position:absolute;inset:0;border-radius:16px;
+  background:linear-gradient(140deg,rgba(255,255,255,.45),transparent 55%);
+  mix-blend-mode:overlay;
+}
+.logo i{font-size:22px;color:#fff;position:relative;z-index:1}
+.brand h1{
+  font-size:clamp(19px,2.1vw,26px);font-weight:800;letter-spacing:-.5px;line-height:1.2;
+  background:linear-gradient(100deg,#fff 10%,#d8b4fe 55%,#67e8f9 95%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.brand p{font-size:12px;color:var(--muted);margin-top:2px;letter-spacing:.2px}
+.hdr-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+.live{
+  display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:99px;
+  background:rgba(52,211,153,.09);border:1px solid rgba(52,211,153,.28);
+  color:#6ee7b7;font-size:12px;font-weight:700;letter-spacing:.4px;
+}
+.live .dot{width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 0 0 rgba(52,211,153,.7);animation:pulse 1.9s infinite}
+.live.connecting{background:rgba(251,191,36,.09);border-color:rgba(251,191,36,.28);color:#fbbf24}
+.live.connecting .dot{background:#fbbf24;box-shadow:none}
+.live.error{background:rgba(251,113,133,.09);border-color:rgba(251,113,133,.28);color:#fb7185}
+.live.error .dot{background:#fb7185;box-shadow:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.65)}70%{box-shadow:0 0 0 11px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+
+.clock{
+  padding:8px 16px;border-radius:99px;font-weight:700;font-size:13px;letter-spacing:1px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);
+  font-variant-numeric:tabular-nums;color:#cbd5e1;
+}
+
+/* Naviqasiya Keçid Düyməsi */
+.nav-switch-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 16px;
+  border-radius:99px;
+  background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(99,102,241,.2));
+  border:1px solid rgba(34,211,238,.38);
+  color:#67e8f9;
+  font-size:12.5px;
+  font-weight:700;
+  text-decoration:none;
+  transition:all .2s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 4px 14px -3px rgba(34,211,238,.25);
+}
+.nav-switch-btn:hover{
+  background:linear-gradient(135deg,rgba(34,211,238,.35),rgba(99,102,241,.38));
+  color:#fff;
+  transform:translateY(-1px);
+  box-shadow:0 6px 20px -3px rgba(34,211,238,.45);
+  border-color:rgba(34,211,238,.65);
+}
+
+.hdr-btn{
+  width:40px;height:40px;border-radius:12px;border:1px solid var(--line);
+  background:rgba(255,255,255,.05);color:var(--text);display:grid;place-items:center;
+  cursor:pointer;font-size:14px;transition:all .2s;position:relative;
+}
+.hdr-btn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);transform:translateY(-1px)}
+.hdr-btn.danger:hover{background:rgba(251,113,133,.18);border-color:rgba(251,113,133,.4);color:#fb7185}
+.notif-badge{
+  position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;
+  font-size:10px;font-weight:800;border-radius:99px;padding:2px 6px;
+  box-shadow:0 2px 8px rgba(239,68,68,.7);min-width:18px;text-align:center;
+}
+
+/* ============ KPI KARTLARI ============ */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:24px}
+.kcard{
+  background:var(--card-bg);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:20px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 10px 30px -10px rgba(0,0,0,.5);
+  transition:all .25s ease;
+}
+.kcard:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.18);box-shadow:0 14px 40px -10px rgba(0,0,0,.7)}
+.kcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.kcard-title{font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.kcard-ico{
+  width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+  font-size:16px;background:rgba(255,255,255,.06);border:1px solid var(--line);
+}
+.kcard.c-violet .kcard-ico{background:rgba(168,85,247,.15);border-color:rgba(168,85,247,.35);color:#d8b4fe}
+.kcard.c-blue .kcard-ico{background:rgba(96,165,250,.15);border-color:rgba(96,165,250,.35);color:#93c5fd}
+.kcard.c-cyan .kcard-ico{background:rgba(34,211,238,.15);border-color:rgba(34,211,238,.35);color:#67e8f9}
+.kcard.c-green .kcard-ico{background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.35);color:#6ee7b7}
+.kcard.c-amber .kcard-ico{background:rgba(251,191,36,.15);border-color:rgba(251,191,36,.35);color:#fde68a}
+.kcard.c-red .kcard-ico{background:rgba(251,113,133,.15);border-color:rgba(251,113,133,.35);color:#fda4af}
+
+.kcard-val{font-size:clamp(22px,2.2vw,30px);font-weight:800;letter-spacing:-.6px;line-height:1.15;margin-bottom:6px}
+.kcard-sub{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.kcard-sub b{color:var(--text);font-weight:700}
+.kcard-sub .tag{
+  padding:2px 7px;border-radius:6px;font-size:10.5px;font-weight:800;
+  background:rgba(52,211,153,.14);color:#6ee7b7;border:1px solid rgba(52,211,153,.3);
+}
+
+/* ============ ANALİTİKA BÖLMƏSİ (TOP QAZANC & KAPİTAL) ============ */
+.analytics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:20px;margin-bottom:24px}
+.panel{
+  background:var(--card-bg);
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:22px;
+  box-shadow:0 12px 34px -10px rgba(0,0,0,.5);
+}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.panel-title{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800;letter-spacing:-.2px}
+.panel-title i{font-size:16px}
+.panel-title .bar{width:4px;height:18px;border-radius:4px;background:linear-gradient(180deg,#a855f7,#22d3ee)}
+.panel-sub{font-size:12px;color:var(--muted);font-weight:600}
+
+/* Reytinq siyahıları */
+.rank-list{display:flex;flex-direction:column;gap:10px}
+.rank-item{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);
+  border:1px solid var(--line-2);transition:all .2s;position:relative;overflow:hidden;
+}
+.rank-item:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);transform:translateX(2px)}
+.rank-bar{
+  position:absolute;left:0;top:0;bottom:0;opacity:.12;pointer-events:none;
+  background:linear-gradient(90deg,#22d3ee,#6366f1);border-radius:14px;
+  transition:width .4s ease;
+}
+.rank-bar.capital{background:linear-gradient(90deg,#fbbf24,#f472b6)}
+.rank-left{display:flex;align-items:center;gap:12px;position:relative;z-index:1;min-width:0;flex:1}
+.rank-idx{
+  width:24px;height:24px;border-radius:8px;background:rgba(255,255,255,.08);
+  font-size:11px;font-weight:800;display:grid;place-items:center;color:#cbd5e1;flex:none;
+}
+.rank-idx.gold{background:linear-gradient(135deg,#fbbf24,#d97706);color:#000}
+.rank-idx.silver{background:linear-gradient(135deg,#e2e8f0,#94a3b8);color:#000}
+.rank-idx.bronze{background:linear-gradient(135deg,#d97706,#b45309);color:#fff}
+
+.rank-info{min-width:0}
+.rank-name{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-meta{font-size:11.5px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:8px}
+.rank-meta span{color:#e2e8f0;font-weight:600}
+
+.rank-right{text-align:right;position:relative;z-index:1;flex:none}
+.rank-main-val{font-size:14.5px;font-weight:800;color:#6ee7b7}
+.rank-main-val.cap{color:#fde68a}
+.rank-sub-val{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ============ CƏDVƏL BÖLMƏSİ ============ */
+.tbl-panel{margin-top:24px}
+.tbl-controls{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;margin-bottom:18px;
+}
+.search-box{
+  position:relative;flex:1;max-width:440px;min-width:260px;
+}
+.search-box i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px}
+.search-input{
+  width:100%;padding:10px 14px 10px 40px;border-radius:12px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);
+  color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:all .2s;
+}
+.search-input:focus{background:rgba(255,255,255,.09);border-color:rgba(34,211,238,.5);box-shadow:0 0 0 3px rgba(34,211,238,.15)}
+
+.chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.chip{
+  padding:7px 14px;border-radius:10px;font-size:12px;font-weight:700;font-family:inherit;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted);
+  cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;
+}
+.chip:hover{background:rgba(255,255,255,.09);color:var(--text)}
+.chip.active{
+  background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff;
+  border-color:transparent;box-shadow:0 4px 14px -3px rgba(168,85,247,.6);
+}
+.chip-count{
+  padding:1px 6px;border-radius:99px;font-size:10px;background:rgba(255,255,255,.18);font-weight:800;
+}
+
+.tbl-actions{display:flex;align-items:center;gap:8px}
+.btn-export{
+  display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:11px;
+  font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;
+  border:1px solid rgba(52,211,153,.35);background:rgba(52,211,153,.1);color:#6ee7b7;
+}
+.btn-export:hover{background:rgba(52,211,153,.22);color:#fff;transform:translateY(-1px);box-shadow:0 6px 18px -4px rgba(52,211,153,.4)}
+
+.tbl-wrap{overflow-x:auto;border-radius:16px;border:1px solid var(--line-2)}
+table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}
+thead{background:rgba(255,255,255,.03);border-bottom:1px solid var(--line)}
+th{
+  padding:13px 14px;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  color:var(--muted);white-space:nowrap;user-select:none;cursor:pointer;transition:color .18s;
+}
+th:hover{color:#fff}
+th.sorted{color:#22d3ee}
+th .arw{font-size:10px;margin-left:4px;opacity:.6}
+th.sorted .arw{opacity:1}
+
+tbody tr{border-bottom:1px solid var(--line-2);transition:background .15s}
+tbody tr:hover{background:rgba(255,255,255,.035)}
+td{padding:12px 14px;vertical-align:middle}
+
+.badge-stok{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:8px;
+  font-size:11px;font-weight:800;
+}
+.stok-ok{background:rgba(52,211,153,.12);color:#6ee7b7;border:1px solid rgba(52,211,153,.3)}
+.stok-low{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
+.stok-zero{background:rgba(251,113,133,.12);color:#fb7185;border:1px solid rgba(251,113,133,.3)}
+
+/* Səhifələmə */
+.tbl-pagination{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px 18px;border-top:1px solid var(--line-2);flex-wrap:wrap;
+  background:rgba(255,255,255,.015);
+}
+.tbl-page-info{font-size:12px;color:var(--muted);font-weight:600}
+.tbl-page-info b{color:#fff;font-weight:800}
+
+/* ============ FLOATING TOAST BİLDİRİŞ ============ */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:9999;
+  background:linear-gradient(165deg,rgba(18,24,42,.96),rgba(9,13,26,.98));
+  border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:16px 20px;
+  box-shadow:0 20px 50px -10px rgba(0,0,0,.8);display:flex;align-items:center;gap:14px;
+  max-width:420px;transform:translateY(120px);opacity:0;pointer-events:none;
+  transition:all .35s cubic-bezier(.34,1.56,.64,1);
+}
+.toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
+.toast-ico{
+  width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff;font-size:18px;flex:none;
+  box-shadow:0 6px 18px -4px rgba(168,85,247,.6);
+}
+.toast-ico.update{background:linear-gradient(135deg,#38bdf8,#6366f1)}
+.toast-ico.delete{background:linear-gradient(135deg,#fb7185,#e11d48)}
+.toast-content{min-width:0;flex:1}
+.toast-title{font-size:13.5px;font-weight:800;margin-bottom:2px}
+.toast-msg{font-size:12px;color:#cbd5e1;line-height:1.35;word-break:break-word}
+.toast-time{font-size:10.5px;color:var(--muted);margin-top:4px}
+
+/* ============ MODALLAR ============ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);
+  display:grid;place-items:center;z-index:9000;padding:20px;overflow-y:auto;
+}
+.modal-overlay.hidden{display:none}
+.modal-card{
+  background:linear-gradient(165deg,rgba(18,24,42,.98),rgba(9,13,26,.99));
+  border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:26px;
+  max-width:480px;width:100%;box-shadow:0 30px 80px -20px rgba(0,0,0,.9);position:relative;
+}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-size:18px;font-weight:800;display:flex;align-items:center;gap:10px}
+.modal-close{
+  width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);
+  border:1px solid var(--line);color:var(--text);display:grid;place-items:center;
+  cursor:pointer;font-size:14px;transition:all .18s;
+}
+.modal-close:hover{background:rgba(255,255,255,.12);transform:scale(1.05)}
+
+.form-grp{margin-bottom:16px}
+.form-lbl{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+.form-inp{
+  width:100%;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,.06);
+  border:1px solid var(--line);color:var(--text);font-size:13.5px;font-family:inherit;outline:none;transition:all .2s;
+}
+.form-inp:focus{background:rgba(255,255,255,.1);border-color:rgba(168,85,247,.6);box-shadow:0 0 0 3px rgba(168,85,247,.15)}
+
+.btn-primary{
+  width:100%;padding:12px;border-radius:13px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff;font-size:13.5px;
+  font-weight:800;font-family:inherit;box-shadow:0 8px 24px -6px rgba(168,85,247,.6);
+  transition:all .2s;
+}
+.btn-primary:hover{opacity:.94;transform:translateY(-1px);box-shadow:0 12px 28px -6px rgba(168,85,247,.75)}
+
+/* AUTH SCREEN */
+.auth-scr{
+  position:fixed;inset:0;background:#05070f;z-index:99999;
+  display:grid;place-items:center;padding:20px;
+}
+.auth-scr.hidden{display:none}
+
+/* LIGHT THEME */
+body.light-theme{
+  --bg:#f8fafc;
+  --line:rgba(0,0,0,.08);
+  --line-2:rgba(0,0,0,.045);
+  --text:#0f172a;
+  --muted:#64748b;
+  --card-bg:#ffffff;
+  background:#f1f5f9;
+}
+body.light-theme .bg::after{opacity:.4}
+body.light-theme .kcard,
+body.light-theme .panel,
+body.light-theme .modal-card{
+  box-shadow:0 10px 25px -8px rgba(0,0,0,.07);border-color:rgba(0,0,0,.08);
+}
+body.light-theme .rank-item{background:#f8fafc;border-color:rgba(0,0,0,.06)}
+body.light-theme .search-input,
+body.light-theme .chip,
+body.light-theme .hdr-btn{background:#ffffff;border-color:rgba(0,0,0,.1);color:#334155}
+body.light-theme .tbl-page-info b{color:#0f172a}
+body.light-theme thead{background:#f8fafc}
+body.light-theme .clock{background:#ffffff;border-color:rgba(0,0,0,.1);color:#334155}
+
+@media(max-width:768px){
+  .wrap{padding:16px 12px 60px}
+  .analytics-grid{grid-template-columns:1fr}
+  .hdr{flex-direction:column;align-items:flex-start}
+  .hdr-right{width:100%;justify-content:space-between}
+}
+</style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+</div>
+
+<!-- ============ AUTH EKRANI ============ -->
+<div class="auth-scr" id="authScreen">
+  <div class="modal-card" id="authBox" style="max-width:380px;text-align:center">
+    <div class="logo" style="margin:0 auto 16px;width:56px;height:56px">
+      <i class="fa-solid fa-boxes-stacked" style="font-size:24px"></i>
+    </div>
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:6px" id="loginStoreTitle">Papatya</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:20px">Anbar &amp; Məhsullar Panelinə giriş</p>
+    <div class="form-grp" style="text-align:left">
+      <label class="form-lbl">Giriş Şifrəsi</label>
+      <input type="password" id="passwordInput" class="form-inp" placeholder="Şifrəni daxil edin..." onkeypress="if(event.key==='Enter')verifyPassword()">
+    </div>
+    <div id="authError" style="color:#fb7185;font-size:12px;margin-bottom:12px;display:none;font-weight:700">❌ Şifrə yanlışdır!</div>
+    <button type="button" class="btn-primary" onclick="verifyPassword()">Daxil Ol</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- ============ HEADER ============ -->
+  <header class="hdr">
+    <div class="brand">
+      <div class="logo">
+        <i class="fa-solid fa-boxes-stacked"></i>
+      </div>
+      <div>
+        <h1 id="appStoreTitle">Papatya — Anbar İdarəetməsi</h1>
+        <p>Məhsulların maya dəyəri, satış qiyməti və canlı stok analitikası</p>
+      </div>
+    </div>
+
+    <div class="hdr-right">
+      <!-- Canlı Status -->
+      <div class="live" id="liveIndicator">
+        <span class="dot" id="liveDot"></span>
+        <span id="liveStatusText">CANLI</span>
+      </div>
+
+      <!-- Real Vaxt Saatı -->
+      <div class="clock" id="clock">--:--:--</div>
+
+      <!-- Satış Panelinə Keçid Düyməsi -->
+      <a href="index.html" class="nav-switch-btn" title="Satış Panelinə keçid">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>Satış Paneli</span>
+      </a>
+
+      <!-- Səs Düyməsi -->
+      <button class="hdr-btn" id="soundBtn" onclick="toggleSound()" title="Səs effektləri">
+        <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+      </button>
+
+      <!-- Yenilə Düyməsi -->
+      <button class="hdr-btn" onclick="fetchProducts()" title="Məhsulları yenilə">
+        <i class="fa-solid fa-rotate"></i>
+      </button>
+
+      <!-- Tema Dəyişmə -->
+      <button class="hdr-btn" id="themeBtn" onclick="toggleTheme()" title="Temanı dəyiş">
+        <i id="themeIcon" class="fa-solid fa-sun" style="color:#fbbf24"></i>
+      </button>
+
+      <!-- Bildirişlər Düyməsi -->
+      <button class="hdr-btn" onclick="toggleNotificationsModal()" title="Bildirişlər">
+        <i class="fa-solid fa-bell"></i>
+        <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+      </button>
+
+      <!-- Ayarlar Düyməsi -->
+      <button class="hdr-btn" onclick="openSettingsModal()" title="Ayarlar">
+        <i class="fa-solid fa-gear"></i>
+      </button>
+
+      <!-- Çıxış Düyməsi -->
+      <button class="hdr-btn danger" onclick="logout()" title="Çıxış">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============ KPI KARTLARI ============ -->
+  <section class="kpis">
+    <!-- 1. Toplam Çeşid Sayı -->
+    <div class="kcard c-violet">
+      <div class="kcard-top">
+        <span class="kcard-title">Toplam Çeşid</span>
+        <div class="kcard-ico"><i class="fa-solid fa-boxes-packing"></i></div>
+      </div>
+      <div class="kcard-val" id="kpiTotalItems">0</div>
+      <div class="kcard-sub">
+        <span>Aktiv məhsul:</span> <b id="kpiActiveItems">0 adda</b>
+      </div>
+    </div>
+
+    <!-- 2. Maya Kapitalı (Bağlı Pul) -->
+    <div class="kcard c-amber">
+      <div class="kcard-top">
+        <span class="kcard-title">Anbar Maya Kapitalı</span>
+        <div class="kcard-ico"><i class="fa-solid fa-coins"></i></div>
+      </div>
+      <div class="kcard-val" id="kpiTotalCost">0.00 ₼</div>
+      <div class="kcard-sub">
+        <span>Anbara yatırılmış məbləğ</span>
+      </div>
+    </div>
+
+    <!-- 3. Satış Dəyəri (Dövriyyə Potensialı) -->
+    <div class="kcard c-cyan">
+      <div class="kcard-top">
+        <span class="kcard-title">Cəmi Satış Dəyəri</span>
+        <div class="kcard-ico"><i class="fa-solid fa-cash-register"></i></div>
+      </div>
+      <div class="kcard-val" id="kpiTotalSale">0.00 ₼</div>
+      <div class="kcard-sub">
+        <span>Bütün mallar satılarsa</span>
+      </div>
+    </div>
+
+    <!-- 4. Gözlənilən Xalis Qazanc & Marja -->
+    <div class="kcard c-green">
+      <div class="kcard-top">
+        <span class="kcard-title">Gözlənilən Qazanc</span>
+        <div class="kcard-ico"><i class="fa-solid fa-chart-line"></i></div>
+      </div>
+      <div class="kcard-val" id="kpiExpectedProfit">0.00 ₼</div>
+      <div class="kcard-sub">
+        <span>Orta Marja:</span> <span class="tag" id="kpiMarginTag">% 0</span>
+      </div>
+    </div>
+
+    <!-- 5. Kritik / Bitmiş Stok -->
+    <div class="kcard c-red">
+      <div class="kcard-top">
+        <span class="kcard-title">Kritik &amp; Bitmiş Ehtiyat</span>
+        <div class="kcard-ico"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      </div>
+      <div class="kcard-val" id="kpiLowStock">0</div>
+      <div class="kcard-sub">
+        <span style="color:#fda4af"><b id="kpiZeroStock">0</b> məhsul tam bitib</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ANALİTİKA BÖLMƏSİ ============ -->
+  <section class="analytics-grid">
+    <!-- 1. Ən Çox Qazanc Verəcək Top 10 Məhsul -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">
+          <span class="bar"></span>
+          <i class="fa-solid fa-trophy" style="color:#fbbf24"></i>
+          <span>Ən Çox Qazanc Verəcək Mallar (Top 10)</span>
+        </div>
+        <div class="panel-sub" id="topProfitSub">Potensial Mənfəət</div>
+      </div>
+      <div class="rank-list" id="topProfitList">
+        <!-- JS ilə dolur -->
+      </div>
+    </div>
+
+    <!-- 2. Ən Çox Maya Bağlanmış Top 10 Məhsul (Kapital Yükü) -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">
+          <span class="bar"></span>
+          <i class="fa-solid fa-vault" style="color:#22d3ee"></i>
+          <span>Ən Çox Maya Yatırılmış Mallar (Top 10)</span>
+        </div>
+        <div class="panel-sub" id="topCostSub">Kapital Yükü</div>
+      </div>
+      <div class="rank-list" id="topCostList">
+        <!-- JS ilə dolur -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CƏDVƏL BÖLMƏSİ ============ -->
+  <section class="panel tbl-panel">
+    <div class="tbl-controls">
+      <!-- Axtarış -->
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="Məhsul adı və ya barkod axtar..." oninput="filterAndRender()">
+      </div>
+
+      <!-- Filtrlər -->
+      <div class="chips" id="filterChips">
+        <button type="button" class="chip active" data-filter="all" onclick="setFilter('all')">
+          <span>Hamısı</span>
+          <span class="chip-count" id="chipAllCount">0</span>
+        </button>
+        <button type="button" class="chip" data-filter="critical" onclick="setFilter('critical')">
+          <i class="fa-solid fa-circle-exclamation" style="color:#fbbf24"></i>
+          <span>Kritik Ehtiyat (&lt;5)</span>
+          <span class="chip-count" id="chipCritCount">0</span>
+        </button>
+        <button type="button" class="chip" data-filter="zero" onclick="setFilter('zero')">
+          <i class="fa-solid fa-ban" style="color:#fb7185"></i>
+          <span>Tükənmişlər (0)</span>
+          <span class="chip-count" id="chipZeroCount">0</span>
+        </button>
+        <button type="button" class="chip" data-filter="high-margin" onclick="setFilter('high-margin')">
+          <i class="fa-solid fa-percent" style="color:#34d399"></i>
+          <span>Yüksək Marja (&gt;40%)</span>
+        </button>
+        <button type="button" class="chip" data-filter="kilo" onclick="setFilter('kilo')">
+          <i class="fa-solid fa-scale-balanced" style="color:#60a5fa"></i>
+          <span>Çəki (Kq) Malları</span>
+        </button>
+      </div>
+
+      <!-- İxrac Düymələri -->
+      <div class="tbl-actions">
+        <button type="button" class="btn-export" onclick="exportToExcel()">
+          <i class="fa-solid fa-file-excel"></i>
+          <span>Excel İxrac</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Cədvəl -->
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable('barkod')">Barkod <span class="arw" id="arw_barkod">▼</span></th>
+            <th onclick="sortTable('ad')">Məhsul Adı <span class="arw" id="arw_ad">▼</span></th>
+            <th style="text-align:center">Vahid</th>
+            <th style="text-align:right" onclick="sortTable('alis_qiymeti')">Maya Dəyəri <span class="arw" id="arw_alis_qiymeti">▼</span></th>
+            <th style="text-align:right" onclick="sortTable('satis_qiymeti')">Satış Qiyməti <span class="arw" id="arw_satis_qiymeti">▼</span></th>
+            <th style="text-align:right" onclick="sortTable('unit_profit')">Tək Qazanc <span class="arw" id="arw_unit_profit">▼</span></th>
+            <th style="text-align:center" onclick="sortTable('margin')">Marja % <span class="arw" id="arw_margin">▼</span></th>
+            <th style="text-align:right" onclick="sortTable('stok')">Qalıq Stok <span class="arw" id="arw_stok">▼</span></th>
+            <th style="text-align:right" onclick="sortTable('total_cost')">Cəmi Maya <span class="arw" id="arw_total_cost">▼</span></th>
+            <th style="text-align:right" onclick="sortTable('total_profit')">Cəmi Qazanc <span class="arw" id="arw_total_profit">▼</span></th>
+            <th style="text-align:center">Vəziyyət</th>
+          </tr>
+        </thead>
+        <tbody id="tblBody">
+          <!-- JS ilə doldurulur -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Səhifələmə -->
+    <div class="tbl-pagination">
+      <div class="tbl-page-info">
+        Göstərilir: <b id="pgVisibleCount">0</b> / <span id="pgTotalCount">0</span> məhsul
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button type="button" class="chip" onclick="showMoreRows(50)"><i class="fa-solid fa-angles-down"></i> Daha çox göstər (+50)</button>
+        <button type="button" class="chip" onclick="showAllRows()">Hamısını göstər</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ TOAST BİLDİRİŞİ ============ -->
+<div class="toast" id="toastNotification">
+  <div class="toast-ico" id="toastIco"><i class="fa-solid fa-box-open"></i></div>
+  <div class="toast-content">
+    <div class="toast-title" id="toastTitle">Yeni Məhsul</div>
+    <div class="toast-msg" id="toastMsg">Məhsul anbara əlavə edildi</div>
+    <div class="toast-time" id="toastTime">00:00:00</div>
+  </div>
+</div>
+
+<!-- ============ BİLDİRİŞLƏR MODALI ============ -->
+<div class="modal-overlay hidden" id="notifModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title"><i class="fa-solid fa-bell" style="color:#a855f7"></i> Gələn Bildirişlər</div>
+      <button class="modal-close" onclick="toggleNotificationsModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="notifList" style="max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:8px">
+      <!-- Bildirişlər -->
+    </div>
+    <div style="margin-top:16px;text-align:right">
+      <button type="button" class="chip" onclick="clearAllNotifications()"><i class="fa-solid fa-trash"></i> Hamısını Sil</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ AYARLAR MODALI ============ -->
+<div class="modal-overlay hidden" id="settingsModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title"><i class="fa-solid fa-gear" style="color:#22d3ee"></i> Supabase və Sistem Ayarları</div>
+      <button class="modal-close" onclick="closeSettingsModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="form-grp">
+      <label class="form-lbl">Mağaza Adı</label>
+      <input type="text" id="settingStoreName" class="form-inp">
+    </div>
+    <div class="form-grp">
+      <label class="form-lbl">Supabase Proyekt URL</label>
+      <input type="text" id="settingSupabaseUrl" class="form-inp">
+    </div>
+    <div class="form-grp">
+      <label class="form-lbl">Supabase Anon Key</label>
+      <input type="password" id="settingSupabaseKey" class="form-inp">
+    </div>
+    <div class="form-grp">
+      <label class="form-lbl">Giriş Şifrəsi</label>
+      <input type="password" id="settingPassword" class="form-inp">
+    </div>
+    <div id="testConnResult" style="padding:10px;border-radius:10px;font-size:12.5px;margin-bottom:14px;display:none"></div>
+    <div style="display:flex;gap:8px">
+      <button type="button" class="chip" style="flex:1;justify-content:center" onclick="testSupabaseConnection()"><i class="fa-solid fa-bolt"></i> Əlaqəni Yoxla</button>
+      <button type="button" class="btn-primary" style="flex:1" onclick="saveSettings()">Yadda Saxla</button>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================================
+     JAVASCRIPT: MƏNTİQ, SUPABASE REALTIME VƏ ANALİTİKA
+     ===================================================================== -->
+<script>
+const DEFAULT_APP_PASSWORD = "Elsen0123456789-";
+const DEFAULT_SUPABASE_URL = "https://zcjthobakvppowerkxmv.supabase.co";
+const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjanRob2Jha3ZwcG93ZXJreG12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MTQyNzMsImV4cCI6MjEwNTI5MDI3M30.ZLaSVPvowhwv50cv6W6d8AFYmPpPZ7oS5eZAxZzHI1U";
+const DEFAULT_STORE_NAME = "Papatya";
+
+function getActiveSupabaseUrl() {
+  return (localStorage.getItem('kassa_supabase_url') || DEFAULT_SUPABASE_URL).trim().replace(/\/+$/, '');
+}
+function getActiveSupabaseKey() {
+  return (localStorage.getItem('kassa_supabase_key') || DEFAULT_SUPABASE_KEY).trim();
+}
+function getActivePassword() {
+  return localStorage.getItem('kassa_custom_password') || DEFAULT_APP_PASSWORD;
+}
+function getActiveStoreName() {
+  const saved = localStorage.getItem('kassa_store_name');
+  if (saved && saved !== 'Satış İdarəetmə Paneli') return saved;
+  return DEFAULT_STORE_NAME;
+}
+
+const $ = id => document.getElementById(id);
+const pad = n => (n < 10 ? '0' + n : '' + n);
+const nf2 = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const nf0 = new Intl.NumberFormat('ru-RU');
+const money = n => nf2.format(n || 0) + ' ₼';
+
+let isSoundMuted = false;
+let supabaseClient = null;
+let realtimeChannel = null;
+let PRODUCTS = [];
+let filteredProducts = [];
+let currentFilter = 'all';
+let currentSortKey = 'total_profit';
+let currentSortDir = -1; // -1: azalan, 1: artan
+let visibleLimit = 50;
+let notifications = [];
+
+/* ============ SAAT VƏ SƏS SİSTEMİ ============ */
+function initClock() {
+  const update = () => {
+    const d = new Date();
+    $('clock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  };
+  update();
+  setInterval(update, 1000);
+}
+
+function initSound() {
+  isSoundMuted = localStorage.getItem('kassa_sound_muted') === 'true';
+  updateSoundIcon();
+}
+
+function toggleSound() {
+  isSoundMuted = !isSoundMuted;
+  localStorage.setItem('kassa_sound_muted', isSoundMuted ? 'true' : 'false');
+  updateSoundIcon();
+  if (!isSoundMuted) playChime('insert');
+}
+
+function updateSoundIcon() {
+  const icon = $('soundIcon');
+  if (isSoundMuted) {
+    icon.className = 'fa-solid fa-volume-xmark';
+    icon.style.color = '#fda4af';
+  } else {
+    icon.className = 'fa-solid fa-volume-high';
+    icon.style.color = '#67e8f9';
+  }
+}
+
+function playChime(type = 'insert') {
+  if (isSoundMuted) return;
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+
+    if (type === 'insert') {
+      // Zəngin qələbə akkordu (Yeni məhsul gəldi)
+      const freqs = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      freqs.forEach((f, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, ctx.currentTime + idx * 0.07);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime + idx * 0.07);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.07 + 0.35);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + idx * 0.07);
+        osc.stop(ctx.currentTime + idx * 0.07 + 0.35);
+      });
+    } else if (type === 'update') {
+      // Zərif iki tonlu bildiriş (Stok yeniləndi)
+      const freqs = [440, 659.25];
+      freqs.forEach((f, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, ctx.currentTime + idx * 0.1);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime + idx * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.1 + 0.28);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + idx * 0.1);
+        osc.stop(ctx.currentTime + idx * 0.1 + 0.28);
+      });
+    } else {
+      // Silinmə xəbərdarlığı
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(329.63, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(220, ctx.currentTime + 0.25);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.3);
+    }
+  } catch (e) {
+    console.warn("Audio xətası:", e);
+  }
+}
+
+/* ============ TEMA DƏYİŞMƏ ============ */
+function initTheme() {
+  const saved = localStorage.getItem('kassa_theme');
+  if (saved === 'light') {
+    document.body.classList.add('light-theme');
+    $('themeIcon').className = 'fa-solid fa-moon';
+    $('themeIcon').style.color = '#6366f1';
+  }
+}
+
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light-theme');
+  localStorage.setItem('kassa_theme', isLight ? 'light' : 'dark');
+  $('themeIcon').className = isLight ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+  $('themeIcon').style.color = isLight ? '#6366f1' : '#fbbf24';
+}
+
+/* ============ AUTH & GİRİŞ ============ */
+function checkAuth() {
+  const currentPassword = getActivePassword();
+  const savedAuth = localStorage.getItem('kassa_auth_token');
+  const storeName = getActiveStoreName();
+  $('appStoreTitle').textContent = storeName + " — Anbar İdarəetməsi";
+  $('loginStoreTitle').textContent = storeName;
+  document.title = storeName + " — Anbar & Məhsullar";
+
+  if (savedAuth === currentPassword) {
+    $('authScreen').classList.add('hidden');
+    initApp();
+  } else {
+    $('authScreen').classList.remove('hidden');
+    setTimeout(() => $('passwordInput').focus(), 150);
+  }
+}
+
+function verifyPassword() {
+  const entered = $('passwordInput').value;
+  const currentPassword = getActivePassword();
+  if (entered === currentPassword) {
+    localStorage.setItem('kassa_auth_token', currentPassword);
+    $('authScreen').classList.add('hidden');
+    initApp();
+  } else {
+    $('authError').style.display = 'block';
+  }
+}
+
+function logout() {
+  if (confirm("Paneldən çıxmaq istəyirsiniz?")) {
+    localStorage.removeItem('kassa_auth_token');
+    location.reload();
+  }
+}
+
+/* ============ FLOATING TOAST VƏ BİLDİRİŞ TARİXÇƏSİ ============ */
+let toastTimer = null;
+function showToast(title, msg, type = 'insert') {
+  const toast = $('toastNotification');
+  const tTitle = $('toastTitle');
+  const tMsg = $('toastMsg');
+  const tIco = $('toastIco');
+  const tTime = $('toastTime');
+
+  tTitle.textContent = title;
+  tMsg.textContent = msg;
+
+  const d = new Date();
+  tTime.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+
+  tIco.className = 'toast-ico ' + type;
+  if (type === 'insert') tIco.innerHTML = '<i class="fa-solid fa-box-open"></i>';
+  else if (type === 'update') tIco.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+  else tIco.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+
+  playChime(type);
+
+  // Bildirişlər siyahısına əlavə et
+  addNotification(title, msg, type);
+
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 5000);
+}
+
+function loadNotifications() {
+  try {
+    const raw = localStorage.getItem('anbar_notifications');
+    notifications = raw ? JSON.parse(raw) : [];
+  } catch (e) { notifications = []; }
+  updateNotifBadge();
+}
+
+function saveNotifications() {
+  try {
+    if (notifications.length > 40) notifications = notifications.slice(0, 40);
+    localStorage.setItem('anbar_notifications', JSON.stringify(notifications));
+  } catch (e) {}
+  updateNotifBadge();
+}
+
+function addNotification(title, msg, type) {
+  const d = new Date();
+  notifications.unshift({
+    id: Date.now(),
+    title, msg, type,
+    time: pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
+  });
+  saveNotifications();
+}
+
+function updateNotifBadge() {
+  const badge = $('notifBadge');
+  if (notifications.length > 0) {
+    badge.style.display = 'block';
+    badge.textContent = notifications.length;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function toggleNotificationsModal() {
+  const m = $('notifModal');
+  const isHidden = m.classList.toggle('hidden');
+  if (!isHidden) renderNotificationList();
+}
+
+function renderNotificationList() {
+  const list = $('notifList');
+  if (!notifications.length) {
+    list.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px"><i class="fa-regular fa-bell-slash" style="font-size:24px;margin-bottom:8px;display:block"></i>Heç bir bildiriş yoxdur</div>`;
+    return;
+  }
+  list.innerHTML = notifications.map(n => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line-2)">
+      <div>
+        <div style="font-size:13px;font-weight:700">${n.title}</div>
+        <div style="font-size:11.5px;color:var(--muted);margin-top:2px">${n.msg}</div>
+      </div>
+      <div style="font-size:10.5px;color:var(--muted);flex:none">${n.time}</div>
+    </div>
+  `).join('');
+}
+
+function clearAllNotifications() {
+  notifications = [];
+  saveNotifications();
+  renderNotificationList();
+}
+
+/* ============ SUPABASE & MƏLUMAT ƏLAQƏSİ ============ */
+function setConnectionStatus(status, text) {
+  const ind = $('liveIndicator');
+  const txt = $('liveStatusText');
+  ind.className = 'live ' + status;
+  txt.textContent = text;
+}
+
+function initApp() {
+  initClock();
+  initSound();
+  initTheme();
+  loadNotifications();
+
+  const url = getActiveSupabaseUrl();
+  const key = getActiveSupabaseKey();
+
+  try {
+    setConnectionStatus('connecting', 'QOŞULUR...');
+    supabaseClient = window.supabase.createClient(url, key);
+    fetchProducts();
+    setupRealtime();
+  } catch (err) {
+    console.error("Supabase əlaqə xətası:", err);
+    setConnectionStatus('error', 'XƏTA');
+  }
+}
+
+async function fetchProducts() {
+  if (!supabaseClient) return;
+  setConnectionStatus('connecting', 'YENİLƏNİR...');
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('mehsullar')
+      .select('*')
+      .eq('is_deleted', false)
+      .order('son_yenilenme_tarixi', { ascending: false });
+
+    if (error) throw error;
+
+    PRODUCTS = (data || []).map(r => {
+      const alis = parseFloat(r.alis_qiymeti) || 0;
+      const satis = parseFloat(r.satis_qiymeti) || 0;
+      const stok = parseFloat(r.stok) || 0;
+      const unitProfit = satis - alis;
+      const margin = alis > 0 ? ((unitProfit / alis) * 100) : (satis > 0 ? 100 : 0);
+      const totalCost = alis * stok;
+      const totalSale = satis * stok;
+      const totalProfit = unitProfit * stok;
+
+      return {
+        id: r.id,
+        barkod: r.barkod || '',
+        ad: r.ad || 'Adsız məhsul',
+        alis_qiymeti: alis,
+        satis_qiymeti: satis,
+        stok: stok,
+        is_kilo: r.is_kilo === true || r.is_kilo === 1,
+        is_active: r.is_active !== false,
+        unit_profit: unitProfit,
+        margin: margin,
+        total_cost: totalCost,
+        total_sale: totalSale,
+        total_profit: totalProfit,
+        raw: r
+      };
+    });
+
+    setConnectionStatus('', 'CANLI');
+    updateAll();
+  } catch (err) {
+    console.error("Məhsullar çəkilərkən xəta:", err);
+    setConnectionStatus('error', 'BAĞLANTI XƏTASI');
+  }
+}
+
+/* ============ REALTIME DİNLƏYİCİ ============ */
+function setupRealtime() {
+  if (!supabaseClient) return;
+
+  if (realtimeChannel) {
+    supabaseClient.removeChannel(realtimeChannel);
+  }
+
+  realtimeChannel = supabaseClient
+    .channel('mehsullar-live-channel')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'mehsullar' },
+      payload => {
+        handleRealtimeEvent(payload);
+      }
+    )
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        setConnectionStatus('', 'CANLI');
+      } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+        setConnectionStatus('error', 'XƏTA');
+      }
+    });
+}
+
+function handleRealtimeEvent(payload) {
+  const { eventType, new: newRow, old: oldRow } = payload;
+
+  if (eventType === 'INSERT') {
+    const alis = parseFloat(newRow.alis_qiymeti) || 0;
+    const satis = parseFloat(newRow.satis_qiymeti) || 0;
+    const stok = parseFloat(newRow.stok) || 0;
+    const unit = newRow.is_kilo ? 'kq' : 'əd';
+
+    showToast(
+      "📦 Yeni Məhsul Əlavə Edildi!",
+      `"${newRow.ad}" anbara daxil edildi. Qalıq: ${stok} ${unit} (Maya: ${money(alis)}, Satış: ${money(satis)})`,
+      'insert'
+    );
+    fetchProducts();
+  } else if (eventType === 'UPDATE') {
+    const prev = PRODUCTS.find(p => p.id === newRow.id);
+    const prevStok = prev ? prev.stok : null;
+    const newStok = parseFloat(newRow.stok) || 0;
+    const unit = newRow.is_kilo ? 'kq' : 'əd';
+
+    let msg = `"${newRow.ad}" məlumatları yeniləndi. Yeni stok: ${newStok} ${unit}`;
+    if (prevStok !== null && prevStok !== newStok) {
+      const diff = newStok - prevStok;
+      const diffStr = diff > 0 ? `+${diff}` : `${diff}`;
+      msg = `"${newRow.ad}" stoku dəyişdi: ${newStok} ${unit} (${diffStr})`;
+    }
+
+    showToast("⚡ Məhsul Yeniləndi", msg, 'update');
+    fetchProducts();
+  } else if (eventType === 'DELETE') {
+    showToast("🗑️ Məhsul Silindi", "Bir məhsul sistemdən silindi", 'delete');
+    fetchProducts();
+  }
+}
+
+/* ============ HESABLAMALAR VƏ ANALİTİKA ============ */
+function updateAll() {
+  calculateKPIs();
+  renderAnalytics();
+  filterAndRender();
+}
+
+function calculateKPIs() {
+  const activeProducts = PRODUCTS.filter(p => p.is_active);
+
+  const totalCost = activeProducts.reduce((sum, p) => sum + (p.total_cost > 0 ? p.total_cost : 0), 0);
+  const totalSale = activeProducts.reduce((sum, p) => sum + (p.total_sale > 0 ? p.total_sale : 0), 0);
+  const expectedProfit = totalSale - totalCost;
+  const avgMargin = totalCost > 0 ? ((expectedProfit / totalCost) * 100) : 0;
+
+  const lowStockCount = activeProducts.filter(p => p.stok > 0 && p.stok < 5).length;
+  const zeroStockCount = activeProducts.filter(p => p.stok <= 0).length;
+
+  $('kpiTotalItems').textContent = nf0.format(PRODUCTS.length) + ' adda';
+  $('kpiActiveItems').textContent = nf0.format(activeProducts.length) + ' adda';
+  $('kpiTotalCost').textContent = money(totalCost);
+  $('kpiTotalSale').textContent = money(totalSale);
+  $('kpiExpectedProfit').textContent = money(expectedProfit);
+  $('kpiMarginTag').textContent = '% ' + avgMargin.toFixed(1);
+  $('kpiLowStock').textContent = nf0.format(lowStockCount + zeroStockCount);
+  $('kpiZeroStock').textContent = zeroStockCount;
+
+  $('chipAllCount').textContent = PRODUCTS.length;
+  $('chipCritCount').textContent = lowStockCount;
+  $('chipZeroCount').textContent = zeroStockCount;
+}
+
+function renderAnalytics() {
+  // 1. Ən Çox Qazanc Verəcək Top 10 Məhsul (Potensial Qazanc = (Satış - Maya) * Stok)
+  const topProfits = [...PRODUCTS]
+    .filter(p => p.total_profit > 0 && p.stok > 0)
+    .sort((a, b) => b.total_profit - a.total_profit)
+    .slice(0, 10);
+
+  const maxProfit = topProfits.length > 0 ? topProfits[0].total_profit : 1;
+
+  $('topProfitList').innerHTML = topProfits.length ? topProfits.map((p, idx) => {
+    const pct = Math.min(100, Math.max(8, (p.total_profit / maxProfit) * 100));
+    const badgeCls = idx === 0 ? 'gold' : (idx === 1 ? 'silver' : (idx === 2 ? 'bronze' : ''));
+    const unit = p.is_kilo ? 'kq' : 'əd';
+
+    return `
+      <div class="rank-item">
+        <div class="rank-bar" style="width:${pct}%"></div>
+        <div class="rank-left">
+          <div class="rank-idx ${badgeCls}">${idx + 1}</div>
+          <div class="rank-info">
+            <div class="rank-name">${escapeHtml(p.ad)}</div>
+            <div class="rank-meta">
+              <span>${p.stok} ${unit}</span> • Tək qazanc: <span>${money(p.unit_profit)}</span> • Marja: <span>% ${p.margin.toFixed(0)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="rank-right">
+          <div class="rank-main-val">+${money(p.total_profit)}</div>
+          <div class="rank-sub-val">${money(p.satis_qiymeti)} / ${unit}</div>
+        </div>
+      </div>
+    `;
+  }).join('') : `<div style="text-align:center;padding:20px;color:var(--muted)">Qazanc potensialı olan məhsul tapılmadı</div>`;
+
+  // 2. Ən Çox Maya Bağlanmış Top 10 Məhsul (Kapital = Maya * Stok)
+  const topCosts = [...PRODUCTS]
+    .filter(p => p.total_cost > 0 && p.stok > 0)
+    .sort((a, b) => b.total_cost - a.total_cost)
+    .slice(0, 10);
+
+  const maxCost = topCosts.length > 0 ? topCosts[0].total_cost : 1;
+
+  $('topCostList').innerHTML = topCosts.length ? topCosts.map((p, idx) => {
+    const pct = Math.min(100, Math.max(8, (p.total_cost / maxCost) * 100));
+    const badgeCls = idx === 0 ? 'gold' : (idx === 1 ? 'silver' : (idx === 2 ? 'bronze' : ''));
+    const unit = p.is_kilo ? 'kq' : 'əd';
+
+    return `
+      <div class="rank-item">
+        <div class="rank-bar capital" style="width:${pct}%"></div>
+        <div class="rank-left">
+          <div class="rank-idx ${badgeCls}">${idx + 1}</div>
+          <div class="rank-info">
+            <div class="rank-name">${escapeHtml(p.ad)}</div>
+            <div class="rank-meta">
+              <span>${p.stok} ${unit}</span> • Vahid maya: <span>${money(p.alis_qiymeti)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="rank-right">
+          <div class="rank-main-val cap">${money(p.total_cost)}</div>
+          <div class="rank-sub-val">Bağlı Kapital</div>
+        </div>
+      </div>
+    `;
+  }).join('') : `<div style="text-align:center;padding:20px;color:var(--muted)">Maya kapitalı olan məhsul tapılmadı</div>`;
+}
+
+/* ============ FİLTRLƏMƏ VƏ CƏDVƏL RENDERİ ============ */
+function setFilter(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('#filterChips .chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.filter === filter);
+  });
+  visibleLimit = 50;
+  filterAndRender();
+}
+
+function filterAndRender() {
+  const q = ($('searchInput').value || '').trim().toLowerCase();
+
+  filteredProducts = PRODUCTS.filter(p => {
+    // Axtarış
+    if (q) {
+      const matchName = (p.ad || '').toLowerCase().includes(q);
+      const matchBarcode = (p.barkod || '').toLowerCase().includes(q);
+      if (!matchName && !matchBarcode) return false;
+    }
+
+    // Kateqoriya filtri
+    if (currentFilter === 'critical') return p.stok > 0 && p.stok < 5;
+    if (currentFilter === 'zero') return p.stok <= 0;
+    if (currentFilter === 'high-margin') return p.margin >= 40;
+    if (currentFilter === 'kilo') return p.is_kilo;
+
+    return true;
+  });
+
+  // Çeşidləmə
+  filteredProducts.sort((a, b) => {
+    let vA = a[currentSortKey];
+    let vB = b[currentSortKey];
+    if (typeof vA === 'string') {
+      return currentSortDir * vA.localeCompare(vB);
+    }
+    return currentSortDir * ((vA || 0) - (vB || 0));
+  });
+
+  renderTable();
+}
+
+function sortTable(key) {
+  if (currentSortKey === key) {
+    currentSortDir = -currentSortDir;
+  } else {
+    currentSortKey = key;
+    currentSortDir = -1; // default olaraq böyükdən kiçiyə
+  }
+
+  // Ox ikonlarını yenilə
+  document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
+  document.querySelectorAll('th .arw').forEach(a => a.textContent = '▼');
+
+  const activeTh = $(`arw_${key}`)?.parentElement;
+  if (activeTh) {
+    activeTh.classList.add('sorted');
+    $(`arw_${key}`).textContent = currentSortDir === 1 ? '▲' : '▼';
+  }
+
+  filterAndRender();
+}
+
+function renderTable() {
+  const tbody = $('tblBody');
+  const count = filteredProducts.length;
+  $('pgTotalCount').textContent = count;
+
+  if (!count) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="11" style="text-align:center;padding:40px;color:var(--muted)">
+          <i class="fa-solid fa-box-archive" style="font-size:32px;margin-bottom:10px;display:block"></i>
+          Seçilmiş filtrlərə uyğun məhsul tapılmadı
+        </td>
+      </tr>
+    `;
+    $('pgVisibleCount').textContent = 0;
+    return;
+  }
+
+  const rowsToRender = filteredProducts.slice(0, visibleLimit);
+  $('pgVisibleCount').textContent = rowsToRender.length;
+
+  tbody.innerHTML = rowsToRender.map(p => {
+    const unit = p.is_kilo ? 'kq' : 'əd';
+
+    let statusHtml = '';
+    if (p.stok <= 0) {
+      statusHtml = '<span class="badge-stok stok-zero"><i class="fa-solid fa-xmark"></i> Bitib</span>';
+    } else if (p.stok < 5) {
+      statusHtml = `<span class="badge-stok stok-low"><i class="fa-solid fa-triangle-exclamation"></i> Az qalıb (${p.stok})</span>`;
+    } else {
+      statusHtml = '<span class="badge-stok stok-ok"><i class="fa-solid fa-check"></i> Normal</span>';
+    }
+
+    const marginColor = p.margin >= 40 ? '#34d399' : (p.margin >= 20 ? '#60a5fa' : '#fbbf24');
+
+    return `
+      <tr>
+        <td style="font-family:monospace;font-size:12px;color:var(--muted)">${p.barkod || '—'}</td>
+        <td style="font-weight:700;color:var(--text)">${escapeHtml(p.ad)}</td>
+        <td style="text-align:center"><span style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,.06)">${unit}</span></td>
+        <td style="text-align:right;color:var(--muted)">${money(p.alis_qiymeti)}</td>
+        <td style="text-align:right;font-weight:700">${money(p.satis_qiymeti)}</td>
+        <td style="text-align:right;color:#6ee7b7;font-weight:700">+${money(p.unit_profit)}</td>
+        <td style="text-align:center;font-weight:800;color:${marginColor}">% ${p.margin.toFixed(0)}</td>
+        <td style="text-align:right;font-weight:800;font-size:13.5px">${p.stok} ${unit}</td>
+        <td style="text-align:right;color:#fde68a">${money(p.total_cost)}</td>
+        <td style="text-align:right;font-weight:800;color:#6ee7b7">+${money(p.total_profit)}</td>
+        <td style="text-align:center">${statusHtml}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function showMoreRows(step = 50) {
+  visibleLimit += step;
+  renderTable();
+}
+
+function showAllRows() {
+  visibleLimit = filteredProducts.length;
+  renderTable();
+}
+
+/* ============ EXCEL İXRAC ============ */
+function exportToExcel() {
+  if (!filteredProducts.length) {
+    alert("İxrac ediləcək məhsul yoxdur!");
+    return;
+  }
+
+  const exportData = filteredProducts.map((p, idx) => ({
+    "№": idx + 1,
+    "Barkod": p.barkod,
+    "Məhsul Adı": p.ad,
+    "Vahid": p.is_kilo ? "kq" : "ədəd",
+    "Maya Dəyəri (AZN)": p.alis_qiymeti,
+    "Satış Qiyməti (AZN)": p.satis_qiymeti,
+    "Tək Qazanc (AZN)": p.unit_profit,
+    "Marja (%)": Number(p.margin.toFixed(1)),
+    "Qalıq Stok": p.stok,
+    "Cəmi Maya (AZN)": p.total_cost,
+    "Cəmi Gözlənilən Qazanc (AZN)": p.total_profit
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(exportData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Anbar");
+
+  const d = new Date();
+  const dateStr = d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate());
+  XLSX.writeFile(workbook, `anbar_mehsullar_${dateStr}.xlsx`);
+}
+
+/* ============ AYARLAR ============ */
+function openSettingsModal() {
+  $('settingStoreName').value = getActiveStoreName();
+  $('settingSupabaseUrl').value = getActiveSupabaseUrl();
+  $('settingSupabaseKey').value = getActiveSupabaseKey();
+  $('settingPassword').value = getActivePassword();
+  $('testConnResult').style.display = 'none';
+  $('settingsModal').classList.remove('hidden');
+}
+
+function closeSettingsModal() {
+  $('settingsModal').classList.add('hidden');
+}
+
+async function testSupabaseConnection() {
+  const url = $('settingSupabaseUrl').value.trim().replace(/\/+$/, '');
+  const key = $('settingSupabaseKey').value.trim();
+  const resDiv = $('testConnResult');
+
+  if (!url || !key) {
+    resDiv.style.display = 'block';
+    resDiv.style.background = 'rgba(251,113,133,.15)';
+    resDiv.style.color = '#fda4af';
+    resDiv.innerHTML = '❌ URL və Anon Key daxil edilməlidir!';
+    return;
+  }
+
+  resDiv.style.display = 'block';
+  resDiv.style.background = 'rgba(99,102,241,.15)';
+  resDiv.style.color = '#a5b4fc';
+  resDiv.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Əlaqə yoxlanılır...';
+
+  try {
+    const resp = await fetch(`${url}/rest/v1/mehsullar?select=id,ad,stok&limit=1`, {
+      headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
+    });
+
+    if (resp.ok) {
+      resDiv.style.background = 'rgba(52,211,153,.15)';
+      resDiv.style.color = '#6ee7b7';
+      resDiv.innerHTML = '✅ <b>Uğurlu!</b> Supabase layihəsinə və `mehsullar` cədvəlinə əlaqə quruldu.';
+    } else {
+      const err = await resp.text();
+      resDiv.style.background = 'rgba(251,113,133,.15)';
+      resDiv.style.color = '#fda4af';
+      resDiv.innerHTML = `❌ Xəta (${resp.status}): ${err.substring(0, 120)}`;
+    }
+  } catch (e) {
+    resDiv.style.background = 'rgba(251,113,133,.15)';
+    resDiv.style.color = '#fda4af';
+    resDiv.innerHTML = `❌ Şəbəkə xətası: ${e.message}`;
+  }
+}
+
+function saveSettings() {
+  const name = $('settingStoreName').value.trim() || DEFAULT_STORE_NAME;
+  const url = $('settingSupabaseUrl').value.trim().replace(/\/+$/, '') || DEFAULT_SUPABASE_URL;
+  const key = $('settingSupabaseKey').value.trim() || DEFAULT_SUPABASE_KEY;
+  const pwd = $('settingPassword').value.trim() || DEFAULT_APP_PASSWORD;
+
+  localStorage.setItem('kassa_store_name', name);
+  localStorage.setItem('kassa_supabase_url', url);
+  localStorage.setItem('kassa_supabase_key', key);
+  localStorage.setItem('kassa_custom_password', pwd);
+  localStorage.setItem('kassa_auth_token', pwd);
+
+  closeSettingsModal();
+  showToast("⚙️ Ayarlar Yeniləndi", "Yeni ayarlar tətbiq edildi!", 'update');
+  initApp();
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+window.addEventListener('DOMContentLoaded', checkAuth);
+</script>
+</body>
+</html>
