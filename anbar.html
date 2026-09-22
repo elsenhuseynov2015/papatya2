@@ -353,6 +353,18 @@ td{padding:12px 14px;vertical-align:middle}
 }
 .btn-primary:hover{opacity:.94;transform:translateY(-1px);box-shadow:0 12px 28px -6px rgba(168,85,247,.75)}
 
+.btn-danger-outline{
+  width:100%;padding:11px 14px;border-radius:12px;
+  border:1px solid rgba(251,113,133,.35);background:rgba(251,113,133,.08);
+  color:#fb7185;font-size:13px;font-weight:700;font-family:inherit;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .2s;
+}
+.btn-danger-outline:hover{
+  background:rgba(251,113,133,.22);border-color:rgba(251,113,133,.6);
+  color:#fff;transform:translateY(-1px);box-shadow:0 6px 18px -4px rgba(251,113,133,.4);
+}
+
 /* AUTH SCREEN */
 .auth-scr{
   position:fixed;inset:0;background:#05070f;z-index:99999;
@@ -709,6 +721,48 @@ body.light-theme .clock{background:#ffffff;border-color:rgba(0,0,0,.1);color:#33
     <div style="display:flex;gap:8px">
       <button type="button" class="chip" style="flex:1;justify-content:center" onclick="testSupabaseConnection()"><i class="fa-solid fa-bolt"></i> Əlaqəni Yoxla</button>
       <button type="button" class="btn-primary" style="flex:1" onclick="saveSettings()">Yadda Saxla</button>
+    </div>
+
+    <!-- Təhlükəli Əməliyyat / Anbarı Sil -->
+    <div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(251,113,133,.2)">
+      <div style="font-size:12px;font-weight:800;color:#fb7185;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+        <i class="fa-solid fa-triangle-exclamation"></i> Təhlükəli Əməliyyat
+      </div>
+      <p style="font-size:11.5px;color:var(--muted);margin-bottom:12px;line-height:1.4">
+        Supabase-dəki bütün anbar məhsullarını birdəfəlik silir. Testlər bitdikdən sonra və ya istənilən vaxt kassa kompüterindən (WPF) tək toxunuşla yenidən göndərə bilərsiniz.
+      </p>
+      <button type="button" class="btn-danger-outline" onclick="openDeleteAllModal()">
+        <i class="fa-solid fa-trash-can"></i>
+        <span>Anbardakı Bütün Məhsulları Sil</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BÜTÜN MƏHSULLARI SİLMƏ TƏSDİQ MODALI ============ -->
+<div class="modal-overlay hidden" id="deleteAllModal">
+  <div class="modal-card" style="max-width:420px;border-color:rgba(251,113,133,.4)">
+    <div class="modal-head">
+      <div class="modal-title" style="color:#fb7185">
+        <i class="fa-solid fa-triangle-exclamation"></i> Bütün Məhsulları Sil
+      </div>
+      <button class="modal-close" onclick="closeDeleteAllModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div style="font-size:13px;color:#cbd5e1;line-height:1.45;margin-bottom:16px">
+      ⚠️ <b>DİQQƏT:</b> Supabase bazasındakı <b>bütün anbar məhsulları</b> tamamilə silinəcək!
+      <br><br>
+      Əməliyyatı təsdiqləmək üçün zəhmət olmasa təhlükəsizlik şifrəsini (<code style="color:#fbbf24;font-weight:700">Elsen0123456789-</code>) daxil edin:
+    </div>
+    <div class="form-grp">
+      <label class="form-lbl">Təsdiq Şifrəsi</label>
+      <input type="password" id="deleteConfirmPassword" class="form-inp" placeholder="Şifrəni daxil edin..." onkeypress="if(event.key==='Enter')confirmDeleteAllProducts()">
+    </div>
+    <div id="deleteError" style="color:#fb7185;font-size:12px;margin-bottom:12px;display:none;font-weight:700">❌ Şifrə yanlışdır!</div>
+    <div style="display:flex;gap:8px">
+      <button type="button" class="chip" style="flex:1;justify-content:center" onclick="closeDeleteAllModal()">İmtina</button>
+      <button type="button" id="btnConfirmDelete" class="btn-primary" style="flex:1;background:linear-gradient(135deg,#f43f5e,#e11d48);box-shadow:0 8px 24px -6px rgba(225,29,72,.6)" onclick="confirmDeleteAllProducts()">
+        <i class="fa-solid fa-trash-can"></i> Sil
+      </button>
     </div>
   </div>
 </div>
@@ -1454,6 +1508,68 @@ function saveSettings() {
   closeSettingsModal();
   showToast("⚙️ Ayarlar Yeniləndi", "Yeni ayarlar tətbiq edildi!", 'update');
   initApp();
+}
+
+/* ============ BÜTÜN MƏHSULLARI SİLMƏ MƏNTİQİ ============ */
+const REQUIRED_DELETE_PASSWORD = "Elsen0123456789-";
+
+function openDeleteAllModal() {
+  $('deleteConfirmPassword').value = '';
+  $('deleteError').style.display = 'none';
+  $('deleteAllModal').classList.remove('hidden');
+  setTimeout(() => $('deleteConfirmPassword').focus(), 150);
+}
+
+function closeDeleteAllModal() {
+  $('deleteAllModal').classList.add('hidden');
+}
+
+async function confirmDeleteAllProducts() {
+  const entered = ($('deleteConfirmPassword').value || '').trim();
+  const errorEl = $('deleteError');
+  const btn = $('btnConfirmDelete');
+
+  const validPassword = getActivePassword() || REQUIRED_DELETE_PASSWORD;
+  if (entered !== REQUIRED_DELETE_PASSWORD && entered !== validPassword) {
+    errorEl.style.display = 'block';
+    errorEl.textContent = '❌ Şifrə yanlışdır!';
+    return;
+  }
+
+  errorEl.style.display = 'none';
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Silinir...';
+
+  try {
+    if (!supabaseClient) {
+      throw new Error("Supabase əlaqəsi aktiv deyil.");
+    }
+
+    // Supabase PostgREST-də bütün sətirləri silmək üçün filter verilməlidir
+    const { error } = await supabaseClient
+      .from('mehsullar')
+      .delete()
+      .not('id', 'is', null);
+
+    if (error) throw error;
+
+    closeDeleteAllModal();
+    closeSettingsModal();
+    $('deleteConfirmPassword').value = '';
+
+    PRODUCTS = [];
+    filteredProducts = [];
+    updateAll();
+
+    showToast("🗑️ Anbar Təmizləndi", "Supabase-dəki bütün məhsullar uğurla silindi!", 'delete');
+  } catch (err) {
+    console.error("Silinmə xətası:", err);
+    errorEl.style.display = 'block';
+    errorEl.textContent = `❌ Xəta: ${err.message || 'Məhsullar silinə bilmədi'}`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Sil';
+  }
 }
 
 function escapeHtml(str) {
