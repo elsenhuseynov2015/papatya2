@@ -399,6 +399,55 @@ input::placeholder,textarea::placeholder{color:#5a6580}
 .tp-track{height:5px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}
 .tp-fill{height:100%;border-radius:99px;width:0;transition:width .85s cubic-bezier(.2,.85,.25,1);
   background:linear-gradient(90deg,#22d3ee,#a855f7)}
+.tp-fill.fill-qty{background:linear-gradient(90deg,#38bdf8,#6366f1)}
+
+/* Top Sıralama Seçimi (Pills Switcher) */
+.top-sort-wrap{
+  position:sticky;
+  top:0;
+  z-index:3;
+  padding:10px 18px 8px;
+  background:linear-gradient(180deg,rgba(11,16,30,.98) 70%,rgba(11,16,30,.85));
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  width:100%;
+}
+.top-sort-pills{
+  display:flex;
+  align-items:center;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+  border-radius:99px;
+  padding:3px;
+  gap:4px;
+}
+.top-sort-btn{
+  flex:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:99px;
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  font-size:11.5px;
+  font-weight:700;
+  font-family:inherit;
+  cursor:pointer;
+  transition:all .2s ease;
+  white-space:nowrap;
+}
+.top-sort-btn:hover{
+  color:var(--text);
+  background:rgba(255,255,255,.04);
+}
+.top-sort-btn.active{
+  background:linear-gradient(135deg,#06b6d4,#6366f1);
+  color:#ffffff;
+  box-shadow:0 2px 10px -1px rgba(6,182,212,.45);
+}
 
 #slideTop{
   max-height:340px;
@@ -635,6 +684,18 @@ textarea.cyber-input{font-family:monospace;font-size:11px;line-height:1.5;resize
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
 }
 .cyber-btn-secondary:hover{background:rgba(255,255,255,.12);color:#fff}
+
+.btn-danger-outline{
+  width:100%;padding:11px 14px;border-radius:12px;
+  border:1px solid rgba(251,113,133,.35);background:rgba(251,113,133,.08);
+  color:#fb7185;font-size:13px;font-weight:700;font-family:inherit;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .2s;
+}
+.btn-danger-outline:hover{
+  background:rgba(251,113,133,.22);border-color:rgba(251,113,133,.6);
+  color:#fff;transform:translateY(-1px);box-shadow:0 6px 18px -4px rgba(251,113,133,.4);
+}
 
 @keyframes shake{
   0%,100%{transform:translateX(0)}
@@ -1181,6 +1242,35 @@ body.light-theme .tp-name {
 body.light-theme .tp-val {
   color: #047857;
   font-weight: 800;
+}
+body.light-theme .tp-val.tp-qty {
+  color: #0284c7;
+}
+body.light-theme .tp-val.tp-profit {
+  color: #047857;
+}
+body.light-theme .tp-fill.fill-qty {
+  background: linear-gradient(90deg, #0284c7, #4f46e5);
+}
+body.light-theme .top-sort-wrap {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 70%, rgba(255, 255, 255, 0.88));
+  border-bottom-color: #e2e8f0;
+}
+body.light-theme .top-sort-pills {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+body.light-theme .top-sort-btn {
+  color: #64748b;
+}
+body.light-theme .top-sort-btn:hover {
+  color: #0f172a;
+  background: rgba(0, 0, 0, 0.04);
+}
+body.light-theme .top-sort-btn.active {
+  background: linear-gradient(135deg, #0284c7, #4f46e5);
+  color: #ffffff;
+  box-shadow: 0 2px 8px -1px rgba(2, 132, 199, 0.35);
 }
 body.light-theme .tp-track {
   background: rgba(0, 0, 0, 0.06);
@@ -1965,6 +2055,64 @@ body.light-theme .btn-rcpt-print{
         <i class="fa-solid fa-floppy-disk"></i> Yadda Saxla & Tətbiq Et
       </button>
     </div>
+
+    <!-- Təhlükəli Əməliyyat / Məlumatları Ayrı-Ayrı Sil -->
+    <div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(251,113,133,.2)">
+      <div style="font-size:12px;font-weight:800;color:#fb7185;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+        <i class="fa-solid fa-triangle-exclamation"></i> Baza Təmizləmə (Ayrı-Ayrı)
+      </div>
+      <p style="font-size:11.5px;color:#8894af;margin-bottom:12px;line-height:1.4">
+        Testlər üçün istədiyiniz məlumat kateqoriyasını Supabase-dən şifrə ilə təhlükəsiz şəkildə ayrı-ayrılıqda silə bilərsiniz:
+      </p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button type="button" class="btn-danger-outline" onclick="openDeleteCategoryModal('satislar')">
+          <i class="fa-solid fa-receipt"></i>
+          <span>1. Satışları Sil</span>
+        </button>
+        <button type="button" class="btn-danger-outline" onclick="openDeleteCategoryModal('mehsullar')">
+          <i class="fa-solid fa-boxes-stacked"></i>
+          <span>2. Anbardakı Malları Sil</span>
+        </button>
+        <button type="button" class="btn-danger-outline" onclick="openDeleteCategoryModal('musteriler')">
+          <i class="fa-solid fa-users"></i>
+          <span>3. Müştəriləri və Borcları Sil</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- KATEQORİYAYA GÖRƏ SİLMƏ TƏSDİQ MODALI     -->
+<!-- ========================================== -->
+<div id="deleteCategoryModal" class="modal-backdrop hidden">
+  <div class="modal-card" style="max-width:440px;border-color:rgba(251,113,133,.4)">
+    <div class="modal-header" style="border-bottom-color:rgba(251,113,133,.2)">
+      <div class="modal-header-title">
+        <div class="modal-header-ico" style="background:linear-gradient(140deg,#fb7185,#e11d48)">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div>
+          <h3 style="font-size:16px;font-weight:800;color:#fb7185" id="deleteModalTitle">Məlumatları Sil</h3>
+          <p style="font-size:11px;color:#707c96">Supabase bazasından silinmə</p>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeDeleteCategoryModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="deleteModalDesc" style="font-size:12.5px;color:#cbd5e1;line-height:1.5;margin-bottom:16px">
+      Məlumatlar tamamilə silinəcək.
+    </div>
+    <div class="form-group">
+      <label class="form-label" style="color:#fb7185"><i class="fa-solid fa-lock"></i> Təsdiq Şifrəsi</label>
+      <input type="password" id="deleteConfirmPassword" class="cyber-input" placeholder="Şifrəni daxil edin..." onkeypress="if(event.key==='Enter')confirmDeleteCategory()">
+    </div>
+    <div id="deleteError" style="color:#fb7185;font-size:12px;margin-bottom:12px;display:none;font-weight:700">❌ Şifrə yanlışdır!</div>
+    <div style="display:flex;gap:10px">
+      <button type="button" class="cyber-btn-secondary" style="flex:1" onclick="closeDeleteCategoryModal()">İmtina</button>
+      <button type="button" id="btnConfirmDeleteCategory" class="cyber-btn-primary" style="flex:1;background:linear-gradient(135deg,#f43f5e,#e11d48);box-shadow:0 8px 24px -6px rgba(225,29,72,.6)" onclick="confirmDeleteCategory()">
+        <i class="fa-solid fa-trash-can"></i> Sil
+      </button>
+    </div>
   </div>
 </div>
 
@@ -2126,6 +2274,12 @@ body.light-theme .btn-rcpt-print{
       <a href="anbar.html" class="nav-switch-btn" title="Anbar və Məhsullar İdarəetmə Paneli">
         <i class="fa-solid fa-boxes-stacked"></i>
         <span>Anbar Paneli</span>
+      </a>
+
+      <!-- Müştərilər Panelinə Keçid Düyməsi -->
+      <a href="musteriler.html" class="nav-switch-btn" title="Müştərilər və Borclar Paneli">
+        <i class="fa-solid fa-users"></i>
+        <span>Müştərilər</span>
       </a>
 
       <!-- Səs Düyməsi -->
@@ -2341,8 +2495,20 @@ body.light-theme .btn-rcpt-print{
             </div>
           </div>
 
-          <!-- Səhifə 2: Ən Qazanclı Məhsullar (Top 5) -->
+          <!-- Səhifə 2: Top Məhsullar (Say / Ədəd və ya Qazanc) -->
           <div class="slider-slide" id="slideTop">
+            <div class="top-sort-wrap" id="topSortWrap">
+              <div class="top-sort-pills">
+                <button type="button" class="top-sort-btn active" id="btnSortQty" onclick="setTopSortMode('qty')" title="Ən çox satılan məhsullar (Say / Çəki)">
+                  <i class="fa-solid fa-boxes-stacked"></i>
+                  <span>Ədəd / Kq-a görə</span>
+                </button>
+                <button type="button" class="top-sort-btn" id="btnSortProfit" onclick="setTopSortMode('qazanc')" title="Ən çox qazanc gətirən məhsullar (Manat)">
+                  <i class="fa-solid fa-coins"></i>
+                  <span>Qazanca görə (₼)</span>
+                </button>
+              </div>
+            </div>
             <div class="top-list" id="topList"></div>
           </div>
         </div>
@@ -2351,7 +2517,7 @@ body.light-theme .btn-rcpt-print{
       <!-- Sürüşdürmə İndikator Nöqtələri (2 Nöqtə) -->
       <div class="slider-dots" id="sliderDots">
         <button type="button" class="s-dot active" data-slide="0" title="Ödəniş Bölgüsü"></button>
-        <button type="button" class="s-dot" data-slide="1" title="Ən Qazanclı Məhsullar"></button>
+        <button type="button" class="s-dot" data-slide="1" id="dotSlideTop" title="Top Məhsullar"></button>
       </div>
     </div>
   </section>
@@ -2432,15 +2598,25 @@ body.light-theme .btn-rcpt-print{
    1) KONFİQURASİYA VƏ DEFOLT DƏYƏRLƏR
    ===================================================================== */
 const DEFAULT_APP_PASSWORD = "Elsen0123456789-";
-const DEFAULT_SUPABASE_URL = "https://zcjthobakvppowerkxmv.supabase.co";
-const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjanRob2Jha3ZwcG93ZXJreG12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MTQyNzMsImV4cCI6MjEwNTI5MDI3M30.ZLaSVPvowhwv50cv6W6d8AFYmPpPZ7oS5eZAxZzHI1U";
+const DEFAULT_SUPABASE_URL = "https://ijnbsuupwwyqohysrjlc.supabase.co";
+const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqbmJzdXVwd3d5cW9oeXNyamxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MjA1NDUsImV4cCI6MjEwNTI5NjU0NX0.ZjiHo2gOzFdHHK4d7CXYfXrjDcwTyGG9oyQ-E6YtGKY";
 const DEFAULT_STORE_NAME = "Papatya";
 
 function getActiveSupabaseUrl() {
-  return (localStorage.getItem('kassa_supabase_url') || DEFAULT_SUPABASE_URL).trim().replace(/\/+$/, '');
+  const saved = (localStorage.getItem('kassa_supabase_url') || '').trim().replace(/\/+$/, '');
+  if (!saved || saved.includes('zcjthobakvppowerkxmv')) {
+    localStorage.setItem('kassa_supabase_url', DEFAULT_SUPABASE_URL);
+    return DEFAULT_SUPABASE_URL;
+  }
+  return saved;
 }
 function getActiveSupabaseKey() {
-  return (localStorage.getItem('kassa_supabase_key') || DEFAULT_SUPABASE_KEY).trim();
+  const saved = (localStorage.getItem('kassa_supabase_key') || '').trim();
+  if (!saved || saved.includes('zcjthobakvppowerkxmv') || saved.endsWith('oyQ-') || (saved.includes('ijnbsuupwwyqohysrjlc') && !saved.endsWith('E6YtGKY')) || saved.length < 200) {
+    localStorage.setItem('kassa_supabase_key', DEFAULT_SUPABASE_KEY);
+    return DEFAULT_SUPABASE_KEY;
+  }
+  return saved;
 }
 function getActivePassword() {
   return localStorage.getItem('kassa_custom_password') || DEFAULT_APP_PASSWORD;
@@ -2467,8 +2643,17 @@ const pad = n => (n < 10 ? '0' + n : '' + n);
 const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
 const nf2 = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const nf0 = new Intl.NumberFormat('ru-RU');
-const money  = n => nf2.format(n) + ' ₼';
-const money0 = n => nf0.format(Math.round(n)) + ' ₼';
+const money  = n => nf2.format(n || 0) + ' ₼';
+const money0 = n => {
+  const val = parseFloat(n) || 0;
+  if (Math.abs(val) > 0 && Math.abs(val) < 1) {
+    return nf2.format(val) + ' ₼';
+  }
+  if (val % 1 !== 0) {
+    return nf2.format(val) + ' ₼';
+  }
+  return nf0.format(Math.round(val)) + ' ₼';
+};
 const $ = id => document.getElementById(id);
 
 /* =====================================================================
@@ -2917,6 +3102,94 @@ function saveSettingsFromModal() {
 }
 
 /* =====================================================================
+   KATEQORİYAYA GÖRƏ SİLMƏ MƏNTİQİ
+   ===================================================================== */
+const REQUIRED_DELETE_PASSWORD = "Elsen0123456789-";
+let currentDeleteTarget = ''; // 'satislar' | 'mehsullar' | 'musteriler'
+
+function openDeleteCategoryModal(target) {
+  currentDeleteTarget = target;
+  $('deleteConfirmPassword').value = '';
+  $('deleteError').style.display = 'none';
+
+  let title = 'Məlumatları Sil';
+  let desc = 'Supabase-dəki seçilmiş məlumatlar silinəcək.';
+
+  if (target === 'satislar') {
+    title = '🛒 Satışları Sil';
+    desc = '⚠️ <b>DİQQƏT:</b> Supabase bazasındakı <b>bütün satış qeydləri</b> tamamilə silinəcək!';
+  } else if (target === 'mehsullar') {
+    title = '📦 Anbardakı Malları Sil';
+    desc = '⚠️ <b>DİQQƏT:</b> Supabase bazasındakı <b>bütün anbar məhsulları</b> tamamilə silinəcək!';
+  } else if (target === 'musteriler') {
+    title = '👥 Müştəriləri və Borcları Sil';
+    desc = '⚠️ <b>DİQQƏT:</b> Supabase bazasındakı <b>bütün müştəri və borc qeydləri</b> tamamilə silinəcək!';
+  }
+
+  $('deleteModalTitle').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${title}`;
+  $('deleteModalDesc').innerHTML = `${desc}<br><br>Əməliyyatı təsdiqləmək üçün zəhmət olmasa təhlükəsizlik şifrəsini (<code style="color:#fbbf24;font-weight:700">Elsen0123456789-</code>) daxil edin:`;
+  $('deleteCategoryModal').classList.remove('hidden');
+  setTimeout(() => $('deleteConfirmPassword').focus(), 150);
+}
+
+function closeDeleteCategoryModal() {
+  $('deleteCategoryModal').classList.add('hidden');
+}
+
+async function confirmDeleteCategory() {
+  const entered = ($('deleteConfirmPassword').value || '').trim();
+  const errorEl = $('deleteError');
+  const btn = $('btnConfirmDeleteCategory');
+
+  const validPassword = getActivePassword() || REQUIRED_DELETE_PASSWORD;
+  if (entered !== REQUIRED_DELETE_PASSWORD && entered !== validPassword) {
+    errorEl.style.display = 'block';
+    errorEl.textContent = '❌ Şifrə yanlışdır!';
+    return;
+  }
+
+  errorEl.style.display = 'none';
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Silinir...';
+
+  try {
+    if (!supabaseClient) {
+      throw new Error("Supabase əlaqəsi aktiv deyil.");
+    }
+
+    if (currentDeleteTarget === 'satislar') {
+      const { error } = await supabaseClient.from('satislar').delete().not('id', 'is', null);
+      if (error) throw error;
+      SALES = [];
+      update();
+      showToast("🗑️ Satışlar Silindi", "Supabase-dəki bütün satış qeydləri uğurla silindi!", false);
+    } 
+    else if (currentDeleteTarget === 'mehsullar') {
+      const { error } = await supabaseClient.from('mehsullar').delete().not('id', 'is', null);
+      if (error) throw error;
+      showToast("🗑️ Anbar Silindi", "Supabase-dəki bütün məhsullar uğurla silindi!", false);
+    } 
+    else if (currentDeleteTarget === 'musteriler') {
+      try { await supabaseClient.from('borc_odenisleri').delete().not('id', 'is', null); } catch(e) {}
+      const { error } = await supabaseClient.from('musteriler').delete().not('id', 'is', null);
+      if (error) throw error;
+      showToast("🗑️ Müştərilər Silindi", "Supabase-dəki bütün müştərilər və borclar uğurla silindi!", false);
+    }
+
+    closeDeleteCategoryModal();
+    closeSettingsModal();
+    $('deleteConfirmPassword').value = '';
+  } catch (err) {
+    console.error("Silinmə xətası:", err);
+    errorEl.style.display = 'block';
+    errorEl.textContent = `❌ Xəta: ${err.message || 'Məlumatlar silinə bilmədi'}`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Sil';
+  }
+}
+
+/* =====================================================================
    7) SUPABASE REALTIME & MƏLUMAT MODELİ
    ===================================================================== */
 let supabaseClient = null;
@@ -2954,16 +3227,28 @@ async function fetchData(showLoading = true) {
   if (!supabaseClient) return;
 
   try {
-    const { data, error } = await supabaseClient
-      .from('satislar')
-      .select('*')
-      .order('tarix', { ascending: false });
+    let allData = [];
+    let from = 0;
+    const step = 1000;
 
-    if (error) throw error;
+    while (true) {
+      const { data, error } = await supabaseClient
+        .from('satislar')
+        .select('*')
+        .order('tarix', { ascending: false })
+        .range(from, from + step - 1);
+
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+
+      allData.push(...data);
+      if (data.length < step) break;
+      from += step;
+    }
 
     // Çəki (Kq) ilə satılan məhsulları avtomatik və dəqiq müəyyən edirik
     const knownKiloNames = new Set();
-    (data || []).forEach(r => {
+    allData.forEach(r => {
       const val = parseFloat(r.say) || 0;
       if (Math.abs(val - Math.round(val)) > 0.0001) {
         if (r.mehsul_adi) knownKiloNames.add(r.mehsul_adi.trim().toLowerCase());
@@ -2976,7 +3261,7 @@ async function fetchData(showLoading = true) {
       }
     });
 
-    SALES = (data || []).map(r => {
+    SALES = (allData || []).map(r => {
       const dateObj = new Date(r.tarix);
       const isDateValid = !isNaN(dateObj.getTime());
 
@@ -3195,7 +3480,7 @@ function renderStats(rows){
   $('stMayaPct').textContent = (total > 0 ? (maya / total) * 100 : 0).toFixed(1) + '%';
   $('stMarja').textContent   = marja.toFixed(1) + '% marja';
   $('stNegdPct').textContent = negdPct.toFixed(1) + '% pay';
-  $('stBorc').textContent    = money0(borc) + ' borc';
+  $('stBorc').textContent    = money(borc) + ' borc';
 
   if ($('stEdedSub')) $('stEdedSub').textContent = nf0.format(totalEded) + ' ədəd';
   if ($('stKiloSub')) {
@@ -3209,7 +3494,7 @@ function renderStats(rows){
   } else {
     donut.style.background = 'conic-gradient(rgba(255,255,255,.08) 0% 100%)';
   }
-  $('donutTotal').textContent = money0(total);
+  $('donutTotal').textContent = money(total);
   $('lgNegd').textContent  = money(negd);
   $('lgNisye').textContent = money(nisye) + ' (' + nisyePct.toFixed(0) + '%)';
 }
@@ -3327,6 +3612,39 @@ function hideTip(){ tip.classList.remove('on'); }
    12) TOP QAZANCLI MƏHSULLAR (Səhifələmə & Daha Çox Göstər ilə)
    ===================================================================== */
 let topProductsLimit = 5;
+let topSortMode = localStorage.getItem('kassa_top_sort_mode') || 'qty'; // 'qty' (Say / Ədəd / Kq) və ya 'qazanc' (Manat / Gəlir)
+
+function initTopSort() {
+  const mode = localStorage.getItem('kassa_top_sort_mode') || 'qty';
+  topSortMode = mode;
+  const btnQty = $('btnSortQty');
+  const btnProfit = $('btnSortProfit');
+  if (btnQty) btnQty.classList.toggle('active', mode === 'qty');
+  if (btnProfit) btnProfit.classList.toggle('active', mode === 'qazanc');
+}
+
+function setTopSortMode(mode) {
+  if (mode !== 'qty' && mode !== 'qazanc') mode = 'qty';
+  topSortMode = mode;
+  localStorage.setItem('kassa_top_sort_mode', mode);
+
+  const btnQty = $('btnSortQty');
+  const btnProfit = $('btnSortProfit');
+  if (btnQty) btnQty.classList.toggle('active', mode === 'qty');
+  if (btnProfit) btnProfit.classList.toggle('active', mode === 'qazanc');
+
+  const titleText = $('sliderTitleText');
+  if (titleText && currentSlide === 1) {
+    titleText.textContent = mode === 'qty' ? 'Ən Çox Satılan Məhsullar' : 'Ən Qazanclı Məhsullar';
+  }
+
+  const subText = $('sliderSubtitle');
+  if (subText && currentSlide === 1) {
+    subText.textContent = `Səhifə 2 / 2 • Top ${topProductsLimit} (${mode === 'qty' ? 'Sayına görə' : 'Qazanca görə'})`;
+  }
+
+  renderTop(getFiltered());
+}
 
 function loadMoreTopProducts(){
   topProductsLimit += 5;
@@ -3350,8 +3668,16 @@ function renderTop(rows){
     map.set(s.mal, o);
   });
 
+  const isQtyMode = topSortMode === 'qty';
+
   const allSorted = [...map.entries()]
-    .sort((a, b) => b[1].qazanc - a[1].qazanc);
+    .sort((a, b) => {
+      if (isQtyMode) {
+        return (b[1].qty - a[1].qty) || (b[1].qazanc - a[1].qazanc);
+      } else {
+        return (b[1].qazanc - a[1].qazanc) || (b[1].qty - a[1].qty);
+      }
+    });
 
   const box = $('topList');
   if (!allSorted.length) {
@@ -3360,18 +3686,38 @@ function renderTop(rows){
   }
 
   const visibleList = allSorted.slice(0, topProductsLimit);
-  const maxQ = allSorted[0][1].qazanc || 1;
+  const maxVal = isQtyMode 
+    ? Math.max(allSorted[0][1].qty || 0, 0.0001) 
+    : Math.max(allSorted[0][1].qazanc || 0, 0.0001);
 
   let html = visibleList.map(([ad, v], idx) => {
-    const qtyFormatted = v.isKilo ? (v.qty % 1 === 0 ? v.qty : v.qty.toFixed(2)) + ' kq' : v.qty + ' ədəd';
+    const qtyFormatted = v.isKilo ? (v.qty % 1 === 0 ? v.qty : v.qty.toFixed(2)) + ' kq' : (v.qty % 1 === 0 ? v.qty : v.qty.toFixed(2)) + ' ədəd';
+    
+    let mainValHtml = '';
+    let subInfoHtml = '';
+    let fillPct = 0;
+
+    const profitStr = (v.qazanc > 0 ? '+' : '') + money(v.qazanc);
+    const satisStr = money(v.satis);
+
+    if (isQtyMode) {
+      mainValHtml = `<span class="tp-val tp-qty" style="color:#38bdf8">${qtyFormatted}</span>`;
+      subInfoHtml = `<div style="font-size:10.5px;color:#64708a">qazanc: <b style="color:#34d399">${profitStr}</b> • satış: ${satisStr}</div>`;
+      fillPct = Math.min(100, Math.max((v.qty / maxVal) * 100, 3));
+    } else {
+      mainValHtml = `<span class="tp-val tp-profit">${profitStr}</span>`;
+      subInfoHtml = `<div style="font-size:10.5px;color:#64708a">${qtyFormatted} • satış: ${satisStr}</div>`;
+      fillPct = Math.min(100, Math.max((Math.max(0, v.qazanc) / maxVal) * 100, 3));
+    }
+
     return `
     <div class="tp">
       <div class="tp-top">
         <span class="tp-name"><span style="color:#8892ab;font-size:11px;margin-right:5px;font-weight:700">#${idx + 1}</span>${escapeHtml(ad)}</span>
-        <span class="tp-val">${money0(v.qazanc)}</span>
+        ${mainValHtml}
       </div>
-      <div class="tp-track"><div class="tp-fill" data-w="${Math.max((v.qazanc / maxQ) * 100, 3)}"></div></div>
-      <div style="font-size:10.5px;color:#64708a">${qtyFormatted} • satış ${money0(v.satis)}</div>
+      <div class="tp-track"><div class="tp-fill ${isQtyMode ? 'fill-qty' : ''}" data-w="${fillPct}"></div></div>
+      ${subInfoHtml}
     </div>`;
   }).join('');
 
@@ -3406,7 +3752,7 @@ function renderTop(rows){
 
   const subText = $('sliderSubtitle');
   if (subText && currentSlide === 1) {
-    subText.textContent = `Səhifə 2 / 2 • Top ${visibleList.length} Məhsul`;
+    subText.textContent = `Səhifə 2 / 2 • Top ${visibleList.length} (${isQtyMode ? 'Sayına görə' : 'Qazanca görə'})`;
   }
 }
 
@@ -4031,14 +4377,16 @@ function goToSlide(idx) {
   }
 
   if (titleText) {
-    titleText.textContent = currentSlide === 0 ? 'Ödəniş Bölgüsü' : 'Ən Qazanclı Məhsullar';
+    titleText.textContent = currentSlide === 0 
+      ? 'Ödəniş Bölgüsü' 
+      : (topSortMode === 'qty' ? 'Ən Çox Satılan Məhsullar' : 'Ən Qazanclı Məhsullar');
   }
 
   const subText = $('sliderSubtitle');
   if (subText) {
     subText.textContent = currentSlide === 0 
       ? 'Səhifə 1 / 2 • Nəğd və Nisyə payı' 
-      : `Səhifə 2 / 2 • Top ${topProductsLimit} Məhsul`;
+      : `Səhifə 2 / 2 • Top ${topProductsLimit} (${topSortMode === 'qty' ? 'Sayına görə' : 'Qazanca görə'})`;
   }
 
   dots.forEach((dot, i) => {
@@ -4151,6 +4499,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initSound();
   loadNotifications();
   initSlider();
+  initTopSort();
   const first = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
   setRange(iso(first), iso(TODAY), '00:00', '23:59');
   checkAuth();
