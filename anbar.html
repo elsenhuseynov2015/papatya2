@@ -944,7 +944,6 @@ body.light-theme .modal-close:hover{background:#e2e8f0;color:#0f172a}
           <tr>
             <th onclick="sortTable('barkod')">Barkod <span class="arw" id="arw_barkod">▼</span></th>
             <th onclick="sortTable('ad')">Məhsul Adı <span class="arw" id="arw_ad">▼</span></th>
-            <th style="text-align:center">Vahid</th>
             <th style="text-align:right" onclick="sortTable('alis_qiymeti')">Maya Dəyəri <span class="arw" id="arw_alis_qiymeti">▼</span></th>
             <th style="text-align:right" onclick="sortTable('satis_qiymeti')">Satış Qiyməti <span class="arw" id="arw_satis_qiymeti">▼</span></th>
             <th style="text-align:right" onclick="sortTable('unit_profit')">Tək Qazanc <span class="arw" id="arw_unit_profit">▼</span></th>
@@ -1886,7 +1885,7 @@ function renderTable() {
   if (!count) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="11" style="text-align:center;padding:40px;color:var(--muted)">
+        <td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">
           <i class="fa-solid fa-box-archive" style="font-size:32px;margin-bottom:10px;display:block"></i>
           Seçilmiş filtrlərə uyğun məhsul tapılmadı
         </td>
@@ -1917,7 +1916,6 @@ function renderTable() {
       <tr>
         <td class="td-barkod">${p.barkod || '—'}</td>
         <td class="td-ad">${escapeHtml(p.ad)}</td>
-        <td style="text-align:center"><span class="badge-vahid">${unit}</span></td>
         <td class="td-maya">${money(p.alis_qiymeti)}</td>
         <td class="td-satis">${money(p.satis_qiymeti)}</td>
         <td class="td-unit-profit">+${money(p.unit_profit)}</td>
@@ -1952,7 +1950,7 @@ function exportToExcel() {
     "№": idx + 1,
     "Barkod": p.barkod,
     "Məhsul Adı": p.ad,
-    "Vahid": p.is_kilo ? "kq" : "ədəd",
+    "Ölçü Vahidi": p.is_kilo ? "kq" : "ədəd",
     "Maya Dəyəri (AZN)": p.alis_qiymeti,
     "Satış Qiyməti (AZN)": p.satis_qiymeti,
     "Tək Qazanc (AZN)": p.unit_profit,
