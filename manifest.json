@@ -1,0 +1,61 @@
+{
+  "name": "Papatya — Satış & Kassa Paneli",
+  "short_name": "Kassa Paneli",
+  "description": "Nəğd & Nisyə satışların real vaxt analitikası və kassa idarəetməsi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#070b14",
+  "theme_color": "#070b14",
+  "orientation": "any",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Satışlar",
+      "short_name": "Satışlar",
+      "description": "Son satışlar cədvəli",
+      "url": "./#sec-table",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Analitika",
+      "short_name": "Analitika",
+      "description": "Satış qrafikləri və dinamika",
+      "url": "./#sec-charts",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Kassa İtkisi",
+      "short_name": "Zərər",
+      "description": "Zərərinə və itkili satış analizi",
+      "url": "./#lossAlertBanner",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
