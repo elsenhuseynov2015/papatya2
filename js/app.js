@@ -1953,9 +1953,13 @@ function renderTable(rows){
   const rowsToRender = sorted.slice(0, currentLimit);
   updatePaginationUI(rowsToRender.length, sorted.length);
 
+  const isMobile = window.innerWidth <= 768;
+
   const html = rowsToRender.map(s => {
     const isQ = s.isQaytarma;
-    const borc  = s.nov === 'nisye' ? (s.satis - s.odenilen) : 0;
+    const borc = s.nov === 'nisye' ? (s.satis - s.odenilen) : 0;
+    const rawIdStr = String(s.id || '');
+    const shortId = rawIdStr.length > 8 ? rawIdStr.slice(0, 8) : rawIdStr;
 
     let musteriCell = '';
     if (isQ) {
@@ -2010,6 +2014,60 @@ function renderTable(rows){
       qazancCell = `<td class="num pos" data-label="Qazanc">+${money(s.qazanc)}</td>`;
     }
 
+    if (isMobile) {
+      // =========================================================
+      // MOBİL (TELEFON) — MƏHSUL ADI BAŞDA & YIĞCAM BİRLƏŞDİRİLMİŞ KART (3 SƏTİRLİ)
+      // Satış ID-si qısaldılır (#4331bbd9), Maya/Satış bir yerdə, qutu hündürlüyü yığcam
+      // =========================================================
+      return `
+        <tr class="${s.nov} ${isLoss ? 'row-loss-warning' : ''}">
+          <td class="td-mob-mal" data-label="Məhsul">
+            <div class="mob-card-head">
+              <div class="mob-mal-info">
+                <span class="mob-mal-name">${escapeHtml(s.mal)}</span>
+                <span class="mob-mal-qty">${s.qty} ${s.isKilo ? 'kq' : 'əd'}</span>
+              </div>
+              <div class="mob-id-btn-grp">
+                <span class="tid" title="${escapeHtml(rawIdStr)}">#${escapeHtml(shortId)}</span>
+                <button type="button" class="row-receipt-btn" onclick="openReceiptModal('${s.id}')" title="Kassa çekinə bax və paylaş">
+                  <i class="fa-solid fa-receipt"></i> Çek
+                </button>
+              </div>
+            </div>
+          </td>
+          <td class="td-mob-tarix" data-label="Tarix & Saat">
+            <div class="mob-tarix-val">
+              <span class="d">${s.tarix.split('-').reverse().join('.')}</span>
+              <span class="t-sep">•</span>
+              <span class="t">${s.saat}</span>
+            </div>
+          </td>
+          <td class="td-mob-musteri" data-label="Müştəri">
+            ${musteriCell}
+          </td>
+          <td class="td-mob-qiymet" data-label="Maya / Satış">
+            <div class="mob-combo">
+              <span class="c-maya">${isQ ? '-' : ''}${money(s.maya)}</span>
+              <span class="c-slash">/</span>
+              <span class="c-satis">${isQ ? '-' : ''}${money(s.satis)}</span>
+            </div>
+          </td>
+          <td class="td-mob-qazanc ${isQ ? 'neg' : (isLoss ? 'neg' : (isZero ? '' : 'pos'))}" data-label="Qazanc">
+            ${isQ
+              ? `<span class="mob-qazanc-val neg">-${money(Math.abs(s.qazanc))}</span>`
+              : isLoss
+              ? `<div class="loss-cell"><span class="loss-val">-${money(Math.abs(s.qazanc))}</span><span class="leak-tag loss-tag" title="Maya: ${money(s.maya)} | Satış: ${money(s.satis)}"><i class="fa-solid fa-triangle-exclamation"></i> Zərər</span></div>`
+              : isZero
+              ? `<div class="loss-cell"><span class="zero-val">0.00 ₼</span><span class="leak-tag zero-tag"><i class="fa-solid fa-circle-minus"></i> 0 qazanc</span></div>`
+              : `<span class="mob-qazanc-val pos">+${money(s.qazanc)}</span>`
+            }
+          </td>
+        </tr>`;
+    }
+
+    // =========================================================
+    // KOMPÜTER (PC) — ORİGİNAL 6 SÜTUNLU DƏQİQ CƏDVƏL (TOXUNULMAZ)
+    // =========================================================
     return `
       <tr class="${s.nov} ${isLoss ? 'row-loss-warning' : ''}">
         <td data-label="Tarix">
@@ -2042,6 +2100,17 @@ function renderTable(rows){
 
   body.innerHTML = html;
 }
+
+let salesTableResizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(salesTableResizeTimer);
+  salesTableResizeTimer = setTimeout(() => {
+    if (SALES && SALES.length > 0) {
+      const filtered = getFiltered();
+      renderTable(filtered);
+    }
+  }, 150);
+});
 
 /* =====================================================================
    KASSA İTKİSİ VƏ ZƏRƏR DEDEKTORU MODAL FUNKSİYALARI
