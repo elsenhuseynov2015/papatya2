@@ -19,12 +19,33 @@ const STORE_PROFILES = {
 const DEFAULT_APP_PASSWORD = "Elsen0123456789-";
 
 function getActiveProfileId() {
+  // 1. Əgər istifadəçi cari sessiyada ekrandakı menyudan xüsusi seçim edibsə:
+  const sessionSelected = sessionStorage.getItem('kassa_session_profile');
+  if (sessionSelected && (STORE_PROFILES[sessionSelected] || sessionSelected === 'custom')) {
+    return sessionSelected;
+  }
+
+  // 2. Link / URL əsasında avtomatik mağaza təyini (DƏQİQ VƏ BİRBAŞA)
+  const href = (window.location.href || '').toLowerCase();
+  const path = (window.location.pathname || '').toLowerCase();
+
+  // Məsələn: https://elsenhuseynov2015.github.io/papatya2/
+  if (href.includes('papatya2') || path.includes('papatya2') || href.includes('store=papatya2')) {
+    return 'papatya2';
+  }
+  // Məsələn: https://elshuseyni1.github.io/aburcubur/
+  if (href.includes('aburcubur') || path.includes('aburcubur') || href.includes('store=aburcubur')) {
+    return 'aburcubur';
+  }
+
+  // 3. Əgər fərdi server və ya test mühitidirsə, yaddaşdan oxu
   let p = localStorage.getItem('kassa_active_profile');
   if (p && (STORE_PROFILES[p] || p === 'custom')) return p;
 
   const savedUrl = (localStorage.getItem('kassa_supabase_url') || '').toLowerCase();
-  if (savedUrl.includes('zcjthobakvppowerkxmv')) return 'aburcubur';
   if (savedUrl.includes('ijnbsuupwwyqohysrjlc')) return 'papatya2';
+  if (savedUrl.includes('zcjthobakvppowerkxmv')) return 'aburcubur';
+
   return 'aburcubur';
 }
 
@@ -79,6 +100,7 @@ function switchStoreProfile(profileId, triggerReload = true) {
     profileId = 'aburcubur';
   }
 
+  sessionStorage.setItem('kassa_session_profile', profileId);
   localStorage.setItem('kassa_active_profile', profileId);
 
   if (STORE_PROFILES[profileId]) {
@@ -103,6 +125,7 @@ function onHeaderStoreChange(val) {
     openSettingsModal();
     return;
   }
+  sessionStorage.setItem('kassa_session_profile', val);
   switchStoreProfile(val, true);
 }
 
@@ -729,6 +752,15 @@ function setConnectionStatus(status, text) {
 
 function initApp() {
   updateStoreTitle();
+  syncStoreSelectUI();
+
+  // Supabase CDN kitabxanasının hazır olduğunu yoxlayırıq
+  if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+    setConnectionStatus('connecting', 'BAĞLANTI GÖZLƏNİLİR...');
+    setTimeout(initApp, 100);
+    return;
+  }
+
   const url = getActiveSupabaseUrl();
   const key = getActiveSupabaseKey();
 
@@ -740,11 +772,20 @@ function initApp() {
   } catch (err) {
     console.error("Supabase client xətası:", err);
     setConnectionStatus('error', 'XƏTA');
+    setTimeout(initApp, 1500);
   }
 }
 
 async function fetchData(showLoading = true) {
-  if (!supabaseClient) return;
+  if (!supabaseClient) {
+    initApp();
+    return;
+  }
+
+  const tblBody = $('tbody');
+  if (showLoading && tblBody && (!SALES || SALES.length === 0)) {
+    tblBody.innerHTML = `<tr><td colspan="6" style="display:block"><div class="empty"><i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#22d3ee;margin-bottom:8px"></i><p>Məlumatlar Supabase bazasından yüklənir...</p></div></td></tr>`;
+  }
 
   try {
     let allData = [];
@@ -2611,7 +2652,7 @@ function applyTheme(theme) {
   setTimeout(tick, 1000);
 })();
 
-window.addEventListener('DOMContentLoaded', () => {
+function startApplication() {
   initTheme();
   initSound();
   loadNotifications();
@@ -2619,10 +2660,17 @@ window.addEventListener('DOMContentLoaded', () => {
   initMainSlider();
   initTopSort();
   syncStoreSelectUI();
+  updateStoreTitle();
   const first = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
   setRange(iso(first), iso(TODAY), '00:00', '23:59');
   checkAuth();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startApplication);
+} else {
+  startApplication();
+}
 
 window.addEventListener('resize', () => {
   clearTimeout(window.__rz);
