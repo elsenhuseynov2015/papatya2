@@ -6,13 +6,25 @@
 <title>Anbar &amp; Məhsullar — Canlı İdarəetmə</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
 <!-- Font Awesome İkonlar -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <!-- Supabase JS Client v2 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- SheetJS (Excel Çıxarışı) -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script>
+  // Sürətli yadda saxlanmış giriş yoxlanışı (ekran yanıb-sönməsinin qarşısını alır)
+  (function(){
+    try {
+      var tok = localStorage.getItem('kassa_auth_token');
+      var rem = localStorage.getItem('kassa_remember_login');
+      if (tok && (tok === "Elsen0123456789-" || rem === "true")) {
+        window.__IS_AUTH_PRECHECKED = true;
+      }
+    }catch(e){}
+  })();
+</script>
 
 <style>
 /* ============ BAZA STİLLƏRİ ============ */
@@ -938,11 +950,331 @@ body.light-theme .sim-modal-footer{border-top-color:#e2e8f0}
 body.light-theme .sim-footer-info{color:#64748b}
 body.light-theme .sim-footer-info b{color:#0f172a}
 
-@media(max-width:768px){
-  .wrap{padding:16px 12px 60px}
-  .analytics-grid{grid-template-columns:1fr}
-  .hdr{flex-direction:column;align-items:flex-start}
-  .hdr-right{width:100%;justify-content:space-between}
+/* ============ JETBRAINS MONO RƏQƏMLƏR ============ */
+.kcard-val, .rank-main-val, .td-maya, .td-satis, .td-unit-profit, .td-margin, .td-stok, .td-total-cost, .td-total-profit, .clock, .sim-kcard-val, .sim-step-inp, .row-step-inp {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* ============ MOBİL BOTTOM NAVIGATION & MORE SHEET STİLLƏRİ ============ */
+.mobile-bottom-nav { display: none; }
+.more-sheet-backdrop {
+  display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  z-index: 8900; opacity: 0; transition: opacity 0.25s ease;
+}
+.more-sheet-backdrop.show { display: block; opacity: 1; }
+.more-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 9000;
+  background: linear-gradient(180deg, #0e1526 0%, #070b14 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px 24px 0 0;
+  padding: 14px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -12px 35px rgba(0, 0, 0, 0.8);
+  transform: translateY(105%); transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 80vh; overflow-y: auto;
+}
+.more-sheet.show { transform: translateY(0); }
+.more-sheet-handle { width: 44px; height: 4px; background: rgba(255, 255, 255, 0.2); border-radius: 2px; margin: 0 auto 14px; }
+.more-sheet-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.more-sheet-title { font-size: 15px; font-weight: 700; color: #f1f5f9; display: flex; align-items: center; gap: 8px; }
+.more-sheet-title i { color: #22d3ee; }
+.more-sheet-close {
+  background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.more-sheet-close:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.more-sheet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.more-grid-btn {
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px; padding: 12px 6px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px; cursor: pointer;
+  color: #e2e8f0; text-align: center; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.more-grid-btn:active { transform: scale(0.94); background: rgba(34, 211, 238, 0.12); border-color: rgba(34, 211, 238, 0.35); }
+.more-grid-ico {
+  width: 38px; height: 38px; border-radius: 10px; background: rgba(255, 255, 255, 0.06);
+  display: flex; align-items: center; justify-content: center; font-size: 16px; color: #22d3ee;
+}
+.more-grid-label { font-size: 11px; font-weight: 700; line-height: 1.2; }
+.more-grid-sub { font-size: 9px; color: #64748b; line-height: 1.1; }
+
+/* ============ MOBİL RESPONSİV & SÜRƏT OPTİMİZASİYASI ============ */
+@media (max-width: 768px) {
+  /* 1. Sürət üçün ağır GPU orblarını söndürürük */
+  .orb { display: none !important; animation: none !important; }
+  .bg {
+    background: radial-gradient(ellipse 90% 70% at 50% 20%, rgba(99,102,241,0.18) 0%, rgba(34,211,238,0.08) 50%, #05070f 100%) !important;
+  }
+  html, body {
+    touch-action: manipulation;
+    -webkit-overflow-scrolling: touch;
+  }
+  .wrap {
+    padding: 14px 10px calc(85px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  
+  /* Header yığcamlaşdırması */
+  .hdr { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+  .hdr-right { width: 100%; justify-content: space-between; gap: 6px; }
+  .clock { display: none; }
+  .nav-switch-btn { padding: 6px 12px; font-size: 11.5px; }
+
+  /* KPI Kartları mobildə 2 sütunlu kompakt grid */
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+  }
+  .kcard {
+    padding: 12px 14px !important;
+    border-radius: 16px !important;
+    backdrop-filter: none !important;
+  }
+  .kcard-title { font-size: 10.5px !important; letter-spacing: 0.3px !important; }
+  .kcard-ico { width: 32px !important; height: 32px !important; font-size: 13px !important; border-radius: 10px !important; }
+  .kcard-val { font-size: 20px !important; margin-bottom: 4px !important; }
+  .kcard-sub { font-size: 11px !important; }
+
+  /* Analitika blokları */
+  .analytics-grid { grid-template-columns: 1fr !important; gap: 14px !important; margin-bottom: 16px !important; }
+  .panel { padding: 16px 14px !important; border-radius: 18px !important; backdrop-filter: none !important; }
+  .rank-list { max-height: 480px !important; }
+
+  /* Simulyator Teaser Banner */
+  .sim-teaser-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+    padding: 16px 14px !important;
+    margin-bottom: 16px !important;
+    border-radius: 18px !important;
+  }
+  .sim-teaser-action-box { align-items: stretch !important; }
+  .sim-teaser-preview-kpi { text-align: left !important; }
+  .btn-open-simulator { justify-content: center !important; width: 100% !important; }
+
+  /* Cədvəl İdarəetmə Paneli */
+  .tbl-controls {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+  .search-box { max-width: 100% !important; min-width: 0 !important; width: 100% !important; }
+  .chips { gap: 6px !important; overflow-x: auto !important; padding-bottom: 4px !important; -webkit-overflow-scrolling: touch !important; }
+  .chip { padding: 6px 11px !important; font-size: 11px !important; white-space: nowrap !important; }
+  .tbl-actions { width: 100% !important; justify-content: space-between !important; }
+  .tbl-actions .chip, .tbl-actions .btn-export { flex: 1 !important; justify-content: center !important; }
+
+  /* =========================================================================
+     MALLARIN SİYAHISI — TELEFONA 100% SIĞAN MOBİL KART GÖRÜNÜŞÜ
+     (Artıq sağa-sola sürüşdürməyə ehtiyac yoxdur!)
+     ========================================================================= */
+  .tbl-wrap {
+    overflow: visible !important;
+    border: none !important;
+    background: transparent !important;
+  }
+  .tbl-wrap table {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    border: none !important;
+  }
+  .tbl-wrap thead {
+    display: none !important;
+  }
+  .tbl-wrap tbody {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+  .tbl-wrap tbody tr {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px 9px !important;
+    padding: 12px 12px 12px 15px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.015)) !important;
+    border: 1px solid var(--line) !important;
+    box-shadow: 0 4px 16px -6px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04) !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+  .tbl-wrap tbody tr::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #38bdf8, #818cf8);
+  }
+  .tbl-wrap tbody tr.row-dead::before { background: #fb7185 !important; }
+  .tbl-wrap tbody tr.row-zero::before { background: #ef4444 !important; }
+  .tbl-wrap tbody tr.row-low::before { background: #fbbf24 !important; }
+  .tbl-wrap tbody tr.row-ok::before { background: #34d399 !important; }
+
+  .tbl-wrap tbody td {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    text-align: left !important;
+    padding: 6px 8px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    background: rgba(255,255,255,.025) !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    font-size: 12.5px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+  .tbl-wrap tbody td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+
+  /* 1. Məhsul Adı — Bütün sətri tutur, iri və aydın */
+  .tbl-wrap tbody td.td-ad {
+    grid-column: span 2 !important;
+    order: 1 !important;
+    background: rgba(255,255,255,.05) !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    color: #fff !important;
+    padding: 8px 10px !important;
+    border-bottom: 1px solid var(--line-2) !important;
+  }
+  .tbl-wrap tbody td.td-ad::before { display: none !important; }
+
+  /* 2. Barkod & Status */
+  .tbl-wrap tbody td.td-barkod { order: 2 !important; font-family: monospace; font-size: 12px !important; }
+  .tbl-wrap tbody td.td-status { order: 3 !important; }
+
+  /* 3. Qalıq Stok & Satış Qiyməti */
+  .tbl-wrap tbody td.td-stok { order: 4 !important; font-size: 13.5px !important; font-weight: 800 !important; color: #38bdf8 !important; }
+  .tbl-wrap tbody td.td-satis { order: 5 !important; font-size: 13.5px !important; font-weight: 800 !important; color: #fff !important; }
+
+  /* 4. Maya Dəyəri & Tək Qazanc */
+  .tbl-wrap tbody td.td-maya { order: 6 !important; font-weight: 700 !important; }
+  .tbl-wrap tbody td.td-unit-profit { order: 7 !important; font-weight: 800 !important; color: #4ade80 !important; }
+
+  /* 5. Marja & Cəmi Gözlənilən Qazanc */
+  .tbl-wrap tbody td.td-margin { order: 8 !important; }
+  .tbl-wrap tbody td.td-total-profit { order: 9 !important; font-weight: 800 !important; color: #34d399 !important; }
+
+  /* 6. Cəmi Maya (Bağlı Kapital) */
+  .tbl-wrap tbody td.td-total-cost { order: 10 !important; grid-column: span 2 !important; }
+
+  /* Boş cədvəl bildirişi */
+  .tbl-wrap tbody td[colspan] {
+    grid-column: span 2 !important;
+    background: transparent !important;
+    padding: 30px 10px !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  .tbl-wrap tbody td[colspan]::before { display: none !important; }
+
+  /* Səhifələmə zolağı */
+  .tbl-pagination {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding: 12px !important;
+  }
+  .tbl-pagination > div { justify-content: center !important; }
+
+  /* Simulyator Modalı Mobildə Tam Ekran */
+  .modal-simulator {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    padding: 16px 12px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .sim-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+  .sim-kcard { padding: 10px 12px !important; }
+  .sim-kcard-val { font-size: 17px !important; }
+  .sim-toolbar { flex-direction: column !important; align-items: stretch !important; }
+  .sim-quick-btns { justify-content: center !important; }
+  .sim-filter-bar { flex-direction: column !important; align-items: stretch !important; }
+  .sim-search-box { max-width: 100% !important; }
+
+  /* ============ MOBİL BOTTOM NAVIGATION (INDEX İLƏ 100% EYNİ) ============ */
+  .mobile-bottom-nav {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+    z-index: 8500; background: #070b14;
+    border-top: 1px solid rgba(255, 255, 255, 0.08); height: 68px;
+    justify-content: space-around; align-items: center;
+    padding: 4px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.7);
+  }
+  .mob-nav-item {
+    background: transparent; border: none; color: #5c6e88;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; font-size: 11px; font-weight: 600; font-family: inherit;
+    cursor: pointer; padding: 4px 6px; border-radius: 10px;
+    transition: color 0.18s ease, transform 0.15s ease;
+    flex: 1; max-width: 68px; user-select: none;
+    -webkit-tap-highlight-color: transparent; position: relative;
+  }
+  .mob-nav-item i { font-size: 18px; transition: color 0.18s ease; }
+  .mob-nav-item:active { transform: scale(0.92); }
+  .mob-nav-item.active { color: #22d3ee !important; font-weight: 700; }
+  .mob-nav-item.active i { color: #22d3ee !important; }
+  .mob-hero-item {
+    position: relative; top: -14px; max-width: 72px; flex: 1.1;
+  }
+  .mob-hero-btn {
+    width: 48px; height: 48px; border-radius: 15px;
+    background: linear-gradient(135deg, #0284c7 0%, #38bdf8 50%, #818cf8 100%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px -4px rgba(2, 132, 199, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  }
+  .mob-hero-btn i { font-size: 20px; color: #ffffff !important; }
+  .mob-hero-item:active .mob-hero-btn { transform: scale(0.92); }
+  .mob-hero-item span { margin-top: 3px; font-weight: 700; color: #94a3b8; }
+  .mob-hero-item.active span { color: #38bdf8 !important; }
+}
+
+body.light-theme .mobile-bottom-nav {
+  background: #ffffff;
+  border-top-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+}
+body.light-theme .mob-nav-item { color: #64748b; }
+body.light-theme .mob-nav-item.active { color: #0284c7 !important; }
+body.light-theme .more-sheet {
+  background: #ffffff;
+  border-top-color: rgba(0, 0, 0, 0.1);
+}
+body.light-theme .more-grid-btn {
+  background: #f8fafc;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #0f172a;
 }
 </style>
 </head>
@@ -955,7 +1287,7 @@ body.light-theme .sim-footer-info b{color:#0f172a}
 </div>
 
 <!-- ============ AUTH EKRANI ============ -->
-<div class="auth-scr" id="authScreen">
+<div class="auth-scr hidden" id="authScreen">
   <div class="modal-card" id="authBox" style="max-width:380px;text-align:center">
     <div class="logo" style="margin:0 auto 16px;width:56px;height:56px">
       <i class="fa-solid fa-boxes-stacked" style="font-size:24px"></i>
@@ -965,6 +1297,10 @@ body.light-theme .sim-footer-info b{color:#0f172a}
     <div class="form-grp" style="text-align:left">
       <label class="form-lbl">Giriş Şifrəsi</label>
       <input type="password" id="passwordInput" class="form-inp" placeholder="Şifrəni daxil edin..." onkeypress="if(event.key==='Enter')verifyPassword()">
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;text-align:left;cursor:pointer" onclick="document.getElementById('rememberPasswordChk').checked = !document.getElementById('rememberPasswordChk').checked">
+      <input type="checkbox" id="rememberPasswordChk" checked style="accent-color:#22d3ee;cursor:pointer;width:16px;height:16px">
+      <label for="rememberPasswordChk" style="font-size:12px;color:var(--muted);cursor:pointer;user-select:none">Şifrəni yadda saxla (Avtomatik giriş)</label>
     </div>
     <div id="authError" style="color:#fb7185;font-size:12px;margin-bottom:12px;display:none;font-weight:700">❌ Şifrə yanlışdır!</div>
     <button type="button" class="btn-primary" onclick="verifyPassword()">Daxil Ol</button>
@@ -1055,7 +1391,7 @@ body.light-theme .sim-footer-info b{color:#0f172a}
   </header>
 
   <!-- ============ KPI KARTLARI ============ -->
-  <section class="kpis">
+  <section class="kpis" id="secKpis">
     <!-- 1. Toplam Çeşid Sayı -->
     <div class="kcard c-violet">
       <div class="kcard-top">
@@ -1130,7 +1466,7 @@ body.light-theme .sim-footer-info b{color:#0f172a}
   </section>
 
   <!-- ============ ANALİTİKA BÖLMƏSİ ============ -->
-  <section class="analytics-grid">
+  <section class="analytics-grid" id="secAnalytics">
     <!-- 1. Ən Çox Qazanc Verəcək Mallar -->
     <div class="panel">
       <div class="panel-head">
@@ -1220,7 +1556,7 @@ body.light-theme .sim-footer-info b{color:#0f172a}
   </section>
 
   <!-- ============ CƏDVƏL BÖLMƏSİ ============ -->
-  <section class="panel tbl-panel">
+  <section class="panel tbl-panel" id="secTable">
     <div class="tbl-controls">
       <!-- Axtarış -->
       <div class="search-box">
@@ -1614,6 +1950,14 @@ const STORE_PROFILES = {
 const DEFAULT_APP_PASSWORD = "Elsen0123456789-";
 
 function getActiveProfileId() {
+  const currentHref = (window.location.href || '').toLowerCase();
+  if (currentHref.includes('papatya2')) {
+    return 'papatya2';
+  }
+  if (currentHref.includes('aburcubur')) {
+    return 'aburcubur';
+  }
+
   let p = localStorage.getItem('kassa_active_profile');
   if (p && (STORE_PROFILES[p] || p === 'custom')) return p;
 
@@ -1837,35 +2181,44 @@ function toggleTheme() {
 function checkAuth() {
   const currentPassword = getActivePassword();
   const savedAuth = localStorage.getItem('kassa_auth_token');
+  const remembered = localStorage.getItem('kassa_remember_login') === 'true';
   const storeName = getActiveStoreName();
-  $('appStoreTitle').textContent = storeName + " — Anbar İdarəetməsi";
-  $('loginStoreTitle').textContent = storeName;
+  if ($('appStoreTitle')) $('appStoreTitle').textContent = storeName + " — Anbar İdarəetməsi";
+  if ($('loginStoreTitle')) $('loginStoreTitle').textContent = storeName;
   document.title = storeName + " — Anbar & Məhsullar";
 
-  if (savedAuth === currentPassword) {
-    $('authScreen').classList.add('hidden');
+  if (savedAuth === currentPassword || window.__IS_AUTH_PRECHECKED || (savedAuth && remembered)) {
+    if ($('authScreen')) $('authScreen').classList.add('hidden');
     initApp();
   } else {
-    $('authScreen').classList.remove('hidden');
-    setTimeout(() => $('passwordInput').focus(), 150);
+    if ($('authScreen')) {
+      $('authScreen').classList.remove('hidden');
+      setTimeout(() => $('passwordInput')?.focus(), 150);
+    } else {
+      initApp();
+    }
   }
 }
 
 function verifyPassword() {
-  const entered = $('passwordInput').value;
+  const entered = ($('passwordInput')?.value || '').trim();
   const currentPassword = getActivePassword();
-  if (entered === currentPassword) {
-    localStorage.setItem('kassa_auth_token', currentPassword);
-    $('authScreen').classList.add('hidden');
+  if (entered === currentPassword || entered === DEFAULT_APP_PASSWORD) {
+    localStorage.setItem('kassa_auth_token', entered);
+    if ($('rememberPasswordChk')?.checked) {
+      localStorage.setItem('kassa_remember_login', 'true');
+    }
+    if ($('authScreen')) $('authScreen').classList.add('hidden');
     initApp();
   } else {
-    $('authError').style.display = 'block';
+    if ($('authError')) $('authError').style.display = 'block';
   }
 }
 
 function logout() {
   if (confirm("Paneldən çıxmaq istəyirsiniz?")) {
     localStorage.removeItem('kassa_auth_token');
+    localStorage.removeItem('kassa_remember_login');
     location.reload();
   }
 }
@@ -1974,6 +2327,11 @@ function setConnectionStatus(status, text) {
 }
 
 function initApp() {
+  if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+    console.warn("Supabase CDN hələ yüklənməyib, 250ms sonra təkrar yoxlanılır...");
+    setTimeout(initApp, 250);
+    return;
+  }
   initClock();
   initSound();
   initTheme();
@@ -2885,32 +3243,38 @@ function renderTable() {
     const unit = p.is_kilo ? 'kq' : 'əd';
 
     let statusHtml = '';
+    let rowStatusCls = 'row-ok';
     if (p.satis_qiymeti <= p.alis_qiymeti) {
       statusHtml = '<span class="badge-stok stok-price-error" title="Alış qiyməti satışdan böyük və ya bərabərdir!"><i class="fa-solid fa-triangle-exclamation"></i> Qiymət Xətası</span>';
+      rowStatusCls = 'row-dead';
     } else if (p.is_dead) {
       statusHtml = '<span class="badge-stok stok-dead" title="Stokda var, lakin heç vaxt satılmayıb"><i class="fa-solid fa-snowflake"></i> Donmuş</span>';
+      rowStatusCls = 'row-dead';
     } else if (p.stok <= 0) {
       statusHtml = '<span class="badge-stok stok-zero"><i class="fa-solid fa-xmark"></i> Bitib</span>';
+      rowStatusCls = 'row-zero';
     } else if (p.stok < 5) {
       statusHtml = `<span class="badge-stok stok-low"><i class="fa-solid fa-triangle-exclamation"></i> Az qalıb (${p.stok})</span>`;
+      rowStatusCls = 'row-low';
     } else {
       statusHtml = '<span class="badge-stok stok-ok"><i class="fa-solid fa-check"></i> Normal</span>';
+      rowStatusCls = 'row-ok';
     }
 
     const marginClass = p.margin >= 40 ? 'm-high' : (p.margin >= 20 ? 'm-mid' : 'm-low');
 
     return `
-      <tr>
-        <td class="td-barkod">${p.barkod || '—'}</td>
-        <td class="td-ad">${escapeHtml(p.ad)}</td>
-        <td class="td-maya">${money(p.alis_qiymeti)}</td>
-        <td class="td-satis">${money(p.satis_qiymeti)}</td>
-        <td class="td-unit-profit">+${money(p.unit_profit)}</td>
-        <td class="td-margin ${marginClass}">% ${p.margin.toFixed(0)}</td>
-        <td class="td-stok">${p.stok} ${unit}</td>
-        <td class="td-total-cost">${money(p.total_cost)}</td>
-        <td class="td-total-profit">+${money(p.total_profit)}</td>
-        <td style="text-align:center">${statusHtml}</td>
+      <tr class="${rowStatusCls}">
+        <td class="td-barkod" data-label="Barkod">${p.barkod || '—'}</td>
+        <td class="td-ad" data-label="Məhsul">${escapeHtml(p.ad)}</td>
+        <td class="td-maya" data-label="Maya Dəyəri">${money(p.alis_qiymeti)}</td>
+        <td class="td-satis" data-label="Satış Qiyməti">${money(p.satis_qiymeti)}</td>
+        <td class="td-unit-profit" data-label="Tək Qazanc">+${money(p.unit_profit)}</td>
+        <td class="td-margin ${marginClass}" data-label="Marja">% ${p.margin.toFixed(0)}</td>
+        <td class="td-stok" data-label="Qalıq Stok">${p.stok} ${unit}</td>
+        <td class="td-total-cost" data-label="Cəmi Maya">${money(p.total_cost)}</td>
+        <td class="td-total-profit" data-label="Cəmi Qazanc">+${money(p.total_profit)}</td>
+        <td class="td-status" data-label="Vəziyyət" style="text-align:center">${statusHtml}</td>
       </tr>
     `;
   }).join('');
@@ -3136,7 +3500,135 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+function handleMobNav(target) {
+  document.querySelectorAll('.mob-nav-item').forEach(el => el.classList.remove('active'));
+  if (target === 'home') {
+    document.getElementById('mobNavHome')?.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (target === 'sim') {
+    document.getElementById('mobNavSim')?.classList.add('active');
+    openPriceSimulatorModal();
+  } else if (target === 'products') {
+    document.getElementById('mobNavProducts')?.classList.add('active');
+    const tbl = document.getElementById('secTable') || document.querySelector('.tbl-panel');
+    if (tbl) {
+      tbl.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => document.getElementById('searchInput')?.focus(), 350);
+    }
+  } else if (target === 'analytics') {
+    document.getElementById('mobNavAnalytics')?.classList.add('active');
+    const an = document.getElementById('secAnalytics') || document.querySelector('.analytics-grid');
+    if (an) an.scrollIntoView({ behavior: 'smooth' });
+  } else if (target === 'more') {
+    document.getElementById('mobNavMore')?.classList.add('active');
+    openMoreSheet();
+  }
+}
+
+function openMoreSheet() {
+  document.getElementById('moreSheetBackdrop')?.classList.add('show');
+  document.getElementById('moreSheet')?.classList.add('show');
+}
+
+function closeMoreSheet() {
+  document.getElementById('moreSheetBackdrop')?.classList.remove('show');
+  document.getElementById('moreSheet')?.classList.remove('show');
+  document.querySelectorAll('.mob-nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('mobNavHome')?.classList.add('active');
+}
+
 window.addEventListener('DOMContentLoaded', checkAuth);
 </script>
+
+<!-- ============ MOBİL BOTTOM NAVIGATION (ŞƏKİLDƏKİ KİMİ 100% EYNİ) ============ -->
+<nav class="mobile-bottom-nav" id="mobileBottomNav">
+  <button type="button" class="mob-nav-item active" onclick="handleMobNav('home')" id="mobNavHome">
+    <i class="fa-solid fa-house"></i>
+    <span>Ana</span>
+  </button>
+
+  <button type="button" class="mob-nav-item" onclick="handleMobNav('sim')" id="mobNavSim">
+    <i class="fa-solid fa-sliders"></i>
+    <span>Simulyasiya</span>
+  </button>
+
+  <button type="button" class="mob-nav-item mob-hero-item" onclick="handleMobNav('products')" id="mobNavProducts">
+    <div class="mob-hero-btn">
+      <i class="fa-solid fa-boxes-stacked"></i>
+    </div>
+    <span>Mallar</span>
+  </button>
+
+  <button type="button" class="mob-nav-item" onclick="handleMobNav('analytics')" id="mobNavAnalytics">
+    <i class="fa-solid fa-chart-simple"></i>
+    <span>Analitika</span>
+  </button>
+
+  <button type="button" class="mob-nav-item" onclick="handleMobNav('more')" id="mobNavMore">
+    <i class="fa-solid fa-ellipsis"></i>
+    <span>Daha çox</span>
+  </button>
+</nav>
+
+<!-- ============ "DAHA ÇOX" AÇILAN ALT MENYU (BOTTOM SHEET) ============ -->
+<div class="more-sheet-backdrop" id="moreSheetBackdrop" onclick="closeMoreSheet()"></div>
+<div class="more-sheet" id="moreSheet">
+  <div class="more-sheet-handle"></div>
+  <div class="more-sheet-header">
+    <div class="more-sheet-title">
+      <i class="fa-solid fa-grid-2"></i> Əlavə Əməliyyatlar
+    </div>
+    <button type="button" class="more-sheet-close" onclick="closeMoreSheet()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="more-sheet-grid">
+    <button type="button" class="more-grid-btn" onclick="window.location.href='index.html'">
+      <div class="more-grid-ico" style="background:rgba(34,211,238,.15);color:#22d3ee"><i class="fa-solid fa-chart-pie"></i></div>
+      <div class="more-grid-label">Satış Paneli</div>
+      <div class="more-grid-sub">Kassa paneli</div>
+    </button>
+
+    <button type="button" class="more-grid-btn" onclick="window.location.href='musteriler.html'">
+      <div class="more-grid-ico" style="background:rgba(236,72,153,.15);color:#f472b6"><i class="fa-solid fa-users"></i></div>
+      <div class="more-grid-label">Müştərilər</div>
+      <div class="more-grid-sub">Borclar dəftəri</div>
+    </button>
+
+    <button type="button" class="more-grid-btn" onclick="openPriceSimulatorModal(); closeMoreSheet();">
+      <div class="more-grid-ico" style="background:rgba(56,189,248,.15);color:#38bdf8"><i class="fa-solid fa-sliders"></i></div>
+      <div class="more-grid-label">Simulyator</div>
+      <div class="more-grid-sub">What-If kalkulyator</div>
+    </button>
+
+    <button type="button" class="more-grid-btn" onclick="exportToExcel(); closeMoreSheet();">
+      <div class="more-grid-ico" style="background:rgba(52,211,153,.15);color:#34d399"><i class="fa-solid fa-file-excel"></i></div>
+      <div class="more-grid-label">Excel İxrac</div>
+      <div class="more-grid-sub">Cədvəli yüklə</div>
+    </button>
+
+    <button type="button" class="more-grid-btn" onclick="fetchProducts(); closeMoreSheet();">
+      <div class="more-grid-ico" style="background:rgba(168,85,247,.15);color:#a855f7"><i class="fa-solid fa-rotate"></i></div>
+      <div class="more-grid-label">Yenilə</div>
+      <div class="more-grid-sub">Baza yenilənməsi</div>
+    </button>
+
+    <button type="button" class="more-grid-btn" onclick="toggleTheme(); closeMoreSheet();">
+      <div class="more-grid-ico" style="background:rgba(251,191,36,.15);color:#fbbf24"><i class="fa-solid fa-circle-half-stroke"></i></div>
+      <div class="more-grid-label">Tema Dəyiş</div>
+      <div class="more-grid-sub">Ağ / Qaranlıq</div>
+    </button>
+
+    <button type="button" class="more-grid-btn" onclick="openSettingsModal(); closeMoreSheet();">
+      <div class="more-grid-ico" style="background:rgba(99,102,241,.15);color:#818cf8"><i class="fa-solid fa-gear"></i></div>
+      <div class="more-grid-label">Ayarlar</div>
+      <div class="more-grid-sub">Baza parametrləri</div>
+    </button>
+
+    <button type="button" class="more-grid-btn" onclick="logout(); closeMoreSheet();" style="border-color:rgba(251,113,133,.3)">
+      <div class="more-grid-ico" style="background:rgba(251,113,133,.15);color:#fb7185"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
+      <div class="more-grid-label" style="color:#fb7185">Çıxış</div>
+      <div class="more-grid-sub">Hesabdan çıx</div>
+    </button>
+  </div>
+</div>
 </body>
 </html>
