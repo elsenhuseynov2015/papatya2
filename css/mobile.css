@@ -192,15 +192,43 @@
     border-radius: 12px !important;
   }
 
-  /* ============ ÇART VƏ SLİDER PANEL BOŞLUQ AZALDILMASI (TELEFON) ============ */
+  /* ============ ÇART VƏ SLİDER PANEL BOŞLUQ ARADAN QALDIRILMASI (TELEFON) ============ */
   .slider-panel {
     min-height: 0 !important;
   }
-  .chart-area {
-    padding: 8px 12px 2px !important;
+  .slider-viewport {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
   }
-  .chart {
-    height: 180px !important;
+  .slider-track {
+    height: 100% !important;
+    min-height: 100% !important;
+  }
+  .slider-slide {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+  #mainSlide1 {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+  }
+  #mainSlide1 .chart-area {
+    padding: 8px 12px 2px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+  #mainSlide1 #chart {
+    flex: 1 !important;
+    height: 100% !important;
+    min-height: 190px !important;
     padding-bottom: 22px !important;
   }
   .chart::before {
@@ -211,35 +239,15 @@
     font-size: 9px !important;
   }
   .main-mode-content .chart {
-    height: 135px !important;
+    height: 145px !important;
   }
   .slider-dots {
     padding: 4px 0 6px !important;
     gap: 6px !important;
-  }
-  .donut {
-    width: 115px !important;
-    height: 115px !important;
-  }
-  .donut-body {
-    padding: 8px 12px 4px !important;
-    gap: 8px !important;
-  }
-  .donut-hole {
-    inset: 10px !important;
-  }
-  .donut-hole strong {
-    font-size: 13px !important;
-  }
-  .d-legend {
-    gap: 4px !important;
-  }
-  .d-row {
-    padding: 4px 8px !important;
-    font-size: 11px !important;
+    margin-top: 0 !important;
   }
   #slideTop {
-    max-height: 240px !important;
+    max-height: 300px !important;
   }
 
   .table-panel .card-head{gap:12px}
