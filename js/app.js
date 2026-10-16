@@ -1505,8 +1505,8 @@ function renderBrackets(rows) {
               <i class="fa-solid ${item.icon}"></i>
             </div>
             <div>
-              <div style="font-weight:800;color:#fff">${item.name}</div>
-              <div style="font-size:10px;color:#94a3b8;font-weight:500">${item.desc}</div>
+              <div class="bracket-name">${item.name}</div>
+              <div class="bracket-desc">${item.desc}</div>
             </div>
           </div>
           <div class="bracket-amt">${money(item.total)}</div>
@@ -1517,7 +1517,7 @@ function renderBrackets(rows) {
         <div class="bracket-meta">
           <span>Pay: <b>${pct.toFixed(1)}%</b></span>
           <span>Miqdar: <b>${Math.round(item.count)} əd/kq</b></span>
-          <span>Qazanc: <b style="color:#6ee7b7">+${money(item.qazanc)}</b></span>
+          <span>Qazanc: <b class="bracket-qazanc-val">+${money(item.qazanc)}</b></span>
         </div>
       </div>
     `;
@@ -1538,7 +1538,7 @@ function renderBrackets(rows) {
     } else {
       moreBtnHtml = `
         <div style="text-align:center;padding:4px 0 6px;grid-column:1/-1">
-          <button type="button" class="btn-top-more" onclick="toggleBracketsExpand()" style="border-color:rgba(255,255,255,.15);color:#94a3b8">
+          <button type="button" class="btn-top-more btn-brackets-collapse" onclick="toggleBracketsExpand()">
             <i class="fa-solid fa-angles-up"></i>
             <span>İlk 2-yə qayıt</span>
             <small style="opacity:.7;margin-left:4px">(Cəmi ${allItems.length} seqment)</small>
