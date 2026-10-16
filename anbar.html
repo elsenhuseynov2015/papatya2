@@ -381,16 +381,13 @@ td{padding:12px 14px;vertical-align:middle}
 .stok-zero{background:rgba(251,113,133,.14);color:#fb7185;border:1px solid rgba(251,113,133,.35)}
 
 /* CƏDVƏL SÜTUNLARI VƏ RƏNGLƏRİ */
-.desk-val{display:inline}
-.mob-combo{display:none}
-.mob-barcode-pill{display:none}
 .td-barkod{
   font-family:monospace;font-size:12.5px;font-weight:700;
   color:#38bdf8;letter-spacing:.4px;
 }
 .td-ad{
   font-weight:700;
-  color:#f8fafc !important;
+  color:#f8fafc;
   min-width:170px;
   max-width:340px;
   word-break:break-word;
@@ -3372,6 +3369,8 @@ function renderTable() {
   const rowsToRender = filteredProducts.slice(0, visibleLimit);
   $('pgVisibleCount').textContent = rowsToRender.length;
 
+  const isMobile = window.innerWidth <= 768;
+
   tbody.innerHTML = rowsToRender.map(p => {
     const unit = p.is_kilo ? 'kq' : 'əd';
     const prodName = p.ad || p.mehsul_adi || (p.raw && (p.raw.ad || p.raw.mehsul_adi || p.raw.name)) || 'Adsız məhsul';
@@ -3395,49 +3394,77 @@ function renderTable() {
       rowStatusCls = 'row-ok';
     }
 
-    const marginClass = p.margin >= 40 ? 'm-high' : (p.margin >= 20 ? 'm-mid' : 'm-low');
+    if (isMobile) {
+      // =========================================================
+      // MOBİL (TELEFON) — 100% YIĞCAM BİRLƏŞDİRİLMİŞ KART GÖRÜNÜŞÜ
+      // Marja gizli, Maya/Satış bir yerdə, Qazanc bir yerdə, Qalıq/Status bir yerdə
+      // =========================================================
+      return `
+        <tr class="${rowStatusCls}">
+          <td class="td-ad" data-label="Məhsul">
+            <div class="td-ad-wrap">
+              <span class="product-name">${escapeHtml(prodName)}</span>
+              ${p.barkod ? `<span class="mob-barcode-pill"><i class="fa-solid fa-barcode"></i> ${escapeHtml(p.barkod)}</span>` : ''}
+            </div>
+          </td>
+          <td class="td-stok" data-label="Qalıq & Vəziyyət">
+            <div class="mob-stok-status">
+              <span class="c-stok-val">${p.stok} <small>${unit}</small></span>
+              <span class="c-status-wrap">${statusHtml}</span>
+            </div>
+          </td>
+          <td class="td-total-cost" data-label="Cəmi Maya">
+            <span class="c-cost-val">${money(p.total_cost)}</span>
+          </td>
+          <td class="td-maya" data-label="Maya / Satış">
+            <div class="mob-combo">
+              <span class="c-maya">${money(p.alis_qiymeti)}</span>
+              <span class="c-slash">/</span>
+              <span class="c-satis">${money(p.satis_qiymeti)}</span>
+            </div>
+          </td>
+          <td class="td-unit-profit" data-label="Tək / Cəmi Qazanc">
+            <div class="mob-combo">
+              <span class="c-unit">+${money(p.unit_profit)}</span>
+              <span class="c-slash">/</span>
+              <span class="c-total">+${money(p.total_profit)}</span>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
 
+    // =========================================================
+    // KOMPÜTER (PC) — ORİGİNAL 10 SÜTUNLU DƏQİQ CƏDVƏL
+    // Heç bir birləşdirmə yoxdur, ad və hər sütun aydın və tək görünür
+    // =========================================================
+    const marginClass = p.margin >= 40 ? 'm-high' : (p.margin >= 20 ? 'm-mid' : 'm-low');
     return `
       <tr class="${rowStatusCls}">
-        <td class="td-barkod" data-label="Barkod">${escapeHtml(p.barkod || '—')}</td>
-        <td class="td-ad" data-label="Məhsul">
-          <div class="td-ad-wrap">
-            <span class="product-name">${escapeHtml(prodName)}</span>
-            ${p.barkod ? `<span class="mob-barcode-pill"><i class="fa-solid fa-barcode"></i> ${escapeHtml(p.barkod)}</span>` : ''}
-          </div>
-        </td>
-        <td class="td-maya" data-label="Maya / Satış">
-          <span class="desk-val">${money(p.alis_qiymeti)}</span>
-          <span class="mob-combo">
-            <span class="c-maya">${money(p.alis_qiymeti)}</span>
-            <span class="c-slash">/</span>
-            <span class="c-satis">${money(p.satis_qiymeti)}</span>
-          </span>
-        </td>
-        <td class="td-satis" data-label="Satış Qiyməti">${money(p.satis_qiymeti)}</td>
-        <td class="td-unit-profit" data-label="Tək / Cəmi Qazanc">
-          <span class="desk-val">+${money(p.unit_profit)}</span>
-          <span class="mob-combo">
-            <span class="c-unit">+${money(p.unit_profit)}</span>
-            <span class="c-slash">/</span>
-            <span class="c-total">+${money(p.total_profit)}</span>
-          </span>
-        </td>
-        <td class="td-margin ${marginClass}" data-label="Marja">% ${p.margin.toFixed(0)}</td>
-        <td class="td-stok" data-label="Qalıq & Vəziyyət">
-          <span class="desk-val">${p.stok} ${unit}</span>
-          <div class="mob-stok-status">
-            <span class="c-stok-val">${p.stok} <small>${unit}</small></span>
-            <span class="c-status-wrap">${statusHtml}</span>
-          </div>
-        </td>
-        <td class="td-total-cost" data-label="Cəmi Maya">${money(p.total_cost)}</td>
-        <td class="td-total-profit" data-label="Cəmi Qazanc">+${money(p.total_profit)}</td>
-        <td class="td-status" data-label="Vəziyyət" style="text-align:center">${statusHtml}</td>
+        <td class="td-barkod">${escapeHtml(p.barkod || '—')}</td>
+        <td class="td-ad">${escapeHtml(prodName)}</td>
+        <td class="td-maya">${money(p.alis_qiymeti)}</td>
+        <td class="td-satis">${money(p.satis_qiymeti)}</td>
+        <td class="td-unit-profit">+${money(p.unit_profit)}</td>
+        <td class="td-margin ${marginClass}">% ${p.margin.toFixed(0)}</td>
+        <td class="td-stok">${p.stok} ${unit}</td>
+        <td class="td-total-cost">${money(p.total_cost)}</td>
+        <td class="td-total-profit">+${money(p.total_profit)}</td>
+        <td class="td-status" style="text-align:center">${statusHtml}</td>
       </tr>
     `;
   }).join('');
 }
+
+let anbarResizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(anbarResizeTimer);
+  anbarResizeTimer = setTimeout(() => {
+    if (filteredProducts && filteredProducts.length > 0) {
+      renderTable();
+    }
+  }, 150);
+});
 
 function showMoreRows(step = 50) {
   visibleLimit += step;
