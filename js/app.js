@@ -1514,7 +1514,11 @@ function renderAdvancedCharts(rows) {
 /* =====================================================================
    12) TOP QAZANCLI MƏHSULLAR (Səhifələmə & Daha Çox Göstər ilə)
    ===================================================================== */
-let topProductsLimit = 5;
+function getInitialTopLimit() {
+  return window.innerWidth <= 768 ? 3 : 5;
+}
+
+let topProductsLimit = getInitialTopLimit();
 let topSortMode = localStorage.getItem('kassa_top_sort_mode') || 'qty'; // 'qty' (Say / Ədəd / Kq) və ya 'qazanc' (Manat / Gəlir)
 
 function initTopSort() {
@@ -1555,7 +1559,7 @@ function loadMoreTopProducts(){
 }
 
 function resetTopLimit(){
-  topProductsLimit = 5;
+  topProductsLimit = getInitialTopLimit();
   renderTop(getFiltered());
 }
 
@@ -1624,7 +1628,8 @@ function renderTop(rows){
     </div>`;
   }).join('');
 
-  if (allSorted.length > 5) {
+  const initialLimit = getInitialTopLimit();
+  if (allSorted.length > initialLimit) {
     if (topProductsLimit < allSorted.length) {
       const nextCount = Math.min(5, allSorted.length - topProductsLimit);
       html += `
@@ -1640,7 +1645,7 @@ function renderTop(rows){
         <div style="text-align:center;padding-top:6px">
           <button type="button" class="btn-top-more" onclick="resetTopLimit()" style="border-color:rgba(255,255,255,.15);color:#94a3b8">
             <i class="fa-solid fa-angles-up"></i>
-            <span>İlk 5-ə qayıt</span>
+            <span>İlk ${initialLimit}-ə qayıt</span>
             <small style="opacity:.7;margin-left:4px">(Cəmi ${allSorted.length} məhsul)</small>
           </button>
         </div>`;
@@ -1686,7 +1691,7 @@ function resetPagination() {
   if (tableStep !== 'all') {
     tableVisibleLimit = typeof tableStep === 'number' ? tableStep : 25;
   }
-  topProductsLimit = 5;
+  topProductsLimit = getInitialTopLimit();
 }
 
 function loadMoreRows() {

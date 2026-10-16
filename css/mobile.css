@@ -3,7 +3,7 @@
 @media (max-width:1080px){.charts{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:680px){
   .wrap{padding:16px 12px 50px}
-  .stats{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
   .filters{padding:14px}
   .chart{height:190px}
   .hdr{gap:12px}
@@ -13,6 +13,102 @@
 
 /* ============ MOBILE TABLE CARD VIEW ============ */
 @media (max-width: 768px){
+  /* ============ STATS 2 SÜTUNLU YAN-YANA CÜTLƏŞMƏ (TELEFON) ============ */
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+  }
+  .stat {
+    padding: 11px 9px !important;
+    border-radius: 14px !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .stat-top {
+    gap: 6px !important;
+    margin-bottom: 6px !important;
+  }
+  .stat-ico {
+    width: 25px !important;
+    height: 25px !important;
+    font-size: 11px !important;
+    border-radius: 7px !important;
+    flex: none !important;
+  }
+  .stat-label {
+    font-size: 9px !important;
+    letter-spacing: .3px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .stat-value {
+    font-size: 17px !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .stat-value-qty {
+    font-size: 14px !important;
+  }
+  .stat-sub {
+    font-size: 9.5px !important;
+    margin-top: 5px !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .stat-sub .pill {
+    padding: 2px 5px !important;
+    font-size: 9px !important;
+  }
+  .stat-spark {
+    display: none !important;
+  }
+
+  /* 2 sütunlu yan-yana cütləşmə sırası: */
+  /* Sətr 1: Ümumi Dövriyyə & Miqdar */
+  .stat-card-total { order: 1 !important; }
+  .stat-card-qty   { order: 2 !important; }
+
+  /* Sətr 2: Maya & Xalis Qazanc (Gəlir) */
+  .stat-card-maya  { order: 3 !important; }
+  .stat-card-qazanc{ order: 4 !important; }
+
+  /* Sətr 3: Nəğd & Nisyə */
+  .stat-card-negd  { order: 5 !important; }
+  .stat-card-nisye { order: 6 !important; }
+
+  /* ============ DƏRİN ANALİTİKA 3-LÜ DÜYMƏLƏR (TELEFON) ============ */
+  .lbl-desk { display: none !important; }
+  .lbl-mob { display: inline !important; }
+  .main-mode-selector {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    padding: 8px 6px !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .mode-pill {
+    padding: 6px 2px !important;
+    font-size: 10.5px !important;
+    gap: 3px !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .mode-pill i {
+    font-size: 10px !important;
+    flex-shrink: 0 !important;
+  }
+
   .table-panel .card-head{gap:12px}
   .table-title-grp{width:100%}
   .tbl-search-wrap{max-width:100%;width:100%;order:2}
@@ -458,6 +554,8 @@ body.light-theme .loss-tbl th{background:#f8fafc;color:#475569}
 body.light-theme .loss-tbl td{color:#1e293b}
 
 /* ============ DEEP ANALYTICS ============ */
+.lbl-desk{display:inline}
+.lbl-mob{display:none}
 .main-mode-selector{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px 8px;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.02);flex-wrap:wrap}
 .mode-pill{font-family:inherit;font-size:11.5px;font-weight:700;color:#94a3b8;cursor:pointer;padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.04);display:inline-flex;align-items:center;gap:6px;transition:all .2s cubic-bezier(.4,0,.2,1)}
 .mode-pill:hover{color:#fff;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);transform:translateY(-1px)}

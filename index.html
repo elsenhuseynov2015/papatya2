@@ -447,34 +447,34 @@
 
   <!-- STATS -->
   <section class="stats anim-cascade delay-2" id="sec-kpis">
-    <div class="stat" style="--accent:#22d3ee">
+    <div class="stat stat-card-total" style="--accent:#22d3ee">
       <div class="stat-top"><div class="stat-ico"><i class="fa-solid fa-wallet"></i></div><span class="stat-label">Ümumi Dövriyyə</span></div>
       <div class="stat-value" id="stTotal">0.00 ₼</div>
       <div class="stat-sub"><span id="stCount">0 əməliyyat</span></div>
       <div class="stat-spark" id="sparkTotal"></div>
     </div>
-    <div class="stat" style="--accent:#fbbf24">
+    <div class="stat stat-card-maya" style="--accent:#fbbf24">
       <div class="stat-top"><div class="stat-ico"><i class="fa-solid fa-boxes-stacked"></i></div><span class="stat-label">Maya Dəyəri</span></div>
       <div class="stat-value" id="stMaya">0.00 ₼</div>
       <div class="stat-sub"><span class="pill info" id="stMayaPct">0%</span> satışdan</div>
     </div>
-    <div class="stat" style="--accent:#34d399">
+    <div class="stat stat-card-qazanc" style="--accent:#34d399">
       <div class="stat-top"><div class="stat-ico"><i class="fa-solid fa-sack-dollar"></i></div><span class="stat-label">Xalis Qazanc</span></div>
       <div class="stat-value accent" id="stQazanc">0.00 ₼</div>
       <div class="stat-sub"><span class="pill up" id="stMarja">0% marja</span></div>
       <div class="stat-spark" id="sparkQazanc"></div>
     </div>
-    <div class="stat" style="--accent:#67e8f9">
+    <div class="stat stat-card-negd" style="--accent:#67e8f9">
       <div class="stat-top"><div class="stat-ico"><i class="fa-solid fa-money-bill-wave"></i></div><span class="stat-label">Nəğd Satış</span></div>
       <div class="stat-value" id="stNegd">0.00 ₼</div>
       <div class="stat-sub"><span class="pill info" id="stNegdPct">0%</span> pay</div>
     </div>
-    <div class="stat" style="--accent:#a855f7">
+    <div class="stat stat-card-nisye" style="--accent:#a855f7">
       <div class="stat-top"><div class="stat-ico"><i class="fa-solid fa-file-invoice-dollar"></i></div><span class="stat-label">Nisyə Satış</span></div>
       <div class="stat-value" id="stNisye">0.00 ₼</div>
       <div class="stat-sub"><span class="pill dn" id="stBorc">0.00 ₼ borc</span></div>
     </div>
-    <div class="stat" style="--accent:#f472b6" title="Ümumi Miqdar (Ədəd) və Çəki (Kq)">
+    <div class="stat stat-card-qty" style="--accent:#f472b6" title="Ümumi Miqdar (Ədəd) və Çəki (Kq)">
       <div class="stat-top"><div class="stat-ico"><i class="fa-solid fa-scale-balanced"></i></div><span class="stat-label">Miqdar / Kq</span></div>
       <div class="stat-value stat-value-qty" id="stQtyKgBox">
         <span class="qty-num"><span id="stEdedVal">0</span><span class="qty-unit"> əd</span></span>
@@ -516,9 +516,9 @@
           </div>
           <div class="slider-slide" id="mainSlide2">
             <div class="main-mode-selector">
-              <button type="button" class="mode-pill active" id="btnModeHourly" data-mode="hourly" onclick="setMainChartMode('hourly')"><i class="fa-solid fa-clock"></i> Saatlıq Pik</button>
-              <button type="button" class="mode-pill" id="btnModeProfit" data-mode="profit" onclick="setMainChartMode('profit')"><i class="fa-solid fa-sack-dollar"></i> Xalis Qazanc</button>
-              <button type="button" class="mode-pill" id="btnModeBrackets" data-mode="brackets" onclick="setMainChartMode('brackets')"><i class="fa-solid fa-tags"></i> Qiymət Seqmenti</button>
+              <button type="button" class="mode-pill active" id="btnModeHourly" data-mode="hourly" onclick="setMainChartMode('hourly')"><i class="fa-solid fa-clock"></i> <span class="lbl-desk">Saatlıq Pik</span><span class="lbl-mob">Saat/Pik</span></button>
+              <button type="button" class="mode-pill" id="btnModeProfit" data-mode="profit" onclick="setMainChartMode('profit')"><i class="fa-solid fa-sack-dollar"></i> <span class="lbl-desk">Xalis Qazanc</span><span class="lbl-mob">Qazanc</span></button>
+              <button type="button" class="mode-pill" id="btnModeBrackets" data-mode="brackets" onclick="setMainChartMode('brackets')"><i class="fa-solid fa-tags"></i> <span class="lbl-desk">Qiymət Seqmenti</span><span class="lbl-mob">Qiy. Seqmenti</span></button>
             </div>
             <div id="modeHourlyBox" class="main-mode-content">
               <div class="chart-area" style="padding:8px 20px 10px">
