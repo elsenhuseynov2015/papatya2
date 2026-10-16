@@ -46,21 +46,22 @@ function getActiveProfileId() {
   if (savedUrl.includes('ijnbsuupwwyqohysrjlc')) return 'papatya2';
   if (savedUrl.includes('zcjthobakvppowerkxmv')) return 'aburcubur';
 
-  return 'aburcubur';
+  // 4. Default olaraq PC və yerli mühitdə Papatya 2 (əsas aktiv baza)
+  return 'papatya2';
 }
 
 function getActiveSupabaseUrl() {
   const pid = getActiveProfileId();
   if (STORE_PROFILES[pid]) return STORE_PROFILES[pid].url;
   const saved = (localStorage.getItem('kassa_supabase_url') || '').trim().replace(/\/+$/, '');
-  return saved || STORE_PROFILES['aburcubur'].url;
+  return saved || STORE_PROFILES['papatya2'].url;
 }
 
 function getActiveSupabaseKey() {
   const pid = getActiveProfileId();
   if (STORE_PROFILES[pid]) return STORE_PROFILES[pid].key;
   const saved = (localStorage.getItem('kassa_supabase_key') || '').trim();
-  return saved || STORE_PROFILES['aburcubur'].key;
+  return saved || STORE_PROFILES['papatya2'].key;
 }
 
 function getActivePassword() {
@@ -72,7 +73,7 @@ function getActiveStoreName() {
   if (STORE_PROFILES[pid]) return STORE_PROFILES[pid].name;
   const saved = localStorage.getItem('kassa_store_name');
   if (saved && saved !== 'Satış İdarəetmə Paneli' && saved !== 'Papatya' && saved !== 'Papatya — Anbar İdarəetməsi') return saved;
-  return 'Abur Çubur';
+  return 'Papatya 2';
 }
 
 function updateStoreTitle() {

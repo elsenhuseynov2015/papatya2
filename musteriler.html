@@ -1208,35 +1208,55 @@ const STORE_PROFILES = {
 const DEFAULT_APP_PASSWORD = "Elsen0123456789-";
 
 function getActiveProfileId() {
+  // 1. URL parametr yoxlanışı (?store=papatya2 və ya ?store=aburcubur)
+  try {
+    const urlParams = new URLSearchParams(window.location.search || '');
+    const storeParam = urlParams.get('store');
+    if (storeParam && (STORE_PROFILES[storeParam] || storeParam === 'custom')) {
+      return storeParam;
+    }
+  } catch (e) {}
+
+  // 2. Link / URL əsasında avtomatik mağaza təyini (DƏQİQ VƏ BİRBAŞA)
   const currentHref = (window.location.href || '').toLowerCase();
-  if (currentHref.includes('papatya2')) {
+  const currentPath = (window.location.pathname || '').toLowerCase();
+  if (currentHref.includes('papatya2') || currentPath.includes('papatya2') || currentHref.includes('papatya')) {
     return 'papatya2';
   }
-  if (currentHref.includes('aburcubur')) {
+  if (currentHref.includes('aburcubur') || currentPath.includes('aburcubur')) {
     return 'aburcubur';
   }
 
+  // 3. İstifadəçi cari sessiyada xüsusi seçim edibsə:
+  const sessionSelected = sessionStorage.getItem('kassa_session_profile');
+  if (sessionSelected && (STORE_PROFILES[sessionSelected] || sessionSelected === 'custom')) {
+    return sessionSelected;
+  }
+
+  // 4. Əgər yaddaşda qeyd varsa:
   let p = localStorage.getItem('kassa_active_profile');
   if (p && (STORE_PROFILES[p] || p === 'custom')) return p;
 
   const savedUrl = (localStorage.getItem('kassa_supabase_url') || '').toLowerCase();
-  if (savedUrl.includes('zcjthobakvppowerkxmv')) return 'aburcubur';
   if (savedUrl.includes('ijnbsuupwwyqohysrjlc')) return 'papatya2';
-  return 'aburcubur';
+  if (savedUrl.includes('zcjthobakvppowerkxmv')) return 'aburcubur';
+
+  // 5. Default olaraq PC və test mühitində Papatya 2 (əsas aktiv baza)
+  return 'papatya2';
 }
 
 function getActiveSupabaseUrl() {
   const pid = getActiveProfileId();
   if (STORE_PROFILES[pid]) return STORE_PROFILES[pid].url;
   const saved = (localStorage.getItem('kassa_supabase_url') || '').trim().replace(/\/+$/, '');
-  return saved || STORE_PROFILES['aburcubur'].url;
+  return saved || STORE_PROFILES['papatya2'].url;
 }
 
 function getActiveSupabaseKey() {
   const pid = getActiveProfileId();
   if (STORE_PROFILES[pid]) return STORE_PROFILES[pid].key;
   const saved = (localStorage.getItem('kassa_supabase_key') || '').trim();
-  return saved || STORE_PROFILES['aburcubur'].key;
+  return saved || STORE_PROFILES['papatya2'].key;
 }
 
 function getActivePassword() {
@@ -1248,7 +1268,7 @@ function getActiveStoreName() {
   if (STORE_PROFILES[pid]) return STORE_PROFILES[pid].name;
   const saved = localStorage.getItem('kassa_store_name');
   if (saved && saved !== 'Papatya' && saved !== 'Satış İdarəetmə Paneli' && saved !== 'Papatya — Müştərilər & Borclar') return saved;
-  return 'Abur Çubur';
+  return 'Papatya 2';
 }
 
 function updateStoreTitle() {
@@ -1273,9 +1293,10 @@ function syncStoreSelectUI() {
 
 function switchStoreProfile(profileId, triggerReload = true) {
   if (!STORE_PROFILES[profileId] && profileId !== 'custom') {
-    profileId = 'aburcubur';
+    profileId = 'papatya2';
   }
 
+  sessionStorage.setItem('kassa_session_profile', profileId);
   localStorage.setItem('kassa_active_profile', profileId);
 
   if (STORE_PROFILES[profileId]) {
