@@ -98,7 +98,7 @@ function syncStoreSelectUI() {
 
 function switchStoreProfile(profileId, triggerReload = true) {
   if (!STORE_PROFILES[profileId] && profileId !== 'custom') {
-    profileId = 'aburcubur';
+    profileId = 'papatya2';
   }
 
   sessionStorage.setItem('kassa_session_profile', profileId);
@@ -158,7 +158,7 @@ const money0 = n => {
   }
   return nf0.format(Math.round(val)) + ' ₼';
 };
-const $ = id => document.getElementById(id);
+const $ = id => document.getElementById(id) || (id === 'chartSub' ? document.getElementById('mainSliderSubtitle') : null);
 
 /* =====================================================================
    3) SƏS SİSTEMİ (Web Audio API Synthesizer)
@@ -249,9 +249,10 @@ function showToast(title, msg, isSale = true, customDate = null) {
   const tMsg = $('toastMsg');
   const tIco = $('toastIco');
   const tTime = $('toastTime');
+  if (!toast || !tTitle) return;
 
   tTitle.textContent = title;
-  tMsg.textContent = msg;
+  if (tMsg) tMsg.textContent = msg;
 
   const d = customDate ? new Date(customDate) : new Date();
   const dateStr = pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear();
@@ -931,8 +932,24 @@ function refreshData() {
 /* =====================================================================
    8) FİLTR VƏ SIRALAMA
    ===================================================================== */
+function normalizeAz(str) {
+  if (!str) return '';
+  return String(str).toLowerCase()
+    .replace(/ə/g, 'e')
+    .replace(/ı/g, 'i')
+    .replace(/ö/g, 'o')
+    .replace(/ü/g, 'u')
+    .replace(/ç/g, 'c')
+    .replace(/ş/g, 's')
+    .replace(/ğ/g, 'g');
+}
+
 function getFiltered(){
-  const q = state.q.trim().toLowerCase();
+  const rawQ = (state.q || '').trim();
+  const q = rawQ.toLowerCase();
+  const cleanQ = q.replace(/^#/, '').trim();
+  const normQ = normalizeAz(cleanQ);
+
   const fromTime = (state.fromTime || '00:00').trim();
   const toTime   = (state.toTime   || '23:59').trim();
 
@@ -948,9 +965,10 @@ function getFiltered(){
     } else if (state.nov !== 'all' && s.nov !== state.nov) {
       return false;
     }
-    if (q) {
-      const hay = (s.mal + ' ' + (s.musteri || '') + ' ' + s.id).toLowerCase();
-      if (!hay.includes(q)) return false;
+    if (cleanQ) {
+      const rawBarcode = s.raw && s.raw.barkod ? String(s.raw.barkod) : '';
+      const hay = (String(s.mal || '') + ' ' + String(s.musteri || '') + ' ' + String(s.id || '') + ' ' + rawBarcode).toLowerCase();
+      if (!hay.includes(cleanQ) && !normalizeAz(hay).includes(normQ)) return false;
     }
     return true;
   });
@@ -1166,7 +1184,8 @@ function renderChart(rows){
 
   if (!data.length) {
     chart.innerHTML = '<div style="margin:auto;color:#5f6b87;font-size:13px;font-weight:600">Seçilmiş dövr üzrə qrafik məlumatı yoxdur</div>';
-    $('chartSub').textContent = 'Məlumat tapılmadı';
+    if ($('chartSub')) $('chartSub').textContent = 'Məlumat tapılmadı';
+    else if ($('mainSliderSubtitle')) $('mainSliderSubtitle').textContent = 'Məlumat tapılmadı';
     return;
   }
 
@@ -1938,11 +1957,13 @@ function renderTable(rows){
   $('tblSub').textContent = nf0.format(sorted.length) + ' nəticə • cəmi ' + money(totalSalesVal);
 
   if (!sorted.length) {
+    const hasSearch = Boolean(state.q && state.q.trim());
     body.innerHTML = `
       <tr><td colspan="6" style="display:block">
         <div class="empty">
           <i class="fa-regular fa-folder-open"></i>
           <p>Seçilmiş kriteriyalara uyğun əməliyyat tapılmadı</p>
+          ${hasSearch ? `<button type="button" class="btn" style="margin-top:10px;padding:6px 14px;font-size:12px;background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);color:#67e8f9;border-radius:8px;cursor:pointer" onclick="document.querySelector('#presets button[data-preset=\\'all\\']').click()"><i class="fa-solid fa-infinity"></i> Bütün dövr üzrə axtar</button>` : ''}
         </div>
       </td></tr>`;
     updatePaginationUI(0, 0);
@@ -2445,7 +2466,7 @@ function exportToExcel() {
   XLSX.writeFile(workbook, `hesabat_${iso(new Date())}.xlsx`);
 }
 
-$('btnCsv').addEventListener('click', () => {
+function exportToCsv() {
   const rows = sortRows(getFiltered());
   const head = ['Tarix','Saat','Kod','Odenis_novu','Musteri','Mehsul','Say','Maya','Satis_qiymeti','Qazanc','Marja_faiz'];
   const lines = [head.join(';')];
@@ -2469,7 +2490,11 @@ $('btnCsv').addEventListener('click', () => {
   a.download = 'satislar_' + iso(new Date()) + '.csv';
   a.click();
   URL.revokeObjectURL(a.href);
-});
+}
+
+if ($('btnCsv')) {
+  $('btnCsv').addEventListener('click', exportToCsv);
+}
 
 /* =====================================================================
    17) SÜRÜŞDÜRÜLƏ BİLƏN SLİDER (Ödəniş Bölgüsü & Top Məhsullar)
@@ -2933,3 +2958,234 @@ window.addEventListener('appinstalled', () => {
   showToast('PWA Quraşdırma', 'Tətbiq artıq telefonunuzdadır!', true);
   deferredPwaPrompt = null;
 });
+
+/* =====================================================================
+   26) SÜRƏTLİ ƏMR & AXTARIŞ (COMMAND PALETTE - Ctrl+K)
+   ===================================================================== */
+let cmdActiveIndex = 0;
+let cmdFiltered = [];
+
+const CMD_ITEMS = [
+  { title: 'Bugün', sub: 'Bugünkü satışları göstər', icon: 'fa-calendar-day', action: () => document.querySelector('#presets button[data-preset="today"]')?.click() },
+  { title: 'Dünən', sub: 'Dünənki satışlar', icon: 'fa-calendar-minus', action: () => document.querySelector('#presets button[data-preset="yesterday"]')?.click() },
+  { title: 'Son 7 gün', sub: 'Həftəlik nəticələr', icon: 'fa-calendar-week', action: () => document.querySelector('#presets button[data-preset="week"]')?.click() },
+  { title: 'Bu ay', sub: 'Cari ay', icon: 'fa-calendar', action: () => document.querySelector('#presets button[data-preset="month"]')?.click() },
+  { title: 'Keçən ay', sub: 'Əvvəlki ay', icon: 'fa-calendar-plus', action: () => document.querySelector('#presets button[data-preset="lastmonth"]')?.click() },
+  { title: 'Son 30 gün', sub: '30 günlük dövr', icon: 'fa-calendar-check', action: () => document.querySelector('#presets button[data-preset="d30"]')?.click() },
+  { title: 'Hamısı', sub: 'Bütün dövr', icon: 'fa-infinity', action: () => document.querySelector('#presets button[data-preset="all"]')?.click() },
+  { title: 'Nəğd satışlar', sub: 'Yalnız nəğd əməliyyatlar', icon: 'fa-money-bill', action: () => document.querySelector('#payTypes button[data-nov="negd"]')?.click() },
+  { title: 'Nisyə satışlar', sub: 'Yalnız nisyə (borc) əməliyyatları', icon: 'fa-file-invoice', action: () => document.querySelector('#payTypes button[data-nov="nisye"]')?.click() },
+  { title: 'Qaytarılmalar', sub: 'Yalnız qaytarma əməliyyatları', icon: 'fa-arrow-rotate-left', action: () => document.querySelector('#payTypes button[data-nov="qaytarma"]')?.click() },
+  { title: 'Kassa İtkisi', sub: 'Zərərli və xeyirsiz satışlar', icon: 'fa-triangle-exclamation', action: () => filterLossSalesOnly() },
+  { title: 'Məlumatları Yenilə', sub: 'Baza ilə təkrar sinxronizasiya', icon: 'fa-rotate', action: () => refreshData() },
+  { title: 'Excel İxrac', sub: 'Hesabatı Excel (.xlsx) olaraq yüklə', icon: 'fa-file-excel', action: () => exportToExcel() },
+  { title: 'CSV İxrac', sub: 'Hesabatı CSV olaraq yüklə', icon: 'fa-file-csv', action: () => exportToCsv() },
+  { title: 'Tema Dəyiş', sub: 'Ağ / Qaranlıq rejim', icon: 'fa-circle-half-stroke', action: () => toggleTheme() },
+  { title: 'Ayarlar', sub: 'Panel və baza parametrləri', icon: 'fa-gear', action: () => openSettingsModal() },
+  { title: 'Bildirişlər', sub: 'Canlı kassa bildirişləri', icon: 'fa-bell', action: () => toggleNotificationsModal() },
+  { title: 'Kassa İtkisi Detalları', sub: 'Detallı itki analizi pəncərəsi', icon: 'fa-list-check', action: () => openLossModal() },
+  { title: 'Anbar Paneli', sub: 'Məhsullar və qalıqlar bazası', icon: 'fa-boxes-stacked', action: () => { window.location.href = 'anbar.html'; } },
+  { title: 'Müştərilər Paneli', sub: 'Müştərilər və borclar bazası', icon: 'fa-users', action: () => { window.location.href = 'musteriler.html'; } },
+  { title: 'Tam Ekran', sub: 'Ekranı böyüt və ya kiçilt', icon: 'fa-expand', action: () => toggleFullScreen() }
+];
+
+function openCmdPalette() {
+  const overlay = $('cmdOverlay');
+  if (!overlay) return;
+  overlay.classList.add('show');
+  const input = $('cmdInput');
+  if (input) {
+    input.value = '';
+    setTimeout(() => input.focus(), 50);
+  }
+  cmdActiveIndex = 0;
+  renderCmdResults('');
+}
+
+function closeCmdPalette() {
+  const overlay = $('cmdOverlay');
+  if (overlay) overlay.classList.remove('show');
+}
+
+function renderCmdResults(query) {
+  const container = $('cmdResults');
+  if (!container) return;
+
+  const rawQ = (query || '').trim();
+  const q = rawQ.toLowerCase();
+  const cleanQ = q.replace(/^#/, '');
+  const normQ = typeof normalizeAz === 'function' ? normalizeAz(cleanQ) : cleanQ;
+
+  let list = [];
+
+  // 1. Əgər istifadəçi axtarış sorğusu yazıbsa, cədvəldə axtarış üçün birinci sıraya qoyuruq
+  if (cleanQ) {
+    list.push({
+      title: `Axtar: "${rawQ}"`,
+      sub: 'Cədvəli bu açar sözlə süzgəcdən keçir və cədvələ keç',
+      icon: 'fa-magnifying-glass',
+      action: () => {
+        const sInput = $('search');
+        if (sInput) sInput.value = rawQ;
+        state.q = rawQ;
+        resetPagination();
+        update();
+        const secTable = $('sec-table') || document.querySelector('.table-panel');
+        if (secTable) secTable.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+
+    // 2. Canlı məhsul / satış / çek uyğunluqları tapırıq
+    if (SALES && SALES.length > 0) {
+      const matchedSales = [];
+      const seen = new Set();
+      for (const s of SALES) {
+        const rawBarcode = s.raw && s.raw.barkod ? String(s.raw.barkod) : '';
+        const hay = (String(s.mal || '') + ' ' + String(s.musteri || '') + ' ' + String(s.id || '') + ' ' + rawBarcode).toLowerCase();
+        const normHay = typeof normalizeAz === 'function' ? normalizeAz(hay) : hay;
+        if (hay.includes(cleanQ) || normHay.includes(normQ)) {
+          const key = s.id || (s.mal + s.tarix);
+          if (!seen.has(key)) {
+            seen.add(key);
+            matchedSales.push(s);
+            if (matchedSales.length >= 4) break;
+          }
+        }
+      }
+
+      matchedSales.forEach(s => {
+        const rawId = String(s.id || '');
+        const shortId = rawId.length > 8 ? rawId.slice(0, 8) : rawId;
+        list.push({
+          title: `${s.mal} (${s.qty} ${s.isKilo ? 'kq' : 'əd'}) — ${money(s.satis)}`,
+          sub: `${s.tarix} • ${s.musteri || 'Nəğd'} • #${shortId}`,
+          icon: 'fa-receipt',
+          action: () => {
+            if (s.id) openReceiptModal(s.id);
+          }
+        });
+      });
+    }
+  }
+
+  // 3. Əmrləri süzgəcdən keçiririk
+  const matchingCmds = cleanQ ? CMD_ITEMS.filter(item => {
+    const t = item.title.toLowerCase();
+    const s = item.sub.toLowerCase();
+    const normT = typeof normalizeAz === 'function' ? normalizeAz(t) : t;
+    const normS = typeof normalizeAz === 'function' ? normalizeAz(s) : s;
+    return t.includes(cleanQ) || s.includes(cleanQ) || normT.includes(normQ) || normS.includes(normQ);
+  }) : CMD_ITEMS;
+
+  list.push(...matchingCmds);
+  cmdFiltered = list;
+
+  if (!cmdFiltered.length) {
+    container.innerHTML = `<div style="text-align:center;padding:30px 10px;color:#707c96"><i class="fa-solid fa-magnifying-glass" style="font-size:24px;margin-bottom:8px;display:block;opacity:.4"></i>Heç nə tapılmadı</div>`;
+    return;
+  }
+
+  container.innerHTML = cmdFiltered.map((item, i) => `
+    <div class="cmd-item ${i === cmdActiveIndex ? 'active' : ''}" onclick="executeCmdItem(${i})">
+      <div class="cmd-item-ico"><i class="fa-solid ${item.icon}"></i></div>
+      <div class="cmd-item-body">
+        <div class="cmd-item-title">${escapeHtml(item.title)}</div>
+        <div class="cmd-item-sub">${escapeHtml(item.sub)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function executeCmdItem(idx) {
+  const item = cmdFiltered[idx];
+  if (!item) return;
+  closeCmdPalette();
+  setTimeout(() => item.action(), 120);
+}
+
+// Global pəncərəyə bağlayırıq (inline onclick-lər üçün)
+window.openCmdPalette = openCmdPalette;
+window.closeCmdPalette = closeCmdPalette;
+window.executeCmdItem = executeCmdItem;
+window.exportToCsv = exportToCsv;
+
+/* =====================================================================
+   27) KEYBOARD SHORTCUTS (KLAVİATURA QISA YOLLARI)
+   ===================================================================== */
+document.addEventListener('keydown', e => {
+  // Ctrl+K və ya Cmd+K -> Command Palette
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    openCmdPalette();
+    return;
+  }
+
+  // Esc -> Pəncərələri bağla
+  if (e.key === 'Escape') {
+    closeCmdPalette();
+    if (typeof closeSettingsModal === 'function') closeSettingsModal();
+    if (typeof closeNotificationsModal === 'function') closeNotificationsModal();
+    if (typeof closeReceiptModal === 'function') closeReceiptModal();
+    if (typeof closeLossModal === 'function') closeLossModal();
+    if (typeof closeDeleteCategoryModal === 'function') closeDeleteCategoryModal();
+    if (typeof closeMoreSheet === 'function') closeMoreSheet();
+    return;
+  }
+
+  // Əgər Command Palette açıqdırsa, ox düymələri və Enter idarəetməsi
+  const cmdOverlay = $('cmdOverlay');
+  if (cmdOverlay && cmdOverlay.classList.contains('show')) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      cmdActiveIndex = Math.min(cmdActiveIndex + 1, cmdFiltered.length - 1);
+      renderCmdResults($('cmdInput')?.value || '');
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      cmdActiveIndex = Math.max(cmdActiveIndex - 1, 0);
+      renderCmdResults($('cmdInput')?.value || '');
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      executeCmdItem(cmdActiveIndex);
+    }
+    return;
+  }
+
+  // Əgər istifadəçi input, textarea və ya select daxilində yazırsa, tək düymə qısa yollarını dayandır
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+  // Tək düyməli qısa yollar
+  const key = e.key.toLowerCase();
+  if (key === 'r') {
+    if (typeof refreshData === 'function') refreshData();
+  } else if (key === 't') {
+    if (typeof toggleTheme === 'function') toggleTheme();
+  } else if (key === 'e') {
+    if (typeof exportToExcel === 'function') exportToExcel();
+  } else if (key === '/') {
+    e.preventDefault();
+    const sInput = $('search');
+    if (sInput) {
+      sInput.focus();
+      sInput.select();
+    }
+  } else if (key >= '1' && key <= '7') {
+    const presets = ['today','yesterday','week','month','lastmonth','d30','all'];
+    const btn = document.querySelector(`#presets button[data-preset="${presets[parseInt(key, 10) - 1]}"]`);
+    if (btn) btn.click();
+  }
+});
+
+const cmdInputEl = $('cmdInput');
+if (cmdInputEl) {
+  cmdInputEl.addEventListener('input', e => {
+    cmdActiveIndex = 0;
+    renderCmdResults(e.target.value);
+  });
+}
+
+const cmdOverlayEl = $('cmdOverlay');
+if (cmdOverlayEl) {
+  cmdOverlayEl.addEventListener('click', e => {
+    if (e.target === cmdOverlayEl) closeCmdPalette();
+  });
+}

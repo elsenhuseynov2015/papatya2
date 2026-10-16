@@ -1571,7 +1571,7 @@ body.light-theme .more-grid-btn {
         <div class="panel-title">
           <span class="bar"></span>
           <i class="fa-solid fa-trophy" style="color:#fbbf24"></i>
-          <span id="topProfitTitle">Ən Çox Qazanc Verəcək Mallar (Top 10)</span>
+          <span id="topProfitTitle">Ən Çox Qazanc Verəcək Mallar (Top 5)</span>
         </div>
         <div class="panel-sub" id="topProfitSub">Potensial Mənfəət</div>
       </div>
@@ -1580,14 +1580,14 @@ body.light-theme .more-grid-btn {
       </div>
       <!-- Səhifələmə / Daha çox göstər -->
       <div class="panel-footer" id="topProfitFooter" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line-2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-        <div style="font-size:12px;color:var(--muted)" id="topProfitInfo">Göstərilir: <b>10</b> / <span id="topProfitTotal">0</span></div>
+        <div style="font-size:12px;color:var(--muted)" id="topProfitInfo">Göstərilir: <b>5</b> / <span id="topProfitTotal">0</span></div>
         <div style="display:flex;align-items:center;gap:6px">
           <button type="button" class="chip" id="btnMoreProfit" onclick="showMoreTopProfit(10)">
             <i class="fa-solid fa-angles-down"></i> Daha çox göstər (+10)
           </button>
           <button type="button" class="chip" id="btnAllProfit" onclick="showAllTopProfit()">Hamısı</button>
           <button type="button" class="chip" id="btnResetProfit" onclick="resetTopProfit()" style="display:none">
-            <i class="fa-solid fa-compress"></i> Top 10
+            <i class="fa-solid fa-compress"></i> Top 5
           </button>
         </div>
       </div>
@@ -1599,7 +1599,7 @@ body.light-theme .more-grid-btn {
         <div class="panel-title">
           <span class="bar"></span>
           <i class="fa-solid fa-vault" style="color:#22d3ee"></i>
-          <span id="topCostTitle">Ən Çox Maya Yatırılmış Mallar (Top 10)</span>
+          <span id="topCostTitle">Ən Çox Maya Yatırılmış Mallar (Top 5)</span>
         </div>
         <div class="panel-sub" id="topCostSub">Kapital Yükü</div>
       </div>
@@ -1608,14 +1608,14 @@ body.light-theme .more-grid-btn {
       </div>
       <!-- Səhifələmə / Daha çox göstər -->
       <div class="panel-footer" id="topCostFooter" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line-2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-        <div style="font-size:12px;color:var(--muted)" id="topCostInfo">Göstərilir: <b>10</b> / <span id="topCostTotal">0</span></div>
+        <div style="font-size:12px;color:var(--muted)" id="topCostInfo">Göstərilir: <b>5</b> / <span id="topCostTotal">0</span></div>
         <div style="display:flex;align-items:center;gap:6px">
           <button type="button" class="chip" id="btnMoreCost" onclick="showMoreTopCost(10)">
             <i class="fa-solid fa-angles-down"></i> Daha çox göstər (+10)
           </button>
           <button type="button" class="chip" id="btnAllCost" onclick="showAllTopCost()">Hamısı</button>
           <button type="button" class="chip" id="btnResetCost" onclick="resetTopCost()" style="display:none">
-            <i class="fa-solid fa-compress"></i> Top 10
+            <i class="fa-solid fa-compress"></i> Top 5
           </button>
         </div>
       </div>
@@ -2745,8 +2745,8 @@ function calculateKPIs() {
   if ($('chipPriceErrorCount')) $('chipPriceErrorCount').textContent = priceErrorProducts.length;
 }
 
-let topProfitLimit = 10;
-let topCostLimit = 10;
+let topProfitLimit = 5;
+let topCostLimit = 5;
 
 function showMoreTopProfit(step = 10) {
   topProfitLimit += step;
@@ -2754,7 +2754,7 @@ function showMoreTopProfit(step = 10) {
 }
 
 function resetTopProfit() {
-  topProfitLimit = 10;
+  topProfitLimit = 5;
   renderAnalytics();
 }
 
@@ -2769,7 +2769,7 @@ function showMoreTopCost(step = 10) {
 }
 
 function resetTopCost() {
-  topCostLimit = 10;
+  topCostLimit = 5;
   renderAnalytics();
 }
 
@@ -2791,7 +2791,7 @@ function renderAnalytics() {
   const totalProfitableCount = allProfitable.length;
 
   if ($('topProfitTitle')) {
-    $('topProfitTitle').textContent = `Ən Çox Qazanc Verəcək Mallar (${profitCount > 10 ? 'Top ' + profitCount : 'Top 10'})`;
+    $('topProfitTitle').textContent = `Ən Çox Qazanc Verəcək Mallar (Top ${profitCount})`;
   }
   if ($('topProfitInfo')) {
     $('topProfitInfo').innerHTML = `Göstərilir: <b>${profitCount}</b> / <span>${totalProfitableCount}</span>`;
@@ -2800,10 +2800,10 @@ function renderAnalytics() {
     $('btnMoreProfit').style.display = profitCount < totalProfitableCount ? 'inline-flex' : 'none';
   }
   if ($('btnAllProfit')) {
-    $('btnAllProfit').style.display = (profitCount < totalProfitableCount && totalProfitableCount > 10) ? 'inline-flex' : 'none';
+    $('btnAllProfit').style.display = (profitCount < totalProfitableCount && totalProfitableCount > 5) ? 'inline-flex' : 'none';
   }
   if ($('btnResetProfit')) {
-    $('btnResetProfit').style.display = topProfitLimit > 10 ? 'inline-flex' : 'none';
+    $('btnResetProfit').style.display = topProfitLimit > 5 ? 'inline-flex' : 'none';
   }
 
   $('topProfitList').innerHTML = topProfits.length ? topProfits.map((p, idx) => {
@@ -2843,7 +2843,7 @@ function renderAnalytics() {
   const totalCostlyCount = allCostly.length;
 
   if ($('topCostTitle')) {
-    $('topCostTitle').textContent = `Ən Çox Maya Yatırılmış Mallar (${costCount > 10 ? 'Top ' + costCount : 'Top 10'})`;
+    $('topCostTitle').textContent = `Ən Çox Maya Yatırılmış Mallar (Top ${costCount})`;
   }
   if ($('topCostInfo')) {
     $('topCostInfo').innerHTML = `Göstərilir: <b>${costCount}</b> / <span>${totalCostlyCount}</span>`;
@@ -2852,10 +2852,10 @@ function renderAnalytics() {
     $('btnMoreCost').style.display = costCount < totalCostlyCount ? 'inline-flex' : 'none';
   }
   if ($('btnAllCost')) {
-    $('btnAllCost').style.display = (costCount < totalCostlyCount && totalCostlyCount > 10) ? 'inline-flex' : 'none';
+    $('btnAllCost').style.display = (costCount < totalCostlyCount && totalCostlyCount > 5) ? 'inline-flex' : 'none';
   }
   if ($('btnResetCost')) {
-    $('btnResetCost').style.display = topCostLimit > 10 ? 'inline-flex' : 'none';
+    $('btnResetCost').style.display = topCostLimit > 5 ? 'inline-flex' : 'none';
   }
 
   $('topCostList').innerHTML = topCosts.length ? topCosts.map((p, idx) => {
@@ -3281,13 +3281,27 @@ function setFilter(filter) {
   filterAndRender();
 }
 
+function normalizeAz(str) {
+  if (!str) return '';
+  return String(str).toLowerCase()
+    .replace(/ə/g, 'e')
+    .replace(/ı/g, 'i')
+    .replace(/ö/g, 'o')
+    .replace(/ü/g, 'u')
+    .replace(/ç/g, 'c')
+    .replace(/ş/g, 's')
+    .replace(/ğ/g, 'g');
+}
+
 function filterAndRender() {
   const q = ($('searchInput').value || '').trim().toLowerCase();
+  const normQ = normalizeAz(q);
 
   filteredProducts = PRODUCTS.filter(p => {
     // Axtarış
     if (q) {
-      const matchName = (p.ad || p.mehsul_adi || '').toLowerCase().includes(q);
+      const name = (p.ad || p.mehsul_adi || '').toLowerCase();
+      const matchName = name.includes(q) || normalizeAz(name).includes(normQ);
       const matchBarcode = (p.barkod || '').toLowerCase().includes(q);
       if (!matchName && !matchBarcode) return false;
     }

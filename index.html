@@ -327,7 +327,18 @@
 </div>
 
 <!-- TOAST CONTAINER -->
-<div class="toast-container" id="toastContainer"></div>
+<div class="toast-container" id="toastContainer">
+  <div id="toastNotification" class="toast">
+    <div id="toastIco" class="toast-ico">
+      <i class="fa-solid fa-cart-shopping"></i>
+    </div>
+    <div class="toast-body">
+      <div id="toastTitle" class="toast-title">Yeni Satış</div>
+      <div id="toastMsg" class="toast-msg">0.00 ₼</div>
+      <div id="toastTime" class="toast-time" style="font-size:10px;color:#8894af;margin-top:2px;display:flex;gap:5px;align-items:center;font-weight:600"></div>
+    </div>
+  </div>
+</div>
 
 <!-- CONFETTI LAYER -->
 <div class="confetti" id="confettiLayer"></div>
@@ -572,8 +583,8 @@
         </div>
       </div>
       <div class="slider-dots" id="sliderDots">
-        <button type="button" class="s-dot active" data-slide="0" title="Ödəniş Bölgüsü"></button>
-        <button type="button" class="s-dot" data-slide="1" id="dotSlideTop" title="Top Məhsullar"></button>
+        <button type="button" class="s-dot active" data-slide="0" onclick="goToSlide(0)" title="Ödəniş Bölgüsü"></button>
+        <button type="button" class="s-dot" data-slide="1" id="dotSlideTop" onclick="goToSlide(1)" title="Top Məhsullar"></button>
       </div>
     </div>
   </section>

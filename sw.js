@@ -3,11 +3,13 @@
    Versiya: 2.1.0 (Modular & High-Speed Mobile Cache)
    ===================================================================== */
 
-const CACHE_NAME = 'papatya-kassa-cache-v2-1-2';
+const CACHE_NAME = 'papatya-kassa-cache-v2-2-1';
 const STATIC_ASSETS = [
   './',
   './index.html',
   './indexv2.html',
+  './anbar.html',
+  './musteriler.html',
   './css/style.css',
   './css/mobile.css',
   './js/app.js',

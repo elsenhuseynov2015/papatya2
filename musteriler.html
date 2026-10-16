@@ -1795,15 +1795,30 @@ function setFilter(filter) {
   filterAndRender();
 }
 
+function normalizeAz(str) {
+  if (!str) return '';
+  return String(str).toLowerCase()
+    .replace(/ə/g, 'e')
+    .replace(/ı/g, 'i')
+    .replace(/ö/g, 'o')
+    .replace(/ü/g, 'u')
+    .replace(/ç/g, 'c')
+    .replace(/ş/g, 's')
+    .replace(/ğ/g, 'g');
+}
+
 function filterAndRender() {
   const q = ($('searchInput').value || '').trim().toLowerCase();
+  const normQ = normalizeAz(q);
 
   filteredCustomers = CUSTOMERS.filter(c => {
     // Axtarış
     if (q) {
-      const matchName = (c.ad_soyad || '').toLowerCase().includes(q);
+      const name = (c.ad_soyad || '').toLowerCase();
+      const matchName = name.includes(q) || normalizeAz(name).includes(normQ);
       const matchPhone = (c.telefon || '').toLowerCase().includes(q);
-      const matchAddress = (c.unvan || '').toLowerCase().includes(q);
+      const address = (c.unvan || '').toLowerCase();
+      const matchAddress = address.includes(q) || normalizeAz(address).includes(normQ);
       if (!matchName && !matchPhone && !matchAddress) return false;
     }
 
