@@ -109,6 +109,89 @@
     flex-shrink: 0 !important;
   }
 
+  /* ============ KASSA İTKİSİ BANNERİ (TELEFON) ============ */
+  .loss-alert-banner {
+    padding: 9px 11px !important;
+    margin-bottom: 12px !important;
+    border-radius: 14px !important;
+    gap: 8px !important;
+  }
+  .loss-alert-left {
+    min-width: 0 !important;
+    width: 100% !important;
+    gap: 8px !important;
+    flex: 1 1 100% !important;
+  }
+  .loss-alert-icon {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+  }
+  .loss-alert-title {
+    font-size: 12.5px !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+  }
+  .loss-badge-count {
+    font-size: 9.5px !important;
+    padding: 1px 6px !important;
+  }
+  .loss-alert-desc {
+    font-size: 10px !important;
+    margin-top: 2px !important;
+    line-height: 1.25 !important;
+  }
+  .loss-alert-right {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+  }
+  .loss-stat-box {
+    padding: 3px 8px !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+  }
+  .loss-stat-lbl {
+    font-size: 8.5px !important;
+    letter-spacing: .3px !important;
+  }
+  .loss-stat-val {
+    font-size: 13.5px !important;
+  }
+  .loss-btns-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    flex-shrink: 0 !important;
+  }
+  .btn-loss-action, .btn-loss-modal {
+    padding: 5px 9px !important;
+    font-size: 11px !important;
+    border-radius: 8px !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
+  }
+  .btn-loss-action i, .btn-loss-modal i {
+    font-size: 11px !important;
+  }
+
+  /* ============ QİYMƏT SEQMENTİ (TELEFON) ============ */
+  .brackets-wrap {
+    grid-template-columns: 1fr !important;
+    padding: 8px 10px 12px !important;
+    gap: 8px !important;
+  }
+  .bracket-card {
+    padding: 10px 12px !important;
+    gap: 6px !important;
+    border-radius: 12px !important;
+  }
+
   .table-panel .card-head{gap:12px}
   .table-title-grp{width:100%}
   .tbl-search-wrap{max-width:100%;width:100%;order:2}
@@ -506,6 +589,7 @@ body.light-theme .btn-rcpt-print{background:#f1f5f9;color:#334155;border-color:r
 .loss-alert-desc{font-size:12px;color:#cbd5e1;margin-top:3px;font-weight:500}
 .loss-alert-desc b{color:#fecdd3;font-weight:700}
 .loss-alert-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.loss-btns-row{display:flex;align-items:center;gap:8px}
 .loss-stat-box{display:flex;flex-direction:column;align-items:flex-end;padding:5px 14px;border-radius:11px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08)}
 .loss-stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;letter-spacing:.6px}
 .loss-stat-val{font-size:16px;font-weight:800;color:#fb7185;font-variant-numeric:tabular-nums}

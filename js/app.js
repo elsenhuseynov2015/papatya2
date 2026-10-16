@@ -1442,6 +1442,13 @@ function renderProfitChart(rows) {
   });
 }
 
+let bracketsExpanded = false;
+
+function toggleBracketsExpand() {
+  bracketsExpanded = !bracketsExpanded;
+  renderBrackets(getFiltered());
+}
+
 function renderBrackets(rows) {
   const container = $('bracketsContainer');
   if (!container) return;
@@ -1449,8 +1456,9 @@ function renderBrackets(rows) {
   const b = {
     b1: { name: '0.00 — 1.00 ₼', desc: 'Xırda mallar (saqqız, kibrit, konfet)', icon: 'fa-cookie-bite', color: '#06b6d4', total: 0, qazanc: 0, count: 0 },
     b2: { name: '1.01 — 5.00 ₼', desc: 'Gündəlik tələbat (çörək, su, süd, biskvit)', icon: 'fa-basket-shopping', color: '#3b82f6', total: 0, qazanc: 0, count: 0 },
-    b3: { name: '5.01 — 15.00 ₼', desc: 'Əsas səbət (yağ, çay, kolbasa, yuyucu)', icon: 'fa-cart-shopping', color: '#8b5cf6', total: 0, qazanc: 0, count: 0 },
-    b4: { name: '15.01 ₼ +', desc: 'Böyük alışlar və qutular', icon: 'fa-gem', color: '#10b981', total: 0, qazanc: 0, count: 0 }
+    b3: { name: '5.01 — 10.00 ₼', desc: 'Orta səbət (şirniyyat, un, makaron)', icon: 'fa-cart-shopping', color: '#8b5cf6', total: 0, qazanc: 0, count: 0 },
+    b4: { name: '10.01 — 20.00 ₼', desc: 'Əsas alışlar (yağ, çay, kolbasa, yuyucu)', icon: 'fa-bag-shopping', color: '#f59e0b', total: 0, qazanc: 0, count: 0 },
+    b5: { name: '20.01 ₼ +', desc: 'Böyük alışlar və qutular', icon: 'fa-gem', color: '#10b981', total: 0, qazanc: 0, count: 0 }
   };
 
   let grandTotal = 0;
@@ -1462,8 +1470,9 @@ function renderBrackets(rows) {
     let target = b.b1;
     if (unitPrice <= 1) target = b.b1;
     else if (unitPrice <= 5) target = b.b2;
-    else if (unitPrice <= 15) target = b.b3;
-    else target = b.b4;
+    else if (unitPrice <= 10) target = b.b3;
+    else if (unitPrice <= 20) target = b.b4;
+    else target = b.b5;
 
     target.total += s.satis;
     target.qazanc += s.qazanc;
@@ -1471,8 +1480,11 @@ function renderBrackets(rows) {
   });
 
   const base = Math.max(grandTotal, 0.001);
+  const allItems = Object.values(b);
+  const isMobile = window.innerWidth <= 768;
+  const visibleItems = (isMobile && !bracketsExpanded) ? allItems.slice(0, 2) : allItems;
 
-  container.innerHTML = Object.values(b).map(item => {
+  let cardsHtml = visibleItems.map(item => {
     const pct = ((item.total / base) * 100);
     return `
       <div class="bracket-card">
@@ -1499,6 +1511,32 @@ function renderBrackets(rows) {
       </div>
     `;
   }).join('');
+
+  let moreBtnHtml = '';
+  if (isMobile) {
+    const remCount = allItems.length - 2;
+    if (!bracketsExpanded) {
+      moreBtnHtml = `
+        <div style="text-align:center;padding:4px 0 6px;grid-column:1/-1">
+          <button type="button" class="btn-top-more" onclick="toggleBracketsExpand()">
+            <i class="fa-solid fa-angles-down"></i>
+            <span>Daha çox göstər (+${remCount})</span>
+            <small style="opacity:.7;margin-left:4px">(2 / ${allItems.length} seqment)</small>
+          </button>
+        </div>`;
+    } else {
+      moreBtnHtml = `
+        <div style="text-align:center;padding:4px 0 6px;grid-column:1/-1">
+          <button type="button" class="btn-top-more" onclick="toggleBracketsExpand()" style="border-color:rgba(255,255,255,.15);color:#94a3b8">
+            <i class="fa-solid fa-angles-up"></i>
+            <span>İlk 2-yə qayıt</span>
+            <small style="opacity:.7;margin-left:4px">(Cəmi ${allItems.length} seqment)</small>
+          </button>
+        </div>`;
+    }
+  }
+
+  container.innerHTML = cardsHtml + moreBtnHtml;
 }
 
 function renderAdvancedCharts(rows) {
@@ -1692,6 +1730,7 @@ function resetPagination() {
     tableVisibleLimit = typeof tableStep === 'number' ? tableStep : 25;
   }
   topProductsLimit = getInitialTopLimit();
+  bracketsExpanded = false;
 }
 
 function loadMoreRows() {
