@@ -454,12 +454,19 @@ function checkAuth() {
   if ((isRemembered && (savedAuth === currentPassword || savedAuth)) || savedAuth === currentPassword) {
     const authScr = $('authScreen');
     if (authScr) authScr.classList.add('hidden');
+    const pInput = $('passwordInput');
+    if (pInput) {
+      pInput.blur();
+      pInput.disabled = true;
+    }
     document.documentElement.classList.add('is-authenticated');
     initApp();
   } else {
     document.documentElement.classList.remove('is-authenticated');
     const authScr = $('authScreen');
     if (authScr) authScr.classList.remove('hidden');
+    const pInput = $('passwordInput');
+    if (pInput) pInput.disabled = false;
     setTimeout(() => {
       const pInput = $('passwordInput');
       if (pInput) pInput.focus();
@@ -485,6 +492,10 @@ function verifyPassword() {
     }
     const authScr = $('authScreen');
     if (authScr) authScr.classList.add('hidden');
+    if (pInput) {
+      pInput.blur();
+      pInput.disabled = true;
+    }
     document.documentElement.classList.add('is-authenticated');
     if (errorEl) errorEl.style.display = 'none';
     showToast("🔓 Uğurlu Giriş", "Xoş gəldiniz! Məlumatlar yüklənir...", true);
@@ -1942,6 +1953,35 @@ function printReceiptDirect() {
   window.print();
 }
 
+function fallbackDownload(canvas, fileName, existingBlob) {
+  const doDownload = (blobUrl) => {
+    const downloadLink = document.createElement('a');
+    downloadLink.href = blobUrl;
+    downloadLink.download = fileName;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    setTimeout(() => {
+      if (downloadLink.parentNode) document.body.removeChild(downloadLink);
+      if (blobUrl && blobUrl.startsWith('blob:')) URL.revokeObjectURL(blobUrl);
+    }, 250);
+    showToast("📸 Çek Endirildi!", "Kassa çeki şəkil kimi yükləndi.", true);
+  };
+
+  if (existingBlob) {
+    doDownload(URL.createObjectURL(existingBlob));
+  } else if (canvas.toBlob) {
+    canvas.toBlob(blob => {
+      if (blob) {
+        doDownload(URL.createObjectURL(blob));
+      } else {
+        doDownload(canvas.toDataURL('image/png'));
+      }
+    }, 'image/png');
+  } else {
+    doDownload(canvas.toDataURL('image/png'));
+  }
+}
+
 async function downloadReceiptImage() {
   const rcptEl = $('thermalReceipt');
   if (!rcptEl || !currentReceiptData) return;
@@ -1951,39 +1991,44 @@ async function downloadReceiptImage() {
       throw new Error("html2canvas yüklənmədi");
     }
 
-    // Ekranda görünən tam çeki ultra-dəqiq 3x Retina keyfiyyəti ilə çəkirik
+    const safeScale = window.innerWidth <= 768 ? 2 : 2.5;
     const canvas = await html2canvas(rcptEl, {
-      scale: 3,
+      scale: safeScale,
       backgroundColor: '#ffffff',
       useCORS: true,
       logging: false,
-      scrollY: -window.scrollY
+      scrollY: 0,
+      scrollX: 0
     });
 
-    canvas.toBlob(blob => {
-      if (!blob) return;
+    const fileName = `cek_${currentReceiptData.receiptId || 'papatya'}_${iso(new Date())}.png`;
 
-      const fileUrl = URL.createObjectURL(blob);
-      const downloadLink = document.createElement('a');
-      downloadLink.href = fileUrl;
-      downloadLink.download = `cek_${currentReceiptData.receiptId || 'papatya'}_${iso(new Date())}.png`;
-      downloadLink.click();
-      URL.revokeObjectURL(fileUrl);
-
-      try {
-        if (navigator.clipboard && window.ClipboardItem) {
-          navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => {
-            showToast("📸 Çek Yadda Saxlanıldı!", "Ekranda görünən kassa çeki şəkil kimi endirildi və buferə kopyalandı (Ctrl+V edə bilərsiniz).", true);
-          }).catch(() => {
-            showToast("📸 Çek Endirildi!", "Kassa çeki PNG şəkli kimi yükləndi.", true);
-          });
-        } else {
-          showToast("📸 Çek Endirildi!", "Kassa çeki PNG şəkli kimi yükləndi.", true);
+    // Mobil brauzerlərdə Web Share dəstəyi ilə birbaşa Qalereyaya və ya WhatsApp-a göndərmə
+    if (navigator.share && navigator.canShare && canvas.toBlob) {
+      canvas.toBlob(async blob => {
+        if (!blob) {
+          fallbackDownload(canvas, fileName);
+          return;
         }
-      } catch {
-        showToast("📸 Çek Endirildi!", "Kassa çeki PNG şəkli kimi yükləndi.", true);
-      }
-    }, 'image/png');
+        try {
+          const file = new File([blob], fileName, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: 'Kassa Çeki',
+              text: `Kassa Çeki #${currentReceiptData.receiptId || ''}`
+            });
+            showToast("📸 Çek Paylaşıldı!", "Kassa çeki uğurla paylaşıldı.", true);
+            return;
+          }
+        } catch (e) {
+          if (e.name === 'AbortError') return;
+        }
+        fallbackDownload(canvas, fileName, blob);
+      }, 'image/png');
+    } else {
+      fallbackDownload(canvas, fileName);
+    }
   } catch (err) {
     console.error("Şəkil yaradılarkən xəta:", err);
     showToast("⚠️ Xəta", "Çek şəkli yaradılarkən xəta baş verdi.", false);

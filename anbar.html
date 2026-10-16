@@ -82,12 +82,22 @@ body{
   background:linear-gradient(140deg,#a855f7,#6366f1 55%,#22d3ee);
   box-shadow:0 12px 34px -8px rgba(168,85,247,.75), inset 0 1px 0 rgba(255,255,255,.35);
   position:relative;
+  animation:logoFloat 4s ease-in-out infinite;
+  will-change:transform;
 }
+@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 .logo::after{
   content:'';position:absolute;inset:0;border-radius:16px;
   background:linear-gradient(140deg,rgba(255,255,255,.45),transparent 55%);
   mix-blend-mode:overlay;
 }
+.logo::before{
+  content:'';position:absolute;inset:-4px;border-radius:20px;
+  background:conic-gradient(from 0deg, transparent, rgba(168,85,247,.7), transparent 40%, rgba(34,211,238,.7), transparent);
+  animation:spinSlow 6s linear infinite;z-index:-1;opacity:.75;
+  will-change:transform;
+}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
 .logo i{font-size:22px;color:#fff;position:relative;z-index:1}
 .brand h1{
   font-size:clamp(19px,2.1vw,26px);font-weight:800;letter-spacing:-.5px;line-height:1.2;
@@ -2308,10 +2318,13 @@ function checkAuth() {
 
   if (savedAuth === currentPassword || window.__IS_AUTH_PRECHECKED || (savedAuth && remembered)) {
     if ($('authScreen')) $('authScreen').classList.add('hidden');
+    $('passwordInput')?.blur();
+    if ($('passwordInput')) $('passwordInput').disabled = true;
     initApp();
   } else {
     if ($('authScreen')) {
       $('authScreen').classList.remove('hidden');
+      if ($('passwordInput')) $('passwordInput').disabled = false;
       setTimeout(() => $('passwordInput')?.focus(), 150);
     } else {
       initApp();
@@ -2328,6 +2341,8 @@ function verifyPassword() {
       localStorage.setItem('kassa_remember_login', 'true');
     }
     if ($('authScreen')) $('authScreen').classList.add('hidden');
+    $('passwordInput')?.blur();
+    if ($('passwordInput')) $('passwordInput').disabled = true;
     initApp();
   } else {
     if ($('authError')) $('authError').style.display = 'block';

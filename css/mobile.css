@@ -5,7 +5,7 @@
   .wrap{padding:16px 12px 50px}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
   .filters{padding:14px}
-  .chart{height:190px}
+  .chart{height:180px;padding-bottom:22px}
   .hdr{gap:12px}
   .clock{display:none}
   .cmd-trigger kbd{display:none}
@@ -190,6 +190,56 @@
     padding: 10px 12px !important;
     gap: 6px !important;
     border-radius: 12px !important;
+  }
+
+  /* ============ ÇART VƏ SLİDER PANEL BOŞLUQ AZALDILMASI (TELEFON) ============ */
+  .slider-panel {
+    min-height: 0 !important;
+  }
+  .chart-area {
+    padding: 8px 12px 2px !important;
+  }
+  .chart {
+    height: 180px !important;
+    padding-bottom: 22px !important;
+  }
+  .chart::before {
+    bottom: 22px !important;
+  }
+  .bar-lbl {
+    bottom: -20px !important;
+    font-size: 9px !important;
+  }
+  .main-mode-content .chart {
+    height: 135px !important;
+  }
+  .slider-dots {
+    padding: 4px 0 6px !important;
+    gap: 6px !important;
+  }
+  .donut {
+    width: 115px !important;
+    height: 115px !important;
+  }
+  .donut-body {
+    padding: 8px 12px 4px !important;
+    gap: 8px !important;
+  }
+  .donut-hole {
+    inset: 10px !important;
+  }
+  .donut-hole strong {
+    font-size: 13px !important;
+  }
+  .d-legend {
+    gap: 4px !important;
+  }
+  .d-row {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+  #slideTop {
+    max-height: 240px !important;
   }
 
   .table-panel .card-head{gap:12px}
@@ -1064,9 +1114,9 @@ body.light-theme .more-grid-ico {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
   }
 
-  /* 5. Loqo və fon fırlanma animasiyalarını mobildə dayandıraraq CPU-nu azad edirik */
-  .logo::before, .logoFloat, .spinSlow {
-    animation: none !important;
+  /* 5. Loqo və fırlanan kölgə animasiyası mobildə GPU sürətləndirməsi ilə */
+  .logo, .logo::before {
+    will-change: transform;
   }
 
   /* 6. Aparat sürətləndirməsi (Hardware Acceleration) ilə yağ kimi sürüşmə */
