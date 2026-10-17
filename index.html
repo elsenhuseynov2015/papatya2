@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="./css/mobile.css">
 
   <!-- ============ PWA DƏSTƏK & MOBİL TƏTBİQ PARAMETRLƏRİ ============ -->
-  <link rel="manifest" href="./manifest.json">
+  <link rel="manifest" id="manifestLink" href="./manifest.json">
   <meta name="theme-color" content="#070b14">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -121,6 +121,11 @@
       <label class="form-label"><i class="fa-solid fa-store"></i> Mağaza / Filial Adı</label>
       <input type="text" id="settingStoreName" placeholder="Məs: 1-ci Mağaza (Mərkəz)" class="cyber-input">
       <span class="form-desc">Başlıqda və hesabatlarda görünəcək ad</span>
+    </div>
+    <div class="form-group">
+      <label class="form-label"><i class="fa-solid fa-mobile-screen-button"></i> PWA Tətbiq Adı (Ana Ekranda İkon Adı)</label>
+      <input type="text" id="settingPwaName" placeholder="Məs: Abur Çubur Kassa və ya Papatya 2" class="cyber-input">
+      <span class="form-desc">Telefon və ya kompüterin ana ekranına əlavə edərkən görünəcək tətbiq adı</span>
     </div>
     <div class="form-group">
       <label class="form-label"><i class="fa-solid fa-cloud"></i> Supabase Project URL</label>

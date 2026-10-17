@@ -4,11 +4,12 @@
   "description": "Nəğd & Nisyə satışların real vaxt analitikası və kassa idarəetməsi",
   "start_url": "./",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone", "minimal-ui", "browser"],
   "background_color": "#070b14",
   "theme_color": "#070b14",
   "orientation": "any",
-  "categories": ["business", "finance", "productivity"],
+  "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
       "src": "./icons/icon-192.png",

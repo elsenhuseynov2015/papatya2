@@ -76,13 +76,57 @@ function getActiveStoreName() {
   return 'Papatya 2';
 }
 
+function getActivePwaName() {
+  const pid = getActiveProfileId();
+  const profilePwa = localStorage.getItem(`kassa_pwa_name_${pid}`);
+  if (profilePwa && profilePwa.trim()) return profilePwa.trim();
+
+  const saved = localStorage.getItem('kassa_pwa_name');
+  if (saved && saved.trim()) return saved.trim();
+
+  const storeName = getActiveStoreName();
+  return storeName ? `${storeName} Kassa` : 'Papatya Kassa';
+}
+
+function updateManifest() {
+  const pwaName = getActivePwaName();
+  const shortName = pwaName.length > 15 ? pwaName.substring(0, 15) : pwaName;
+
+  // 1. Browser Title & Apple PWA Title
+  document.title = `${pwaName} — Satış Paneli`;
+  let appleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+  if (!appleMeta) {
+    appleMeta = document.createElement('meta');
+    appleMeta.name = 'apple-mobile-web-app-title';
+    document.head.appendChild(appleMeta);
+  }
+  appleMeta.content = shortName;
+
+  // 2. Service Worker mesajı (Dinamik PWA manifest)
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    try {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SET_PWA_NAME',
+        name: pwaName,
+        shortName: shortName
+      });
+    } catch (e) {}
+  }
+
+  // 3. Manifest linkini dinamik parametr ilə yeniləyirik
+  const manifestLink = $('manifestLink') || document.querySelector('link[rel="manifest"]');
+  if (manifestLink) {
+    manifestLink.href = `./manifest.json?pwa_name=${encodeURIComponent(pwaName)}&t=${Date.now()}`;
+  }
+}
+
 function updateStoreTitle() {
   const name = getActiveStoreName();
   const titleEl = $('appStoreTitle');
   if (titleEl) titleEl.textContent = `${name} — Satış Paneli`;
   const loginTitle = $('loginStoreTitle');
   if (loginTitle) loginTitle.textContent = name;
-  document.title = `${name} — Satış Paneli`;
+  updateManifest();
 }
 
 function syncStoreSelectUI() {
@@ -133,6 +177,10 @@ function onHeaderStoreChange(val) {
 function selectProfileInModal(profileId) {
   if (STORE_PROFILES[profileId]) {
     $('settingStoreName').value = STORE_PROFILES[profileId].name;
+    if ($('settingPwaName')) {
+      const savedProfPwa = localStorage.getItem(`kassa_pwa_name_${profileId}`);
+      $('settingPwaName').value = savedProfPwa || `${STORE_PROFILES[profileId].name} Kassa`;
+    }
     $('settingSupabaseUrl').value = STORE_PROFILES[profileId].url;
     $('settingSupabaseKey').value = STORE_PROFILES[profileId].key;
   }
@@ -499,6 +547,7 @@ function verifyPassword() {
     document.documentElement.classList.add('is-authenticated');
     if (errorEl) errorEl.style.display = 'none';
     showToast("🔓 Uğurlu Giriş", "Xoş gəldiniz! Məlumatlar yüklənir...", true);
+    if (isPwa()) enterFullScreen();
     initApp();
   } else {
     if (errorEl) errorEl.style.display = 'block';
@@ -543,6 +592,7 @@ function logout() {
 function openSettingsModal() {
   syncStoreSelectUI();
   $('settingStoreName').value = getActiveStoreName();
+  if ($('settingPwaName')) $('settingPwaName').value = getActivePwaName();
   $('settingSupabaseUrl').value = getActiveSupabaseUrl();
   $('settingSupabaseKey').value = getActiveSupabaseKey();
   $('settingPassword').value = getActivePassword();
@@ -561,6 +611,7 @@ function closeSettingsModal() {
 function resetDefaultCredentials() {
   if (confirm("Standart parametrlərə (Abur Çubur) qaytarmaq istəyirsiniz?")) {
     selectProfileInModal('aburcubur');
+    if ($('settingPwaName')) $('settingPwaName').value = 'Abur Çubur Kassa';
     $('settingPassword').value = DEFAULT_APP_PASSWORD;
   }
 }
@@ -630,6 +681,7 @@ async function testSupabaseInHtml() {
 
 function saveSettingsFromModal() {
   const storeName = $('settingStoreName').value.trim() || 'Mağaza';
+  const pwaName = $('settingPwaName') ? $('settingPwaName').value.trim() : '';
   const url = $('settingSupabaseUrl').value.trim().replace(/\/+$/, '');
   const key = $('settingSupabaseKey').value.trim();
   const pwd = $('settingPassword').value.trim() || DEFAULT_APP_PASSWORD;
@@ -644,6 +696,13 @@ function saveSettingsFromModal() {
 
   localStorage.setItem('kassa_active_profile', matchedProfile);
   localStorage.setItem('kassa_store_name', storeName);
+  if (pwaName) {
+    localStorage.setItem('kassa_pwa_name', pwaName);
+    localStorage.setItem(`kassa_pwa_name_${matchedProfile}`, pwaName);
+  } else {
+    localStorage.removeItem('kassa_pwa_name');
+    localStorage.removeItem(`kassa_pwa_name_${matchedProfile}`);
+  }
   localStorage.setItem('kassa_supabase_url', url);
   localStorage.setItem('kassa_supabase_key', key);
   localStorage.setItem('kassa_custom_password', pwd);
@@ -2848,6 +2907,7 @@ function startApplication() {
   const first = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
   setRange(iso(first), iso(TODAY), '00:00', '23:59');
   checkAuth();
+  initPwaFullscreen();
 }
 
 if (document.readyState === 'loading') {
@@ -2917,23 +2977,46 @@ window.addEventListener('scroll', onWindowScrollThrottled, { passive: true });
 /* =====================================================================
    29) TAM EKRAN (FULLSCREEN), MOBİL NAV VƏ PWA DƏSTƏYİ
    ===================================================================== */
-function toggleFullScreen() {
+function isPwa() {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+         window.matchMedia('(display-mode: fullscreen)').matches ||
+         window.matchMedia('(display-mode: minimal-ui)').matches ||
+         window.navigator.standalone === true ||
+         document.referrer.includes('android-app://');
+}
+
+function isCurrentlyFullscreen() {
+  return !!(document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement ||
+            window.matchMedia('(display-mode: fullscreen)').matches);
+}
+
+function enterFullScreen() {
+  const el = document.documentElement;
   if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
-    const el = document.documentElement;
-    if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
-    else if (el.msRequestFullscreen) el.msRequestFullscreen();
+    if (el.requestFullscreen) return el.requestFullscreen().catch(() => {});
+    if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+    if (el.mozRequestFullScreen) return el.mozRequestFullScreen();
+    if (el.msRequestFullscreen) return el.msRequestFullscreen();
+  }
+}
+
+function toggleFullScreen() {
+  if (!isCurrentlyFullscreen()) {
+    enterFullScreen();
   } else {
     if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
     else if (document.msExitFullscreen) document.msExitFullscreen();
   }
+  setTimeout(updateFullscreenIcon, 150);
 }
 
 function updateFullscreenIcon() {
-  const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+  const isFull = isCurrentlyFullscreen() || isPwa();
   const ico = $('fullscreenIcon');
   const btn = $('fullscreenBtn');
   if (ico) {
@@ -2945,10 +3028,36 @@ function updateFullscreenIcon() {
   }
 }
 
+function initPwaFullscreen() {
+  if (isPwa()) {
+    // 1. Birbaşa tam ekrana cəhd edirik (PWA runtime icazə verirsə)
+    enterFullScreen();
+    updateFullscreenIcon();
+
+    // 2. Brauzerin "user gesture" təhlükəsizliyinə görə istifadəçinin ekrana ilk toxunuşunda tam ekranı aktivləşdiririk
+    const onFirstUserAction = () => {
+      enterFullScreen();
+      updateFullscreenIcon();
+    };
+
+    window.addEventListener('pointerdown', onFirstUserAction, { once: true, passive: true });
+    window.addEventListener('touchstart', onFirstUserAction, { once: true, passive: true });
+    window.addEventListener('click', onFirstUserAction, { once: true });
+  } else {
+    updateFullscreenIcon();
+  }
+}
+
 document.addEventListener('fullscreenchange', updateFullscreenIcon);
 document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
 document.addEventListener('mozfullscreenchange', updateFullscreenIcon);
 document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
+if (window.matchMedia) {
+  try {
+    window.matchMedia('(display-mode: fullscreen)').addEventListener('change', updateFullscreenIcon);
+    window.matchMedia('(display-mode: standalone)').addEventListener('change', updateFullscreenIcon);
+  } catch (e) {}
+}
 
 function scrollToSection(secId) {
   const el = $(secId) || document.querySelector('.' + secId);

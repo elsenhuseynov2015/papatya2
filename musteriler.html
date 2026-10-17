@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Müştərilər &amp; Borc Dəftəri — Canlı İdarəetmə</title>
+<meta name="theme-color" content="#070b14">
+<link rel="manifest" id="manifestLink" href="./manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Müştərilər Paneli">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
@@ -1127,6 +1133,10 @@ body.light-theme .more-grid-btn {
       <input type="text" id="settingStoreName" class="form-inp">
     </div>
     <div class="form-grp">
+      <label class="form-lbl"><i class="fa-solid fa-mobile-screen-button"></i> PWA Tətbiq Adı (Ana Ekranda İkon Adı)</label>
+      <input type="text" id="settingPwaName" class="form-inp" placeholder="Məs: Abur Çubur və ya Papatya 2">
+    </div>
+    <div class="form-grp">
       <label class="form-lbl">Supabase Proyekt URL</label>
       <input type="text" id="settingSupabaseUrl" class="form-inp">
     </div>
@@ -1287,7 +1297,13 @@ function updateStoreTitle() {
   if (titleEl) titleEl.textContent = `${name} — Müştərilər & Borclar`;
   const loginTitle = $('loginStoreTitle');
   if (loginTitle) loginTitle.textContent = name;
-  document.title = `${name} — Müştərilər & Borclar`;
+  const pid = getActiveProfileId();
+  const pwaName = localStorage.getItem(`kassa_pwa_name_${pid}`) || localStorage.getItem('kassa_pwa_name') || `${name} — Müştərilər Paneli`;
+  document.title = pwaName;
+  const manifestLink = $('manifestLink');
+  if (manifestLink) {
+    manifestLink.href = `./manifest.json?pwa_name=${encodeURIComponent(pwaName)}&t=${Date.now()}`;
+  }
 }
 
 function syncStoreSelectUI() {
@@ -1337,6 +1353,9 @@ function onHeaderStoreChange(val) {
 function selectProfileInModal(profileId) {
   if (STORE_PROFILES[profileId]) {
     $('settingStoreName').value = STORE_PROFILES[profileId].name;
+    if ($('settingPwaName')) {
+      $('settingPwaName').value = localStorage.getItem(`kassa_pwa_name_${profileId}`) || `${STORE_PROFILES[profileId].name} Kassa`;
+    }
     $('settingSupabaseUrl').value = STORE_PROFILES[profileId].url;
     $('settingSupabaseKey').value = STORE_PROFILES[profileId].key;
   }
@@ -1606,6 +1625,16 @@ function initApp() {
   }
   syncStoreSelectUI();
   updateStoreTitle();
+
+  if (window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches || window.navigator.standalone === true) {
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if (req && !document.fullscreenElement) {
+      req.call(el).catch(() => {});
+      window.addEventListener('click', () => { req.call(el).catch(() => {}); }, { once: true });
+      window.addEventListener('touchstart', () => { req.call(el).catch(() => {}); }, { once: true, passive: true });
+    }
+  }
   initClock();
   initSound();
   initTheme();
@@ -2002,6 +2031,10 @@ function exportToExcel() {
 function openSettingsModal() {
   syncStoreSelectUI();
   $('settingStoreName').value = getActiveStoreName();
+  if ($('settingPwaName')) {
+    const pid = getActiveProfileId();
+    $('settingPwaName').value = localStorage.getItem(`kassa_pwa_name_${pid}`) || localStorage.getItem('kassa_pwa_name') || `${getActiveStoreName()} Kassa`;
+  }
   $('settingSupabaseUrl').value = getActiveSupabaseUrl();
   $('settingSupabaseKey').value = getActiveSupabaseKey();
   $('settingPassword').value = getActivePassword();
@@ -2055,6 +2088,7 @@ async function testSupabaseConnection() {
 
 function saveSettings() {
   const name = $('settingStoreName').value.trim() || 'Mağaza';
+  const pwaName = $('settingPwaName') ? $('settingPwaName').value.trim() : '';
   const url = $('settingSupabaseUrl').value.trim().replace(/\/+$/, '');
   const key = $('settingSupabaseKey').value.trim();
   const pwd = $('settingPassword').value.trim() || DEFAULT_APP_PASSWORD;
@@ -2069,6 +2103,13 @@ function saveSettings() {
 
   localStorage.setItem('kassa_active_profile', matchedProfile);
   localStorage.setItem('kassa_store_name', name);
+  if (pwaName) {
+    localStorage.setItem('kassa_pwa_name', pwaName);
+    localStorage.setItem(`kassa_pwa_name_${matchedProfile}`, pwaName);
+  } else {
+    localStorage.removeItem('kassa_pwa_name');
+    localStorage.removeItem(`kassa_pwa_name_${matchedProfile}`);
+  }
   localStorage.setItem('kassa_supabase_url', url);
   localStorage.setItem('kassa_supabase_key', key);
   localStorage.setItem('kassa_custom_password', pwd);
