@@ -315,7 +315,7 @@
     display:flex;align-items:center;gap:6px;flex:none;
   }
   .mob-id-btn-grp .tid{
-    font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;
+    font-size:10.5px;font-weight:700;
     color:#94a3b8;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
     padding:2px 6px;border-radius:6px;max-width:85px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
@@ -327,7 +327,7 @@
   .mob-tarix-val .d{color:#fff}
   body.light-theme .mob-tarix-val .d{color:#0f172a}
   .mob-tarix-val .t-sep{color:#64748b;font-size:10px}
-  .mob-tarix-val .t{color:#38bdf8;font-weight:800;font-family:'JetBrains Mono',monospace}
+  .mob-tarix-val .t{color:#38bdf8;font-weight:800}
 
   /* 3. Müştəri */
   tbody td.td-mob-musteri{grid-column:span 1 !important}
@@ -340,7 +340,7 @@
   tbody td.td-mob-qiymet{grid-column:span 1 !important}
   .mob-combo{
     display:flex;align-items:center;gap:4px;font-weight:800;
-    font-size:12.5px;white-space:nowrap;font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;white-space:nowrap;font-variant-numeric:tabular-nums;
   }
   .mob-combo .c-slash{color:#64748b;font-weight:600;font-size:11px;margin:0 1px}
   .mob-combo .c-maya{color:#fb923c}
@@ -349,7 +349,7 @@
 
   /* 5. Qazanc */
   tbody td.td-mob-qazanc{grid-column:span 1 !important;text-align:right !important;align-items:flex-end !important}
-  .mob-qazanc-val{font-size:13px;font-weight:800;font-family:'JetBrains Mono',monospace}
+  .mob-qazanc-val{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
   .mob-qazanc-val.pos{color:#34d399}
   .mob-qazanc-val.neg{color:#fb7185}
   tbody td.num{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
@@ -811,13 +811,6 @@ body.light-theme .bracket-meta b{color:#0f172a !important;font-weight:800 !impor
 body.light-theme .bracket-qazanc-val{color:#047857 !important;font-weight:800 !important}
 body.light-theme .bracket-track{background:rgba(0,0,0,.06) !important}
 body.light-theme .btn-brackets-collapse{border-color:rgba(0,0,0,.15) !important;color:#475569 !important}
-
-/* ============ GOOGLE FONT: JETBRAINS MONO ============ */
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
-
-.stat-value, .stat-value-qty, .clock, .mono-num, .loss-badge, .kassa-tag {
-  font-family: 'JetBrains Mono', monospace !important;
-}
 
 /* ============ KASKADLI FADE-UP GİRİŞ ANİMASİYASI ============ */
 @keyframes cascadeFadeUp {

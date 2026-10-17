@@ -6,7 +6,7 @@
 <title>Papatya — Kassa & Satışlar v2.0 (Canlı İdarəetmə)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
@@ -62,7 +62,7 @@
     <h2 style="font-size:19px;font-weight:800;letter-spacing:-.3px;color:#fff" id="loginStoreTitle">Satış İdarəetmə Paneli</h2>
     <p style="font-size:12px;color:#8894af;margin:6px 0 20px">Canlı məlumatları izləmək üçün şifrəni daxil edin</p>
     <div style="position:relative;margin-bottom:12px">
-      <input type="password" id="passwordInput" placeholder="Giriş şifrəsi..." class="cyber-input" style="text-align:center;font-family:'JetBrains Mono',monospace;letter-spacing:3px;font-size:15px;padding-right:42px" onkeydown="if(event.key==='Enter') verifyPassword()">
+      <input type="password" id="passwordInput" placeholder="Giriş şifrəsi..." class="cyber-input" style="text-align:center;letter-spacing:3px;font-size:15px;padding-right:42px" onkeydown="if(event.key==='Enter') verifyPassword()">
       <button type="button" onclick="togglePasswordVisibility()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#64748b;cursor:pointer;font-size:14px">
         <i id="pwdToggleIcon" class="fa-solid fa-eye"></i>
       </button>
@@ -109,11 +109,11 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="modalStoreCards">
         <div class="store-card-opt" id="cardAburCubur" onclick="selectProfileInModal('aburcubur')">
           <div style="font-weight:800;font-size:13px;display:flex;align-items:center;gap:6px"><i class="fa-solid fa-store" style="color:#22d3ee"></i> Abur Çubur</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace">zcjthobakvppower...</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;font-family:monospace">zcjthobakvppower...</div>
         </div>
         <div class="store-card-opt" id="cardPapatya2" onclick="selectProfileInModal('papatya2')">
           <div style="font-weight:800;font-size:13px;display:flex;align-items:center;gap:6px"><i class="fa-solid fa-seedling" style="color:#a855f7"></i> Papatya 2</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace">ijnbsuupwwyqohy...</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;font-family:monospace">ijnbsuupwwyqohy...</div>
         </div>
       </div>
     </div>
@@ -129,7 +129,7 @@
     </div>
     <div class="form-group">
       <label class="form-label"><i class="fa-solid fa-cloud"></i> Supabase Project URL</label>
-      <input type="text" id="settingSupabaseUrl" placeholder="https://xxxx.supabase.co" class="cyber-input" style="font-family:'JetBrains Mono',monospace;font-size:11.5px">
+      <input type="text" id="settingSupabaseUrl" placeholder="https://xxxx.supabase.co" class="cyber-input" style="font-size:11.5px">
     </div>
     <div class="form-group">
       <label class="form-label"><i class="fa-solid fa-key"></i> Supabase Anon Key</label>
@@ -142,7 +142,7 @@
     <div id="testConnResult" style="display:none;padding:10px 14px;border-radius:12px;font-size:11.5px;line-height:1.45;margin-bottom:14px"></div>
     <div class="form-group" style="padding-top:12px;border-top:1px solid var(--line-2)">
       <label class="form-label"><i class="fa-solid fa-lock"></i> Giriş Şifrəsi</label>
-      <input type="text" id="settingPassword" placeholder="Giriş şifrəsi" class="cyber-input" style="font-family:'JetBrains Mono',monospace">
+      <input type="text" id="settingPassword" placeholder="Giriş şifrəsi" class="cyber-input">
       <span class="form-desc">Panelə daxil olarkən tələb olunan şifrə</span>
     </div>
     <div style="padding-top:12px;border-top:1px solid var(--line-2);margin-bottom:18px">

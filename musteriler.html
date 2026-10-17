@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- Font Awesome İkonlar -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <!-- Supabase JS Client v2 -->
@@ -514,11 +514,6 @@ body.light-theme .store-card-opt.active{
   box-shadow:0 0 0 1px #0284c7;
 }
 
-/* ============ JETBRAINS MONO RƏQƏMLƏR ============ */
-.kcard-val, .rank-main-val, .clock, .mono-num {
-  font-family: 'JetBrains Mono', monospace !important;
-}
-
 /* ============ MOBİL BOTTOM NAVIGATION & MORE SHEET STİLLƏRİ ============ */
 .mobile-bottom-nav { display: none; }
 .more-sheet-backdrop {
@@ -718,8 +713,8 @@ body.light-theme .store-card-opt.active{
   .tbl-wrap tbody td.td-status { order: 3 !important; }
 
   /* 3. Cari Borc & Kredit Limiti */
-  .tbl-wrap tbody td.td-borc { order: 4 !important; font-size: 14px !important; font-weight: 800 !important; font-family: 'JetBrains Mono', monospace !important; }
-  .tbl-wrap tbody td.td-limit { order: 5 !important; font-size: 13px !important; font-family: 'JetBrains Mono', monospace !important; }
+  .tbl-wrap tbody td.td-borc { order: 4 !important; font-size: 14px !important; font-weight: 800 !important; font-variant-numeric: tabular-nums !important; }
+  .tbl-wrap tbody td.td-limit { order: 5 !important; font-size: 13px !important; font-variant-numeric: tabular-nums !important; }
 
   /* 4. Ünvan & Qeyd */
   .tbl-wrap tbody td.td-unvan { order: 6 !important; }
