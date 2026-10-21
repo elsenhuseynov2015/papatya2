@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Cyber Security & Data Protection Headers -->
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdn.sheetjs.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;">
 <title>Müştərilər &amp; Borc Dəftəri — Canlı İdarəetmə</title>
 <meta name="theme-color" content="#070b14">
 <link rel="manifest" id="manifestLink" href="./manifest.json">
@@ -25,7 +29,7 @@
     try {
       var tok = localStorage.getItem('kassa_auth_token');
       var rem = localStorage.getItem('kassa_remember_login');
-      if (tok && (tok === "Elsen0123456789-" || rem === "true")) {
+      if (tok && (tok.indexOf('session_') === 0 || rem === "true")) {
         window.__IS_AUTH_PRECHECKED = true;
       }
     }catch(e){}
@@ -1175,27 +1179,31 @@ body.light-theme .more-grid-btn {
   </div>
 </div>
 
-<!-- ============ KATEQORİYAYA GÖRƏ SİLMƏ TƏSDİQ MODALI ============ -->
+<!-- ============ KATEQORİYAYA GÖRƏ SİLMƏ TƏSDİQ MODALI (TYPE-TO-CONFIRM) ============ -->
 <div class="modal-overlay hidden" id="deleteCategoryModal">
-  <div class="modal-card" style="max-width:440px;border-color:rgba(251,113,133,.4)">
+  <div class="modal-card" style="max-width:440px;border-color:rgba(251,113,133,.45)">
     <div class="modal-head">
       <div class="modal-title" style="color:#fb7185" id="deleteModalTitle">
         <i class="fa-solid fa-triangle-exclamation"></i> Məlumatları Sil
       </div>
       <button class="modal-close" onclick="closeDeleteCategoryModal()"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div id="deleteModalDesc" style="font-size:13px;color:#cbd5e1;line-height:1.45;margin-bottom:16px">
+    <div id="deleteModalDesc" style="font-size:12px;color:#cbd5e1;line-height:1.45;margin-bottom:14px;padding:10px 12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:10px">
       Məlumatlar tamamilə silinəcək.
     </div>
-    <div class="form-grp">
-      <label class="form-lbl">Təsdiq Şifrəsi</label>
-      <input type="password" id="deleteConfirmPassword" class="form-inp" placeholder="Şifrəni daxil edin..." onkeypress="if(event.key==='Enter')confirmDeleteCategory()">
+    <div class="form-grp" style="margin-bottom:12px">
+      <label class="form-lbl" style="color:#fb7185;font-size:11.5px"><i class="fa-solid fa-keyboard"></i> 1. Təsdiq üçün böyük hərflərlə <b>SİLMƏK İSTƏYİRƏM</b> yazın:</label>
+      <input type="text" id="deleteConfirmText" class="form-inp" placeholder="SİLMƏK İSTƏYİRƏM" autocomplete="off" oninput="updateDeleteBtnState()">
     </div>
-    <div id="deleteError" style="color:#fb7185;font-size:12px;margin-bottom:12px;display:none;font-weight:700">❌ Şifrə yanlışdır!</div>
+    <div class="form-grp" style="margin-bottom:14px">
+      <label class="form-lbl" style="color:#fb7185;font-size:11.5px"><i class="fa-solid fa-lock"></i> 2. Admin Təhlükəsizlik Şifrəsi:</label>
+      <input type="password" id="deleteConfirmPassword" class="form-inp" placeholder="Admin şifrəsini daxil edin..." oninput="updateDeleteBtnState()" onkeypress="if(event.key==='Enter')confirmDeleteCategory()">
+    </div>
+    <div id="deleteError" style="color:#fb7185;font-size:12px;margin-bottom:12px;display:none;font-weight:700"></div>
     <div style="display:flex;gap:8px">
       <button type="button" class="chip" style="flex:1;justify-content:center" onclick="closeDeleteCategoryModal()">İmtina</button>
-      <button type="button" id="btnConfirmDeleteCategory" class="btn-primary" style="flex:1;background:linear-gradient(135deg,#f43f5e,#e11d48);box-shadow:0 8px 24px -6px rgba(225,29,72,.6)" onclick="confirmDeleteCategory()">
-        <i class="fa-solid fa-trash-can"></i> Sil
+      <button type="button" id="btnConfirmDeleteCategory" class="btn-primary" style="flex:1;background:linear-gradient(135deg,#f43f5e,#e11d48);opacity:0.35;cursor:not-allowed;" disabled onclick="confirmDeleteCategory()">
+        <i class="fa-solid fa-trash-can"></i> Silinməni Təsdiqlə
       </button>
     </div>
   </div>
@@ -1219,8 +1227,6 @@ const STORE_PROFILES = {
     key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqbmJzdXVwd3d5cW9oeXNyamxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MjA1NDUsImV4cCI6MjEwNTI5NjU0NX0.ZjiHo2gOzFdHHK4d7CXYfXrjDcwTyGG9oyQ-E6YtGKY'
   }
 };
-
-const DEFAULT_APP_PASSWORD = "Elsen0123456789-";
 
 function getActiveProfileId() {
   // 1. URL parametr yoxlanışı (?store=papatya2 və ya ?store=aburcubur)
@@ -1275,7 +1281,7 @@ function getActiveSupabaseKey() {
 }
 
 function getActivePassword() {
-  return localStorage.getItem('kassa_custom_password') || DEFAULT_APP_PASSWORD;
+  return localStorage.getItem('kassa_custom_password') || '';
 }
 
 function getActiveStoreName() {
@@ -1470,7 +1476,9 @@ function checkAuth() {
   syncStoreSelectUI();
   updateStoreTitle();
 
-  if (savedAuth === currentPassword || window.__IS_AUTH_PRECHECKED || (savedAuth && remembered)) {
+  const isAuthOk = (savedAuth && (savedAuth.indexOf('session_') === 0 || (currentPassword && savedAuth === currentPassword) || remembered)) || window.__IS_AUTH_PRECHECKED;
+
+  if (isAuthOk) {
     if ($('authScreen')) $('authScreen').classList.add('hidden');
     $('passwordInput')?.blur();
     if ($('passwordInput')) $('passwordInput').disabled = true;
@@ -1489,8 +1497,14 @@ function checkAuth() {
 function verifyPassword() {
   const entered = ($('passwordInput')?.value || '').trim();
   const currentPassword = getActivePassword();
-  if (entered === currentPassword || entered === DEFAULT_APP_PASSWORD) {
-    localStorage.setItem('kassa_auth_token', entered);
+  let ok = false;
+
+  if (currentPassword && entered === currentPassword) {
+    ok = true;
+  }
+
+  if (ok) {
+    localStorage.setItem('kassa_auth_token', 'session_authenticated');
     if ($('rememberPasswordChk')?.checked) {
       localStorage.setItem('kassa_remember_login', 'true');
     }
@@ -2086,7 +2100,7 @@ function saveSettings() {
   const pwaName = $('settingPwaName') ? $('settingPwaName').value.trim() : '';
   const url = $('settingSupabaseUrl').value.trim().replace(/\/+$/, '');
   const key = $('settingSupabaseKey').value.trim();
-  const pwd = $('settingPassword').value.trim() || DEFAULT_APP_PASSWORD;
+  const pwd = $('settingPassword').value.trim();
 
   let matchedProfile = 'custom';
   for (const [pid, prof] of Object.entries(STORE_PROFILES)) {
@@ -2118,47 +2132,101 @@ function saveSettings() {
 }
 
 /* ============ KATEQORİYAYA GÖRƏ SİLMƏ MƏNTİQİ ============ */
-const REQUIRED_DELETE_PASSWORD = "Elsen0123456789-";
 let currentDeleteTarget = ''; // 'satislar' | 'mehsullar' | 'musteriler'
+const DELETE_CONFIRM_PHRASE = "SİLMƏK İSTƏYİRƏM";
 
 function openDeleteCategoryModal(target) {
   currentDeleteTarget = target;
-  $('deleteConfirmPassword').value = '';
-  $('deleteError').style.display = 'none';
+  if ($('deleteConfirmText')) $('deleteConfirmText').value = '';
+  if ($('deleteConfirmPassword')) $('deleteConfirmPassword').value = '';
+  if ($('deleteError')) $('deleteError').style.display = 'none';
 
   let title = 'Məlumatları Sil';
   let desc = 'Supabase-dəki seçilmiş məlumatlar silinəcək.';
 
   if (target === 'satislar') {
     title = '🛒 Satışları Sil';
-    desc = '⚠️ <b>DİQQƏT:</b> Supabase bazasındakı <b>bütün satış qeydləri</b> tamamilə silinəcək!';
+    desc = '⚠️ <b style="color:#fb7185">DİQQƏT:</b> Supabase bazasındakı <b>bütün satış qeydləri</b> birdəfəlik silinəcək! Bu əməliyyat geri qaytarıla bilməz.';
   } else if (target === 'mehsullar') {
     title = '📦 Anbardakı Malları Sil';
-    desc = '⚠️ <b>DİQQƏT:</b> Supabase bazasındakı <b>bütün anbar məhsulları</b> tamamilə silinəcək!';
+    desc = '⚠️ <b style="color:#fb7185">DİQQƏT:</b> Supabase bazasındakı <b>bütün anbar məhsulları</b> birdəfəlik silinəcək! Bu əməliyyat geri qaytarıla bilməz.';
   } else if (target === 'musteriler') {
     title = '👥 Müştəriləri və Borcları Sil';
-    desc = '⚠️ <b>DİQQƏT:</b> Supabase bazasındakı <b>bütün müştəri və borc qeydləri</b> tamamilə silinəcək!';
+    desc = '⚠️ <b style="color:#fb7185">DİQQƏT:</b> Supabase bazasındakı <b>bütün müştəri və borc qeydləri</b> birdəfəlik silinəcək! Bu əməliyyat geri qaytarıla bilməz.';
   }
 
   $('deleteModalTitle').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${title}`;
-  $('deleteModalDesc').innerHTML = `${desc}<br><br>Əməliyyatı təsdiqləmək üçün zəhmət olmasa təhlükəsizlik şifrəsini (<code style="color:#fbbf24;font-weight:700">Elsen0123456789-</code>) daxil edin:`;
+  $('deleteModalDesc').innerHTML = desc;
+  updateDeleteBtnState();
   $('deleteCategoryModal').classList.remove('hidden');
-  setTimeout(() => $('deleteConfirmPassword').focus(), 150);
+  setTimeout(() => {
+    if ($('deleteConfirmText')) $('deleteConfirmText').focus();
+  }, 150);
+}
+
+function updateDeleteBtnState() {
+  const textInput = $('deleteConfirmText');
+  const pwdInput = $('deleteConfirmPassword');
+  const btn = $('btnConfirmDeleteCategory');
+  if (!btn) return;
+
+  const enteredText = (textInput ? textInput.value : '').trim().toUpperCase();
+  const enteredPwd = (pwdInput ? pwdInput.value : '').trim();
+
+  const isTextValid = enteredText === DELETE_CONFIRM_PHRASE || enteredText === 'SILMEK ISTEYIREM';
+  const isPwdProvided = enteredPwd.length >= 3;
+
+  if (isTextValid && isPwdProvided) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+    btn.style.boxShadow = '0 8px 24px -6px rgba(225,29,72,.7)';
+  } else {
+    btn.disabled = true;
+    btn.style.opacity = '0.35';
+    btn.style.cursor = 'not-allowed';
+    btn.style.boxShadow = 'none';
+  }
 }
 
 function closeDeleteCategoryModal() {
   $('deleteCategoryModal').classList.add('hidden');
+  if ($('deleteConfirmText')) $('deleteConfirmText').value = '';
+  if ($('deleteConfirmPassword')) $('deleteConfirmPassword').value = '';
 }
 
 async function confirmDeleteCategory() {
-  const entered = ($('deleteConfirmPassword').value || '').trim();
+  const textInput = $('deleteConfirmText');
+  const enteredText = (textInput ? textInput.value : '').trim().toUpperCase();
+  const entered = ($('deleteConfirmPassword')?.value || '').trim();
   const errorEl = $('deleteError');
   const btn = $('btnConfirmDeleteCategory');
 
-  const validPassword = getActivePassword() || REQUIRED_DELETE_PASSWORD;
-  if (entered !== REQUIRED_DELETE_PASSWORD && entered !== validPassword) {
+  if (enteredText !== DELETE_CONFIRM_PHRASE && enteredText !== 'SILMEK ISTEYIREM') {
     errorEl.style.display = 'block';
-    errorEl.textContent = '❌ Şifrə yanlışdır!';
+    errorEl.textContent = '❌ Təsdiq üçün yuxarıdakı xanaya "SİLMƏK İSTƏYİRƏM" yazmalısınız!';
+    if (textInput) textInput.focus();
+    return;
+  }
+
+  const validPassword = getActivePassword();
+  let passOk = false;
+  if (validPassword && entered === validPassword) {
+    passOk = true;
+  } else {
+    try {
+      const email = localStorage.getItem('kassa_auth_email');
+      if (email && supabaseClient) {
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password: entered });
+        if (!error) passOk = true;
+      }
+    } catch(e) {}
+  }
+
+  if (!passOk) {
+    errorEl.style.display = 'block';
+    errorEl.textContent = '❌ Admin şifrəsi yanlışdır!';
+    if ($('deleteConfirmPassword')) $('deleteConfirmPassword').focus();
     return;
   }
 
@@ -2193,11 +2261,20 @@ async function confirmDeleteCategory() {
 
     closeDeleteCategoryModal();
     closeSettingsModal();
-    $('deleteConfirmPassword').value = '';
   } catch (err) {
     console.error("Silinmə xətası:", err);
     errorEl.style.display = 'block';
-    errorEl.textContent = `❌ Xəta: ${err.message || 'Məlumatlar silinə bilmədi'}`;
+    if (err.message && err.message.toLowerCase().includes('violates row-level security')) {
+      errorEl.textContent = '🛡️ XƏTA: Supabase RLS təhlükəsizlik qaydası client tərəfdən bazanı silməyə icazə vermir!';
+    } else {
+      errorEl.textContent = `❌ Xəta: ${err.message || 'Məlumatlar silinə bilmədi'}`;
+    }
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Silinməni Təsdiqlə';
+    updateDeleteBtnState();
+  }
+}
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Sil';

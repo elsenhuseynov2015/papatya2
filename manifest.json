@@ -1,7 +1,7 @@
 {
-  "name": "Papatya — Satış & Kassa Paneli",
+  "name": "Papatya - Satış & Kassa Paneli",
   "short_name": "Kassa Paneli",
-  "description": "Nəğd & Nisyə satışların real vaxt analitikası və kassa idarəetməsi",
+  "description": "Nağd & Nisyə satışların real vaxt analitikası və kassa idarəetməsi",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
