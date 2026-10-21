@@ -2336,7 +2336,7 @@ function shareReceiptWhatsApp() {
   msg += `✨ _Elektron Kassa Sistemi_`;
 
   const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 function printReceiptDirect() {

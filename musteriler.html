@@ -1969,7 +1969,7 @@ function renderTable() {
         <td class="td-qeyd" data-label="Qeyd">${escapeHtml(c.qeyd) || '—'}</td>
         <td class="td-action" data-label="Əlaqə" style="text-align:center">
           ${waLink ? `
-            <a href="${waLink}" target="_blank" class="btn-wa" title="WhatsApp ilə borc bildirişi göndər">
+            <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="btn-wa" title="WhatsApp ilə borc bildirişi göndər">
               <i class="fa-brands fa-whatsapp"></i> WhatsApp Xatırlat
             </a>
           ` : ''}
@@ -2282,12 +2282,14 @@ async function confirmDeleteCategory() {
 }
 
 function escapeHtml(str) {
-  if (!str) return '';
+  if (str === null || str === undefined) return '';
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+    .replace(/\//g, '&#x2F;');
 }
 
 function handleMobNav(target) {
