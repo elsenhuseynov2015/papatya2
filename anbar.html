@@ -6,7 +6,6 @@
 <!-- Cyber Security & Data Protection Headers -->
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdn.sheetjs.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;">
 <title>Anbar &amp; Məhsullar — Canlı İdarəetmə</title>
 <meta name="theme-color" content="#070b14">
 <link rel="manifest" id="manifestLink" href="./manifest.json">
@@ -24,7 +23,15 @@
 <!-- SheetJS (Excel Çıxarışı) -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script>
-  // Sürətli yadda saxlanmış giriş yoxlanışı (ekran yanıb-sönməsinin qarşısını alır)
+  // Sürətli tema yoxlanışı (Ağ temanın dərhal açılması və yadda saxlanması üçün)
+  (function(){
+    try {
+      if (localStorage.getItem('kassa_theme') === 'light') {
+        document.documentElement.classList.add('light-theme');
+      }
+    }catch(e){}
+  })();
+  // Sürətli yadda saxlanmış giriş yoxlanışı
   (function(){
     try {
       var tok = localStorage.getItem('kassa_auth_token');
@@ -64,7 +71,10 @@ body{
   -webkit-font-smoothing:antialiased;
   position:relative;
 }
-.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bg{
+  position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  background:radial-gradient(ellipse 90% 70% at 50% 20%, rgba(99,102,241,0.18) 0%, rgba(34,211,238,0.08) 50%, #05070f 100%);
+}
 .bg::after{
   content:'';position:absolute;inset:0;
   background-image:
@@ -74,13 +84,7 @@ body{
   -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 30%,#000 30%,transparent 100%);
   mask-image:radial-gradient(ellipse 90% 70% at 50% 30%,#000 30%,transparent 100%);
 }
-.orb{position:absolute;border-radius:50%;filter:blur(130px);opacity:.45;will-change:transform}
-.o1{width:620px;height:620px;background:#6366f1;top:-260px;left:-160px;animation:drift1 24s ease-in-out infinite}
-.o2{width:540px;height:540px;background:#a855f7;top:-100px;right:-140px;animation:drift2 28s ease-in-out infinite;opacity:.35}
-.o3{width:580px;height:580px;background:#22d3ee;bottom:-300px;left:30%;animation:drift3 32s ease-in-out infinite;opacity:.28}
-@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(110px,70px) scale(1.1)}}
-@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-90px,110px) scale(1.08)}}
-@keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(70px,-80px) scale(1.12)}}
+.orb{display:none !important;animation:none !important;}
 
 .wrap{position:relative;z-index:1;max-width:1680px;margin:0 auto;padding:26px 24px 70px}
 
@@ -263,6 +267,127 @@ body{
   background:rgba(52,211,153,.14);color:#6ee7b7;border:1px solid rgba(52,211,153,.3);
 }
 
+/* ============ AÇILIB-BAĞLANAN (COLLAPSIBLE) SÖLMƏ BARS ============ */
+.collapse-toggle-wrapper {
+  margin-bottom: 14px;
+}
+.collapse-toggle-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 13px 18px;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  color: var(--text);
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 4px 14px -4px rgba(0,0,0,0.3);
+  transition: all .2s ease;
+  user-select: none;
+  text-align: left;
+}
+.collapse-toggle-bar:hover {
+  border-color: rgba(99,102,241,0.45);
+  background: rgba(30,41,59,0.7);
+  box-shadow: 0 6px 20px -4px rgba(99,102,241,0.2);
+  transform: translateY(-1px);
+}
+body.light-theme .collapse-toggle-bar {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px -2px rgba(0,0,0,0.05);
+}
+body.light-theme .collapse-toggle-bar:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+.toggle-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.toggle-bar-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.toggle-bar-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.toggle-bar-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.light-theme .toggle-bar-title {
+  color: #0f172a;
+}
+.toggle-bar-hint {
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.toggle-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.toggle-pill-status {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  transition: all .2s;
+}
+body.light-theme .toggle-pill-status {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+.toggle-chevron {
+  font-size: 13px;
+  color: var(--muted);
+  transition: transform .25s ease;
+}
+.collapse-toggle-bar.is-open {
+  border-color: rgba(99,102,241,0.5);
+  margin-bottom: 12px;
+}
+.collapse-toggle-bar.is-open .toggle-chevron {
+  transform: rotate(180deg);
+}
+.collapse-toggle-bar.is-open .toggle-pill-status {
+  background: rgba(99,102,241,0.18);
+  border-color: rgba(99,102,241,0.4);
+  color: #818cf8;
+}
+body.light-theme .collapse-toggle-bar.is-open .toggle-pill-status {
+  background: #ede9fe;
+  color: #6366f1;
+  border-color: #c4b5fd;
+}
+
 /* ============ ANALİTİKA BÖLMƏSİ (TOP QAZANC & KAPİTAL) ============ */
 .analytics-grid{
   display:grid;
@@ -405,13 +530,15 @@ td{padding:12px 14px;vertical-align:middle}
   font-family:monospace;font-size:12.5px;font-weight:700;
   color:#38bdf8;letter-spacing:.4px;
 }
-.td-ad{
+.td-mal-adi, .td-ad{
   font-weight:700;
   color:#f8fafc;
   min-width:170px;
   max-width:340px;
   word-break:break-word;
   line-height:1.4;
+  visibility:visible !important;
+  opacity:1 !important;
 }
 .badge-vahid{
   font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;
@@ -906,7 +1033,7 @@ body.light-theme th.sorted{color:#4338ca}
 body.light-theme tbody tr{border-bottom-color:#e2e8f0}
 body.light-theme tbody tr:hover{background:#f8fafc}
 body.light-theme .td-barkod{color:#0284c7;font-weight:700}
-body.light-theme .td-ad{color:#0f172a;font-weight:800}
+body.light-theme .td-mal-adi, body.light-theme .td-ad{color:#0f172a !important;font-weight:800;visibility:visible !important;opacity:1 !important;}
 body.light-theme .badge-vahid{background:#e2e8f0;color:#1e293b;border-color:#cbd5e1}
 body.light-theme .td-maya{color:#c2410c;font-weight:800}
 body.light-theme .td-satis{color:#0f172a;font-weight:800}
@@ -1062,6 +1189,25 @@ body.light-theme .sim-footer-info b{color:#0f172a}
   .kcard-val { font-size: 20px !important; margin-bottom: 4px !important; }
   .kcard-sub { font-size: 11px !important; }
 
+  /* Açılıb-bağlanan Bar Mobil Görünüş */
+  .collapse-toggle-bar {
+    padding: 10px 14px !important;
+    border-radius: 14px !important;
+    gap: 10px !important;
+  }
+  .toggle-bar-icon-wrap {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 13px !important;
+    border-radius: 10px !important;
+  }
+  .toggle-bar-title {
+    font-size: 12.5px !important;
+  }
+  .toggle-bar-hint {
+    display: none !important;
+  }
+
   /* Analitika blokları */
   .analytics-grid { grid-template-columns: 1fr !important; gap: 14px !important; margin-bottom: 16px !important; }
   .panel { padding: 16px 14px !important; border-radius: 18px !important; backdrop-filter: none !important; }
@@ -1187,14 +1333,24 @@ body.light-theme .sim-footer-info b{color:#0f172a}
   .mob-combo { display: flex !important; }
 
   /* 1. Məhsul Adı — Bütün sətri tutur, iri və aydın + Barkod pill */
+  .tbl-wrap tbody td.td-mal-adi,
   .tbl-wrap tbody td.td-ad {
     grid-column: span 2 !important;
     order: 1 !important;
     background: rgba(255,255,255,.05) !important;
     padding: 8px 10px !important;
     border-bottom: 1px solid var(--line-2) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
+  body.light-theme .tbl-wrap tbody td.td-mal-adi,
+  body.light-theme .tbl-wrap tbody td.td-ad {
+    background: rgba(0,0,0,.03) !important;
+    color: #0f172a !important;
+  }
+  .tbl-wrap tbody td.td-mal-adi::before,
   .tbl-wrap tbody td.td-ad::before { display: none !important; }
+  .td-mal-wrap,
   .td-ad-wrap {
     display: flex;
     align-items: center;
@@ -1202,15 +1358,19 @@ body.light-theme .sim-footer-info b{color:#0f172a}
     gap: 8px;
     width: 100%;
     flex-wrap: wrap;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   .product-name {
     font-size: 13.5px;
     font-weight: 800;
-    color: #fff;
+    color: var(--text) !important;
     word-break: break-word;
     line-height: 1.35;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
-  body.light-theme .product-name { color: #0f172a; }
+  body.light-theme .product-name { color: #0f172a !important; }
   .mob-barcode-pill {
     display: inline-flex !important;
     align-items: center;
@@ -1443,16 +1603,6 @@ body.light-theme .more-grid-btn {
       <!-- Real Vaxt Saatı -->
       <div class="clock" id="clock">--:--:--</div>
 
-      <!-- Aktiv Mağaza / Baza Seçici -->
-      <div class="store-badge-selector" title="Aktiv Mağaza / Baza Seçimi">
-        <i class="fa-solid fa-store" style="color:#22d3ee;font-size:12px"></i>
-        <select id="headerStoreSelect" class="store-dropdown" onchange="onHeaderStoreChange(this.value)">
-          <option value="aburcubur">Abur Çubur</option>
-          <option value="papatya2">Papatya 2</option>
-          <option value="custom">Fərdi Baza</option>
-        </select>
-      </div>
-
       <!-- Satış Panelinə Keçid Düyməsi -->
       <a href="index.html" class="nav-switch-btn" title="Satış Panelinə keçid">
         <i class="fa-solid fa-chart-pie"></i>
@@ -1578,8 +1728,27 @@ body.light-theme .more-grid-btn {
     </div>
   </section>
 
+  <!-- ============ AÇILIB-BAĞLANAN BÖLMƏ: TOP 5 ANALİTİKA ============ -->
+  <div class="collapse-toggle-wrapper">
+    <button type="button" class="collapse-toggle-bar" id="btnToggleAnalytics" onclick="toggleCollapseSection('secAnalytics', this)">
+      <div class="toggle-bar-left">
+        <span class="toggle-bar-icon-wrap" style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.3)">
+          <i class="fa-solid fa-trophy"></i>
+        </span>
+        <div class="toggle-bar-text">
+          <span class="toggle-bar-title">Ən Çox Qazanc Verəcək Mallar (Top 5) &amp; Ən Çox Maya Yatırılmış Mallar (Top 5)</span>
+          <span class="toggle-bar-hint">Potensial mənfəət və kapital yükü analitikasını görmək üçün klikləyin</span>
+        </div>
+      </div>
+      <div class="toggle-bar-right">
+        <span class="toggle-pill-status">Göstər</span>
+        <i class="fa-solid fa-chevron-down toggle-chevron"></i>
+      </div>
+    </button>
+  </div>
+
   <!-- ============ ANALİTİKA BÖLMƏSİ ============ -->
-  <section class="analytics-grid" id="secAnalytics">
+  <section class="analytics-grid" id="secAnalytics" style="display: none;">
     <!-- 1. Ən Çox Qazanc Verəcək Mallar -->
     <div class="panel">
       <div class="panel-head">
@@ -1637,8 +1806,27 @@ body.light-theme .more-grid-btn {
     </div>
   </section>
 
+  <!-- ============ AÇILIB-BAĞLANAN BÖLMƏ: QİYMƏT SİMULYATORU ============ -->
+  <div class="collapse-toggle-wrapper">
+    <button type="button" class="collapse-toggle-bar" id="btnToggleSimTeaser" onclick="toggleCollapseSection('secSimTeaser', this)">
+      <div class="toggle-bar-left">
+        <span class="toggle-bar-icon-wrap" style="background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid rgba(56,189,248,0.3)">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </span>
+        <div class="toggle-bar-text">
+          <span class="toggle-bar-title">Qiymət Simulyatoru: 5 və ya 10 qəpik artım nə qədər qazandırar?</span>
+          <span class="toggle-bar-hint">"What-If" qazanc kalkulyatorunu görmək üçün klikləyin</span>
+        </div>
+      </div>
+      <div class="toggle-bar-right">
+        <span class="toggle-pill-status">Göstər</span>
+        <i class="fa-solid fa-chevron-down toggle-chevron"></i>
+      </div>
+    </button>
+  </div>
+
   <!-- ============ QİYMƏT SİMULYATORU TEASER BANNERİ ============ -->
-  <section class="sim-teaser-card">
+  <section class="sim-teaser-card" id="secSimTeaser" style="display: none;">
     <div class="sim-teaser-content">
       <div class="sim-teaser-badge">
         <i class="fa-solid fa-wand-magic-sparkles"></i>
@@ -2073,55 +2261,47 @@ function getActivePassword() {
 }
 
 function getActiveProfileId() {
-  // 1. URL parametr yoxlanışı (?store=papatya2 və ya ?store=aburcubur)
-  try {
-    const urlParams = new URLSearchParams(window.location.search || '');
-    const storeParam = urlParams.get('store');
-    if (storeParam && (STORE_PROFILES[storeParam] || storeParam === 'custom')) {
-      return storeParam;
-    }
-  } catch (e) {}
-
-  // 2. Link / URL əsasında avtomatik mağaza təyini (DƏQİQ VƏ BİRBAŞA)
-  const currentHref = (window.location.href || '').toLowerCase();
-  const currentPath = (window.location.pathname || '').toLowerCase();
-  if (currentHref.includes('papatya2') || currentPath.includes('papatya2') || currentHref.includes('papatya')) {
-    return 'papatya2';
-  }
-  if (currentHref.includes('aburcubur') || currentPath.includes('aburcubur')) {
-    return 'aburcubur';
-  }
-
-  // 3. İstifadəçi cari sessiyada xüsusi seçim edibsə:
+  // 1. İstifadəçi tərəfindən seçilmiş aktiv profil (localStorage / sessionStorage)
   const sessionSelected = sessionStorage.getItem('kassa_session_profile');
   if (sessionSelected && (STORE_PROFILES[sessionSelected] || sessionSelected === 'custom')) {
     return sessionSelected;
   }
 
-  // 4. Əgər yaddaşda qeyd varsa:
-  let p = localStorage.getItem('kassa_active_profile');
-  if (p && (STORE_PROFILES[p] || p === 'custom')) return p;
+  const localSelected = localStorage.getItem('kassa_active_profile');
+  if (localSelected && (STORE_PROFILES[localSelected] || localSelected === 'custom')) {
+    return localSelected;
+  }
+
+  // 2. Yaddaşda saxlanılan mağaza adı və ya URL-i
+  const savedStoreName = (localStorage.getItem('kassa_store_name') || '').toLowerCase();
+  if (savedStoreName.includes('papatya')) return 'papatya2';
+  if (savedStoreName.includes('abur')) return 'aburcubur';
 
   const savedUrl = (localStorage.getItem('kassa_supabase_url') || '').toLowerCase();
   if (savedUrl.includes('ijnbsuupwwyqohysrjlc')) return 'papatya2';
   if (savedUrl.includes('zcjthobakvppowerkxmv')) return 'aburcubur';
 
-  // 5. Default olaraq PC / local / test mühitində Papatya 2 (çünki aktiv anbar malları buradadır!)
-  return 'papatya2';
+  // 3. Əgər linkdə və ya fayl adında birbaşa göstərilibsə
+  const currentHref = (window.location.href || '').toLowerCase();
+  if (currentHref.includes('papatya2') || currentHref.includes('papatya')) return 'papatya2';
+  if (currentHref.includes('aburcubur')) return 'aburcubur';
+
+  // 4. Default olaraq Abur Çubur
+  return 'aburcubur';
 }
 
 function getActiveSupabaseUrl() {
   const pid = getActiveProfileId();
   if (STORE_PROFILES[pid]) return STORE_PROFILES[pid].url;
   const saved = (localStorage.getItem('kassa_supabase_url') || '').trim().replace(/\/+$/, '');
-  return saved || STORE_PROFILES['papatya2'].url;
+  return saved || STORE_PROFILES['aburcubur'].url;
 }
 
 function getActiveSupabaseKey() {
   const pid = getActiveProfileId();
   if (STORE_PROFILES[pid]) return STORE_PROFILES[pid].key;
   const saved = (localStorage.getItem('kassa_supabase_key') || '').trim();
-  return saved || STORE_PROFILES['papatya2'].key;
+  return saved || STORE_PROFILES['aburcubur'].key;
 }
 
 function getActivePassword() {
@@ -2133,16 +2313,16 @@ function getActiveStoreName() {
   if (STORE_PROFILES[pid]) return STORE_PROFILES[pid].name;
   const saved = localStorage.getItem('kassa_store_name');
   if (saved && saved !== 'Papatya' && saved !== 'Satış İdarəetmə Paneli' && saved !== 'Papatya — Anbar İdarəetməsi') return saved;
-  return 'Papatya 2';
+  return 'Abur Çubur';
 }
 
 function updateStoreTitle() {
   const name = getActiveStoreName();
+  const pid = getActiveProfileId();
   const titleEl = $('appStoreTitle');
   if (titleEl) titleEl.textContent = `${name} — Anbar İdarəetməsi`;
   const loginTitle = $('loginStoreTitle');
-  if (loginTitle) loginTitle.textContent = name;
-  const pid = getActiveProfileId();
+  if (loginTitle) loginTitle.textContent = `${name} Paneli`;
   const pwaName = localStorage.getItem(`kassa_pwa_name_${pid}`) || localStorage.getItem('kassa_pwa_name') || `${name} — Anbar Paneli`;
   document.title = pwaName;
   const manifestLink = $('manifestLink');
@@ -2161,6 +2341,9 @@ function syncStoreSelectUI() {
   if (cardA) cardA.classList.toggle('active', pid === 'aburcubur');
   if (cardP) cardP.classList.toggle('active', pid === 'papatya2');
 }
+
+// Səhifə oxunan kimi mağaza adını dərhal tətbiq edirik
+try { updateStoreTitle(); syncStoreSelectUI(); } catch(e) {}
 
 function switchStoreProfile(profileId, triggerReload = true) {
   if (!STORE_PROFILES[profileId] && profileId !== 'custom') {
@@ -2800,6 +2983,29 @@ function calculateKPIs() {
   if ($('chipDeadCount')) $('chipDeadCount').textContent = nf0.format(deadProducts.length);
   const priceErrorProducts = activeProducts.filter(p => p.satis_qiymeti <= p.alis_qiymeti);
   if ($('chipPriceErrorCount')) $('chipPriceErrorCount').textContent = priceErrorProducts.length;
+}
+
+/* ============ AÇILIB-BAĞLANAN BÖLMƏLƏRİN İDARƏSİ (COLLAPSE / TOGGLE) ============ */
+function toggleCollapseSection(sectionId, btnEl) {
+  const sec = document.getElementById(sectionId);
+  if (!sec) return;
+  const isHidden = (sec.style.display === 'none' || getComputedStyle(sec).display === 'none');
+  
+  if (isHidden) {
+    sec.style.display = (sectionId === 'secAnalytics' ? 'grid' : 'flex');
+    if (btnEl) {
+      btnEl.classList.add('is-open');
+      const pill = btnEl.querySelector('.toggle-pill-status');
+      if (pill) pill.textContent = 'Gizlət';
+    }
+  } else {
+    sec.style.display = 'none';
+    if (btnEl) {
+      btnEl.classList.remove('is-open');
+      const pill = btnEl.querySelector('.toggle-pill-status');
+      if (pill) pill.textContent = 'Göstər';
+    }
+  }
 }
 
 let topProfitLimit = 5;
@@ -3472,8 +3678,8 @@ function renderTable() {
       // =========================================================
       return `
         <tr class="${rowStatusCls}">
-          <td class="td-ad" data-label="Məhsul">
-            <div class="td-ad-wrap">
+          <td class="td-mal-adi" data-label="Məhsul">
+            <div class="td-mal-wrap">
               <span class="product-name">${escapeHtml(prodName)}</span>
               ${p.barkod ? `<span class="mob-barcode-pill"><i class="fa-solid fa-barcode"></i> ${escapeHtml(p.barkod)}</span>` : ''}
             </div>
@@ -3513,7 +3719,7 @@ function renderTable() {
     return `
       <tr class="${rowStatusCls}">
         <td class="td-barkod">${escapeHtml(p.barkod || '—')}</td>
-        <td class="td-ad">${escapeHtml(prodName)}</td>
+        <td class="td-mal-adi">${escapeHtml(prodName)}</td>
         <td class="td-maya">${money(p.alis_qiymeti)}</td>
         <td class="td-satis">${money(p.satis_qiymeti)}</td>
         <td class="td-unit-profit">+${money(p.unit_profit)}</td>
@@ -3847,6 +4053,10 @@ function handleMobNav(target) {
   } else if (target === 'analytics') {
     document.getElementById('mobNavAnalytics')?.classList.add('active');
     const an = document.getElementById('secAnalytics') || document.querySelector('.analytics-grid');
+    const btn = document.getElementById('btnToggleAnalytics');
+    if (an && (an.style.display === 'none' || getComputedStyle(an).display === 'none')) {
+      toggleCollapseSection('secAnalytics', btn);
+    }
     if (an) an.scrollIntoView({ behavior: 'smooth' });
   } else if (target === 'more') {
     document.getElementById('mobNavMore')?.classList.add('active');
@@ -3910,13 +4120,13 @@ window.addEventListener('DOMContentLoaded', checkAuth);
     <button type="button" class="more-sheet-close" onclick="closeMoreSheet()"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="more-sheet-grid">
-    <button type="button" class="more-grid-btn" onclick="window.location.href='index.html'">
+    <button type="button" class="more-grid-btn" id="btnMobNavIndex" onclick="window.location.href='index.html'">
       <div class="more-grid-ico" style="background:rgba(34,211,238,.15);color:#22d3ee"><i class="fa-solid fa-chart-pie"></i></div>
       <div class="more-grid-label">Satış Paneli</div>
       <div class="more-grid-sub">Kassa paneli</div>
     </button>
 
-    <button type="button" class="more-grid-btn" onclick="window.location.href='musteriler.html'">
+    <button type="button" class="more-grid-btn" id="btnMobNavMusteriler" onclick="window.location.href='musteriler.html'">
       <div class="more-grid-ico" style="background:rgba(236,72,153,.15);color:#f472b6"><i class="fa-solid fa-users"></i></div>
       <div class="more-grid-label">Müştərilər</div>
       <div class="more-grid-sub">Borclar dəftəri</div>
