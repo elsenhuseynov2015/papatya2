@@ -501,6 +501,494 @@ body.light-theme .collapse-toggle-bar.is-open .toggle-pill-status {
 }
 .btn-export:hover{background:rgba(52,211,153,.22);color:#fff;transform:translateY(-1px);box-shadow:0 6px 18px -4px rgba(52,211,153,.4)}
 
+/* ============ WPF FİLTR VƏ SIRALAMA MƏRKƏZİ STİLLƏRİ ============ */
+.vahid-segmented-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid var(--line);
+  user-select: none;
+}
+.vahid-pill-btn {
+  padding: 7px 14px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all .18s ease;
+  white-space: nowrap;
+}
+.vahid-pill-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, .05);
+}
+.vahid-pill-btn.active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  box-shadow: 0 3px 12px -2px rgba(99, 102, 241, .5);
+}
+
+.filter-btn-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-filter-hub {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, .12), rgba(99, 102, 241, .18));
+  border: 1px solid rgba(251, 191, 36, .38);
+  color: #fde68a;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .2s cubic-bezier(.4, 0, .2, 1);
+  box-shadow: 0 4px 14px -3px rgba(251, 191, 36, .2);
+  white-space: nowrap;
+}
+.btn-filter-hub:hover {
+  background: linear-gradient(135deg, rgba(251, 191, 36, .25), rgba(99, 102, 241, .32));
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -3px rgba(251, 191, 36, .35);
+  border-color: rgba(251, 191, 36, .6);
+}
+.filter-badge {
+  background: #ef4444;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 800;
+  border-radius: 99px;
+  padding: 1px 7px;
+  min-width: 18px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, .6);
+}
+.filter-hub-arrow {
+  font-size: 11px;
+  color: var(--muted);
+  transition: transform .2s ease;
+}
+
+.btn-filter-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, .12);
+  border: 1px solid rgba(239, 68, 68, .35);
+  color: #fca5a5;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .2s ease;
+  white-space: nowrap;
+}
+.btn-filter-reset:hover {
+  background: rgba(239, 68, 68, .25);
+  border-color: #ef4444;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px;
+}
+.search-clear-btn:hover {
+  color: #fff;
+}
+
+/* Səffaf Backdrop */
+.filter-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .45);
+  backdrop-filter: blur(2px);
+  z-index: 998;
+}
+
+/* Modern Üzən Panel (Floating Flyout Hub) */
+.filter-flyout-panel {
+  position: absolute;
+  top: 58px;
+  right: 0;
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  max-height: 85vh;
+  background: #0b1120;
+  border: 1px solid rgba(255, 255, 255, .15);
+  border-radius: 18px;
+  box-shadow: 0 20px 55px rgba(0, 0, 0, .85);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: flyoutFadeIn .22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes flyoutFadeIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.flyout-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, .03);
+  border-bottom: 1px solid var(--line);
+}
+.flyout-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  color: var(--text);
+}
+.flyout-active-badge {
+  background: #6366f1;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 99px;
+}
+.flyout-close-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all .15s ease;
+}
+.flyout-close-btn:hover {
+  background: rgba(239, 68, 68, .2);
+  color: #fb7185;
+}
+
+.flyout-body {
+  padding: 16px 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: calc(85vh - 120px);
+}
+.flyout-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-2);
+}
+.flyout-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.flyout-section-title-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.flyout-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .6px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.btn-clear-date {
+  background: transparent;
+  border: none;
+  color: #fb7185;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-clear-date:hover {
+  text-decoration: underline;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+.filter-select option {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+.flyout-segmented {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+}
+.flyout-segmented .vahid-pill-btn {
+  text-align: center;
+  width: 100%;
+}
+
+.date-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+.date-preset-btn {
+  padding: 6px 2px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .03);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .15s ease;
+  text-align: center;
+}
+.date-preset-btn:hover {
+  background: rgba(255, 255, 255, .08);
+  color: var(--text);
+}
+.date-preset-btn.active {
+  background: #6366f1;
+  color: #fff;
+  border-color: #6366f1;
+}
+
+.date-inputs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.filter-input-date {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  outline: none;
+}
+.date-sep {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.flyout-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.flyout-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.range-inputs-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.filter-input-num {
+  width: 100%;
+  padding: 8px 6px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 11.5px;
+  font-family: inherit;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+}
+.range-sep {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.stok-radio-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.dead-stock-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 4px;
+}
+.stok-radio-card {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .03);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s ease;
+  user-select: none;
+}
+.stok-radio-card:hover {
+  background: rgba(255, 255, 255, .07);
+  color: var(--text);
+}
+.stok-radio-card.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, .2), rgba(34, 211, 238, .15));
+  border-color: #6366f1;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, .25);
+}
+.stok-radio-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--muted);
+  flex: none;
+  transition: all .15s ease;
+}
+.stok-radio-card.active .stok-radio-dot {
+  border-color: #6366f1;
+  background: #6366f1;
+  box-shadow: inset 0 0 0 2px #fff;
+}
+
+.flyout-check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.flyout-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+.flyout-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #6366f1;
+  cursor: pointer;
+}
+.flyout-sub-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.flyout-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, .03);
+  border-top: 1px solid var(--line);
+}
+.btn-flyout-reset {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, .14);
+  border: 1px solid rgba(239, 68, 68, .3);
+  color: #fca5a5;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.btn-flyout-reset:hover {
+  background: rgba(239, 68, 68, .25);
+  color: #fff;
+}
+.btn-flyout-apply {
+  padding: 8px 20px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .15s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, .4);
+}
+.btn-flyout-apply:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-star {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 4px;
+  transition: all .15s ease;
+}
+.btn-star:hover {
+  color: #fbbf24;
+  transform: scale(1.2);
+}
+.btn-star.starred {
+  color: #f59e0b;
+}
+
 .tbl-wrap{overflow-x:auto;border-radius:16px;border:1px solid var(--line-2)}
 table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}
 thead{background:rgba(255,255,255,.03);border-bottom:1px solid var(--line)}
@@ -1025,6 +1513,115 @@ body.light-theme .btn-export:hover{
   background:#15803d;color:#fff;
 }
 
+/* Light Theme üçün WPF Filtrlər Paneli */
+body.light-theme .vahid-segmented-pill {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+body.light-theme .vahid-pill-btn {
+  color: #475569;
+}
+body.light-theme .vahid-pill-btn:hover {
+  color: #0f172a;
+}
+body.light-theme .vahid-pill-btn.active {
+  background: #ffffff;
+  color: #4f46e5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+body.light-theme .btn-filter-hub {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #b45309;
+  box-shadow: 0 3px 12px -2px rgba(251, 191, 36, .2);
+}
+body.light-theme .btn-filter-hub:hover {
+  background: #fef3c7;
+  color: #78350f;
+}
+body.light-theme .btn-filter-reset {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+body.light-theme .btn-filter-reset:hover {
+  background: #fecaca;
+  color: #b91c1c;
+}
+body.light-theme .filter-flyout-panel {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, .22);
+}
+body.light-theme .flyout-header {
+  background: #f8fafc;
+  border-bottom-color: #e2e8f0;
+}
+body.light-theme .flyout-header-title {
+  color: #0f172a;
+}
+body.light-theme .flyout-section-title {
+  color: #64748b;
+}
+body.light-theme .filter-select {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+body.light-theme .filter-select option {
+  background: #ffffff;
+  color: #0f172a;
+}
+body.light-theme .date-preset-btn {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+body.light-theme .date-preset-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+body.light-theme .date-preset-btn.active {
+  background: #4f46e5;
+  color: #fff;
+  border-color: #4f46e5;
+}
+body.light-theme .filter-input-date, body.light-theme .filter-input-num {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+body.light-theme .stok-radio-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  color: #334155;
+}
+body.light-theme .stok-radio-card:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+body.light-theme .stok-radio-card.active {
+  background: #eef2ff;
+  border-color: #6366f1;
+  color: #4338ca;
+}
+body.light-theme .flyout-checkbox-label {
+  color: #1e293b;
+}
+body.light-theme .flyout-footer {
+  background: #f8fafc;
+  border-top-color: #e2e8f0;
+}
+body.light-theme .btn-flyout-reset {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+body.light-theme .btn-flyout-apply {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #fff;
+}
+
 /* Cədvəl */
 body.light-theme thead{background:#f8fafc;border-bottom-color:#e2e8f0}
 body.light-theme th{color:#475569;font-weight:800}
@@ -1237,6 +1834,41 @@ body.light-theme .sim-footer-info b{color:#0f172a}
   .chip { padding: 6px 11px !important; font-size: 11px !important; white-space: nowrap !important; }
   .tbl-actions { width: 100% !important; justify-content: space-between !important; }
   .tbl-actions .chip, .tbl-actions .btn-export { flex: 1 !important; justify-content: center !important; }
+
+  .filter-btn-wrap {
+    width: 100% !important;
+    display: flex !important;
+    gap: 8px !important;
+  }
+  .btn-filter-hub {
+    flex: 1 !important;
+    justify-content: center !important;
+  }
+  .vahid-segmented-pill {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  .vahid-pill-btn {
+    text-align: center !important;
+    padding: 7px 4px !important;
+    font-size: 11px !important;
+  }
+  .filter-flyout-panel {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 85vh !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, .6) !important;
+  }
+  .flyout-body {
+    max-height: calc(85vh - 125px) !important;
+  }
 
   /* =========================================================================
      MALLARIN SİYAHISI — TELEFONA 100% SIĞAN MOBİL KART GÖRÜNÜŞÜ
@@ -1655,8 +2287,8 @@ body.light-theme .more-grid-btn {
 
   <!-- ============ KPI KARTLARI ============ -->
   <section class="kpis" id="secKpis">
-    <!-- 1. Toplam Çeşid Sayı -->
-    <div class="kcard c-violet">
+    <!-- 1. Toplam Çeşid Sayı (Bütün mallar filtri) -->
+    <div class="kcard c-violet" onclick="setStokFilter('Hamisi')" style="cursor:pointer" title="Bütün malları göstərmək üçün klikləyin">
       <div class="kcard-top">
         <span class="kcard-title">Toplam Çeşid</span>
         <div class="kcard-ico"><i class="fa-solid fa-boxes-packing"></i></div>
@@ -1703,8 +2335,8 @@ body.light-theme .more-grid-btn {
       </div>
     </div>
 
-    <!-- 5. Kritik / Bitmiş Stok -->
-    <div class="kcard c-red">
+    <!-- 5. Kritik / Bitmiş Stok (Az stok filtri) -->
+    <div class="kcard c-red" onclick="setStokFilter('AzStok')" style="cursor:pointer" title="Az qalan malları (≤ 3) göstərmək üçün klikləyin">
       <div class="kcard-top">
         <span class="kcard-title">Kritik &amp; Bitmiş Ehtiyat</span>
         <div class="kcard-ico"><i class="fa-solid fa-triangle-exclamation"></i></div>
@@ -1715,8 +2347,8 @@ body.light-theme .more-grid-btn {
       </div>
     </div>
 
-    <!-- 6. Donmuş / Ölü Maya (Hərəkətsiz Mallar) -->
-    <div class="kcard c-rose" onclick="setFilter('dead-stock')" style="cursor:pointer" title="Ölü malları göstərmək üçün klikləyin">
+    <!-- 6. Donmuş / Ölü Maya (Hərəkətsiz Mallar - 1 Ay filtri) -->
+    <div class="kcard c-rose" onclick="setStokFilter('OluMallar1Ay')" style="cursor:pointer" title="Son 1 ayda satılmayan ölü malları göstərmək üçün klikləyin">
       <div class="kcard-top">
         <span class="kcard-title">Donmuş Maya (Ölü Pul)</span>
         <div class="kcard-ico"><i class="fa-solid fa-snowflake"></i></div>
@@ -1857,51 +2489,37 @@ body.light-theme .more-grid-btn {
   </section>
 
   <!-- ============ CƏDVƏL BÖLMƏSİ ============ -->
-  <section class="panel tbl-panel" id="secTable">
+  <section class="panel tbl-panel" id="secTable" style="position:relative">
     <div class="tbl-controls">
-      <!-- Axtarış -->
+      <!-- 1. Axtarış -->
       <div class="search-box">
         <i class="fa-solid fa-magnifying-glass"></i>
         <input type="text" id="searchInput" class="search-input" placeholder="Məhsul adı və ya barkod axtar..." oninput="filterAndRender()">
+        <button type="button" class="search-clear-btn" id="searchClearBtn" onclick="$('searchInput').value='';filterAndRender();" style="display:none" title="Təmizlə">✕</button>
       </div>
 
-      <!-- Filtrlər -->
-      <div class="chips" id="filterChips">
-        <button type="button" class="chip active" data-filter="all" onclick="setFilter('all')">
-          <span>Hamısı</span>
-          <span class="chip-count" id="chipAllCount">0</span>
+      <!-- 2. Sürətli Vahid Zolağı (WPF ilə 1:1) -->
+      <div class="vahid-segmented-pill">
+        <button type="button" class="vahid-pill-btn active" data-vahid="Hamisi" onclick="setVahidFilter('Hamisi')">Hamısı</button>
+        <button type="button" class="vahid-pill-btn" data-vahid="Kilo" onclick="setVahidFilter('Kilo')">⚖️ Kilo</button>
+        <button type="button" class="vahid-pill-btn" data-vahid="Eded" onclick="setVahidFilter('Eded')">🔢 Ədəd</button>
+      </div>
+
+      <!-- 3. "⚡ Filtrlər" Aç/Bağla və "✕ Sıfırla" Düymələri -->
+      <div class="filter-btn-wrap">
+        <button type="button" class="btn-filter-hub" id="btnToggleFilterPanel" onclick="toggleFilterPanel()" title="Genişləndirilmiş Filtrlər və Sıralama Paneli">
+          <i class="fa-solid fa-bolt" style="color:#fbbf24"></i>
+          <span>Filtrlər</span>
+          <span class="filter-badge" id="filterActiveBadge" style="display:none">0</span>
+          <i class="fa-solid fa-chevron-down filter-hub-arrow" id="filterHubArrow"></i>
         </button>
-        <button type="button" class="chip" data-filter="critical" onclick="setFilter('critical')">
-          <i class="fa-solid fa-circle-exclamation" style="color:#fbbf24"></i>
-          <span>Kritik Ehtiyat (&lt;5)</span>
-          <span class="chip-count" id="chipCritCount">0</span>
-        </button>
-        <button type="button" class="chip" data-filter="zero" onclick="setFilter('zero')">
-          <i class="fa-solid fa-ban" style="color:#fb7185"></i>
-          <span>Tükənmişlər (0)</span>
-          <span class="chip-count" id="chipZeroCount">0</span>
-        </button>
-        <button type="button" class="chip chip-dead" data-filter="dead-stock" onclick="setFilter('dead-stock')">
-          <i class="fa-solid fa-snowflake" style="color:#fb7185"></i>
-          <span>Ölü Mallar (Donmuş Maya)</span>
-          <span class="chip-count" id="chipDeadCount">0</span>
-        </button>
-        <button type="button" class="chip chip-price-error" data-filter="price-error" onclick="setFilter('price-error')">
-          <i class="fa-solid fa-triangle-exclamation" style="color:#fb7185"></i>
-          <span>Qiymət Xətası (Alış ≥ Satış)</span>
-          <span class="chip-count" id="chipPriceErrorCount">0</span>
-        </button>
-        <button type="button" class="chip" data-filter="high-margin" onclick="setFilter('high-margin')">
-          <i class="fa-solid fa-percent" style="color:#34d399"></i>
-          <span>Yüksək Marja (&gt;40%)</span>
-        </button>
-        <button type="button" class="chip" data-filter="kilo" onclick="setFilter('kilo')">
-          <i class="fa-solid fa-scale-balanced" style="color:#60a5fa"></i>
-          <span>Çəki (Kq) Malları</span>
+        <button type="button" class="btn-filter-reset" id="btnResetFilters" onclick="resetAllFilters()" style="display:none" title="Bütün filtrləri sıfırla">
+          <i class="fa-solid fa-xmark"></i>
+          <span>Sıfırla</span>
         </button>
       </div>
 
-      <!-- İxrac Düymələri -->
+      <!-- 4. İxrac Düymələri -->
       <div class="tbl-actions">
         <button type="button" class="chip" onclick="openPriceSimulatorModal()" style="border-color:#38bdf8;color:#38bdf8;background:rgba(56,189,248,.1);font-weight:700">
           <i class="fa-solid fa-sliders"></i>
@@ -1910,6 +2528,210 @@ body.light-theme .more-grid-btn {
         <button type="button" class="btn-export" onclick="exportToExcel()">
           <i class="fa-solid fa-file-excel"></i>
           <span>Excel İxrac</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sürətli Kapsul Zolağı (Filtr Chips) -->
+    <div class="chips" id="filterChips" style="margin-bottom:18px">
+      <button type="button" class="chip active" data-filter="all" onclick="setQuickChipFilter('all')">
+        <span>Hamısı</span>
+        <span class="chip-count" id="chipAllCount">0</span>
+      </button>
+      <button type="button" class="chip" data-filter="stokda-var" onclick="setQuickChipFilter('stokda-var')">
+        <i class="fa-solid fa-circle-check" style="color:#34d399"></i>
+        <span>Stokda Var</span>
+        <span class="chip-count" id="chipInStockCount">0</span>
+      </button>
+      <button type="button" class="chip" data-filter="az-stok" onclick="setQuickChipFilter('az-stok')">
+        <i class="fa-solid fa-circle-exclamation" style="color:#fbbf24"></i>
+        <span>Az Qalan (≤3)</span>
+        <span class="chip-count" id="chipCritCount">0</span>
+      </button>
+      <button type="button" class="chip" data-filter="zero" onclick="setQuickChipFilter('zero')">
+        <i class="fa-solid fa-ban" style="color:#fb7185"></i>
+        <span>Bitmiş Stok (0)</span>
+        <span class="chip-count" id="chipZeroCount">0</span>
+      </button>
+      <button type="button" class="chip chip-dead" data-filter="dead-stock" onclick="setQuickChipFilter('dead-stock')">
+        <i class="fa-solid fa-snowflake" style="color:#fb7185"></i>
+        <span>Ölü Mallar</span>
+        <span class="chip-count" id="chipDeadCount">0</span>
+      </button>
+      <button type="button" class="chip" data-filter="favorites" onclick="setQuickChipFilter('favorites')" style="border-color:rgba(251,191,36,.35);color:#fbbf24">
+        <i class="fa-solid fa-star" style="color:#fbbf24"></i>
+        <span>Ulduzlu Mallar</span>
+        <span class="chip-count" id="chipFavCount">0</span>
+      </button>
+      <button type="button" class="chip chip-price-error" data-filter="ziyanli" onclick="setQuickChipFilter('ziyanli')">
+        <i class="fa-solid fa-triangle-exclamation" style="color:#fb7185"></i>
+        <span>Ziyanlı (Maya &gt; Satış)</span>
+        <span class="chip-count" id="chipPriceErrorCount">0</span>
+      </button>
+      <button type="button" class="chip" data-filter="deactivated" onclick="setQuickChipFilter('deactivated')" style="border-color:rgba(148,163,184,.35);color:#94a3b8">
+        <i class="fa-solid fa-eye-slash" style="color:#94a3b8"></i>
+        <span>Deaktiv Mallar</span>
+        <span class="chip-count" id="chipDeactiveCount">0</span>
+      </button>
+      <button type="button" class="chip" data-filter="high-margin" onclick="setQuickChipFilter('high-margin')">
+        <i class="fa-solid fa-percent" style="color:#34d399"></i>
+        <span>Yüksək Marja (&gt;40%)</span>
+      </button>
+    </div>
+
+    <!-- Səffaf klik tutucu -->
+    <div id="filterBackdrop" class="filter-backdrop" onclick="closeFilterPanel()" style="display:none"></div>
+
+    <!-- ⭐ MODERN ÜZƏN PEŞƏKAR FİLTR VƏ SIRALAMA MƏRKƏZİ (Floating Flyout Hub — WPF ilə 1:1) -->
+    <div id="filterFlyoutPanel" class="filter-flyout-panel" style="display:none">
+      <!-- 1. Başlıq və Bağla düyməsi -->
+      <div class="flyout-header">
+        <div class="flyout-header-title">
+          <i class="fa-solid fa-bolt" style="color:#fbbf24;font-size:14px"></i>
+          <span>FİLTRLƏR VƏ SIRALAMA</span>
+          <span class="flyout-active-badge" id="flyoutActiveBadge" style="display:none">0 aktiv</span>
+        </div>
+        <button type="button" class="flyout-close-btn" onclick="closeFilterPanel()" title="Bağla">✕</button>
+      </div>
+
+      <!-- 2. Bütün Filtrlər (Səliqəli Şaquli Sürüşmə) -->
+      <div class="flyout-body">
+        <!-- 1. Sıralama Qaydası -->
+        <div class="flyout-section">
+          <div class="flyout-section-title">🔤 SIRALAMA QAYDASI</div>
+          <select id="filterSortOrder" class="filter-select" onchange="onSortOrderChange(this.value)">
+            <option value="created_desc">🕒 Ən son əlavə olunanlar</option>
+            <option value="updated_desc">🔄 Ən son yenilənənlər</option>
+            <option value="name_asc">🔤 Ad (A ➔ Z)</option>
+            <option value="name_desc">🔤 Ad (Z ➔ A)</option>
+            <option value="price_asc">💰 Qiymət (Ucuzdan bahaya)</option>
+            <option value="price_desc">💰 Qiymət (Bahadan ucuza)</option>
+            <option value="stock_asc">📦 Stok (Azdan çoxa)</option>
+            <option value="stock_desc">📦 Stok (Çoxdan aza)</option>
+          </select>
+        </div>
+
+        <!-- 2. Vahid Növü (Ölçü Vahidi) -->
+        <div class="flyout-section">
+          <div class="flyout-section-title">⚖️ ÖLÇÜ VAHİDİ</div>
+          <div class="vahid-segmented-pill flyout-segmented">
+            <button type="button" class="vahid-pill-btn active" data-vahid="Hamisi" onclick="setVahidFilter('Hamisi')">Hamısı</button>
+            <button type="button" class="vahid-pill-btn" data-vahid="Kilo" onclick="setVahidFilter('Kilo')">⚖️ Kilo</button>
+            <button type="button" class="vahid-pill-btn" data-vahid="Eded" onclick="setVahidFilter('Eded')">🔢 Ədəd</button>
+          </div>
+        </div>
+
+        <!-- 3. Anbara Daxil Olma Tarixi -->
+        <div class="flyout-section">
+          <div class="flyout-section-title-wrap">
+            <div class="flyout-section-title">📅 ANBARA DAXİL OLMA TARİXİ</div>
+            <button type="button" class="btn-clear-date" id="btnClearDateFilter" onclick="setDatePreset('Hamisi')" style="display:none">✕ Tarixi Təmizlə</button>
+          </div>
+          <div class="date-presets-grid">
+            <button type="button" class="date-preset-btn active" data-date-preset="Hamisi" onclick="setDatePreset('Hamisi')">Hamısı</button>
+            <button type="button" class="date-preset-btn" data-date-preset="Bugun" onclick="setDatePreset('Bugun')">Bu gün</button>
+            <button type="button" class="date-preset-btn" data-date-preset="Dunen" onclick="setDatePreset('Dunen')">Dünən</button>
+            <button type="button" class="date-preset-btn" data-date-preset="BuAy" onclick="setDatePreset('BuAy')">Bu ay</button>
+            <button type="button" class="date-preset-btn" data-date-preset="KecenAy" onclick="setDatePreset('KecenAy')">Keçən ay</button>
+          </div>
+          <div class="date-inputs-row">
+            <input type="date" id="filterStartDate" class="filter-input-date" onchange="onCustomDateChange()">
+            <span class="date-sep">➔</span>
+            <input type="date" id="filterEndDate" class="filter-input-date" onchange="onCustomDateChange()">
+          </div>
+        </div>
+
+        <!-- 4. Qiymət və Stok Aralığı -->
+        <div class="flyout-section">
+          <div class="flyout-grid-2">
+            <!-- Qiymət -->
+            <div class="flyout-col">
+              <div class="flyout-section-title">💰 QİYMƏT ARALIĞI (₼)</div>
+              <div class="range-inputs-row">
+                <input type="number" step="any" id="filterMinPrice" class="filter-input-num" placeholder="Min ₼" oninput="onRangeFilterChange()">
+                <span class="range-sep">-</span>
+                <input type="number" step="any" id="filterMaxPrice" class="filter-input-num" placeholder="Max ₼" oninput="onRangeFilterChange()">
+              </div>
+            </div>
+            <!-- Stok -->
+            <div class="flyout-col">
+              <div class="flyout-section-title">📦 STOK ARALIĞI</div>
+              <div class="range-inputs-row">
+                <input type="number" step="any" id="filterMinStock" class="filter-input-num" placeholder="Min" oninput="onRangeFilterChange()">
+                <span class="range-sep">-</span>
+                <input type="number" step="any" id="filterMaxStock" class="filter-input-num" placeholder="Max" oninput="onRangeFilterChange()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Stok Vəziyyəti -->
+        <div class="flyout-section">
+          <div class="flyout-section-title">📦 STOK VƏZİYYƏTİ</div>
+          <div class="stok-radio-grid">
+            <div class="stok-radio-card active" data-stok-filter="Hamisi" onclick="setStokFilter('Hamisi')">
+              <span class="stok-radio-dot"></span>
+              <span>📦 Bütün mallar</span>
+            </div>
+            <div class="stok-radio-card" data-stok-filter="StokdaVar" onclick="setStokFilter('StokdaVar')">
+              <span class="stok-radio-dot"></span>
+              <span>✅ Stokda var</span>
+            </div>
+            <div class="stok-radio-card" data-stok-filter="AzStok" onclick="setStokFilter('AzStok')">
+              <span class="stok-radio-dot"></span>
+              <span>⚠️ Az qalan (≤ 3)</span>
+            </div>
+            <div class="stok-radio-card" data-stok-filter="BitmisStok" onclick="setStokFilter('BitmisStok')">
+              <span class="stok-radio-dot"></span>
+              <span>🛑 Bitmiş stok (0)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Xüsusi və Ölü Mallar -->
+        <div class="flyout-section">
+          <div class="flyout-section-title">🏷️ XÜSUSİ VƏ ÖLÜ MALLAR</div>
+          <div class="flyout-check-list">
+            <label class="flyout-checkbox-label">
+              <input type="checkbox" id="chkOnlyFavorites" onchange="filterOnlyFavorites=this.checked;filterAndRender();">
+              <span>⭐ Yalnız Ulduzlu (Sürətli) mallar</span>
+            </label>
+            <label class="flyout-checkbox-label">
+              <input type="checkbox" id="chkOnlyZiyanli" onchange="filterOnlyZiyanli=this.checked;filterAndRender();">
+              <span>📉 Yalnız Ziyanlı mallar (Maya &gt; Satış)</span>
+            </label>
+            <label class="flyout-checkbox-label">
+              <input type="checkbox" id="chkShowDeactivated" onchange="filterShowDeactivated=this.checked;filterAndRender();">
+              <span>👁️ Gizlədilmiş (deaktiv) mallar</span>
+            </label>
+          </div>
+
+          <!-- Ölü Mallar Radio Qrupu (1, 2, 3 ay) -->
+          <div class="flyout-sub-title">🕒 Hərəkətsiz (Ölü) Mallar:</div>
+          <div class="dead-stock-grid">
+            <div class="stok-radio-card" data-stok-filter="OluMallar1Ay" onclick="setStokFilter('OluMallar1Ay')">
+              <span class="stok-radio-dot"></span>
+              <span>🕒 Son 1 ay</span>
+            </div>
+            <div class="stok-radio-card" data-stok-filter="OluMallar2Ay" onclick="setStokFilter('OluMallar2Ay')">
+              <span class="stok-radio-dot"></span>
+              <span>🕒 Son 2 ay</span>
+            </div>
+            <div class="stok-radio-card" data-stok-filter="OluMallar3Ay" onclick="setStokFilter('OluMallar3Ay')">
+              <span class="stok-radio-dot"></span>
+              <span>🕒 Son 3 ay</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Alt Zolaq: Sıfırla və Bağla Düymələri -->
+      <div class="flyout-footer">
+        <button type="button" class="btn-flyout-reset" onclick="resetAllFilters()">
+          <i class="fa-solid fa-xmark"></i> Bütün Filtrləri Sıfırla
+        </button>
+        <button type="button" class="btn-flyout-apply" onclick="closeFilterPanel()">
+          Tətbiq Et
         </button>
       </div>
     </div>
@@ -2743,13 +3565,28 @@ function processSalesStats(salesRows) {
     const prof = parseFloat(s.qazanc) || 0;
     const isReturn = (s.emeliyyat_tipi || '').toUpperCase() === 'QAYTARILMA';
 
+    let saleTime = null;
+    if (s.tarix) {
+      const t = new Date(s.tarix).getTime();
+      if (!isNaN(t)) {
+        saleTime = t;
+        if (!minD || t < minD) minD = t;
+        if (!maxD || t > maxD) maxD = t;
+      }
+    }
+
     if (!PRODUCT_SALES_STATS[key]) {
       PRODUCT_SALES_STATS[key] = {
         name: rawName,
         sold_count: 0,
         revenue: 0,
-        profit: 0
+        profit: 0,
+        last_sold_time: saleTime
       };
+    } else if (saleTime) {
+      if (!PRODUCT_SALES_STATS[key].last_sold_time || saleTime > PRODUCT_SALES_STATS[key].last_sold_time) {
+        PRODUCT_SALES_STATS[key].last_sold_time = saleTime;
+      }
     }
 
     if (isReturn) {
@@ -2760,14 +3597,6 @@ function processSalesStats(salesRows) {
       PRODUCT_SALES_STATS[key].sold_count += qty;
       PRODUCT_SALES_STATS[key].revenue += rev;
       PRODUCT_SALES_STATS[key].profit += prof;
-    }
-
-    if (s.tarix) {
-      const t = new Date(s.tarix).getTime();
-      if (!isNaN(t)) {
-        if (!minD || t < minD) minD = t;
-        if (!maxD || t > maxD) maxD = t;
-      }
     }
   }
 
@@ -2846,6 +3675,10 @@ async function fetchProducts() {
       const soldCount = stat ? Math.max(0, stat.sold_count) : 0;
       const soldRevenue = stat ? Math.max(0, stat.revenue) : 0;
       const soldProfit = stat ? stat.profit : 0;
+      const lastSoldTime = stat && stat.last_sold_time ? stat.last_sold_time : null;
+      const isDead1m = stok > 0 && (!lastSoldTime || lastSoldTime < (Date.now() - 30 * 86400000));
+      const isDead2m = stok > 0 && (!lastSoldTime || lastSoldTime < (Date.now() - 60 * 86400000));
+      const isDead3m = stok > 0 && (!lastSoldTime || lastSoldTime < (Date.now() - 90 * 86400000));
 
       return {
         id: r.id,
@@ -2860,7 +3693,14 @@ async function fetchProducts() {
         sold_profit: soldProfit,
         is_kilo: r.is_kilo === true || r.is_kilo === 1,
         is_active: r.is_active !== false,
+        is_favorite: r.is_favorite === true || r.is_favorite === 1 || r.IsFavorite === true || r.IsFavorite === 1,
+        yaradilma_tarixi: r.yaradilma_tarixi || r.created_at || r.YaradilmaTarixi || r.son_yenilenme_tarixi || null,
+        son_yenilenme_tarixi: r.son_yenilenme_tarixi || r.updated_at || r.SonYenilenmeTarixi || null,
         is_dead: isDead,
+        last_sold_time: lastSoldTime,
+        is_dead_1m: isDead1m,
+        is_dead_2m: isDead2m,
+        is_dead_3m: isDead3m,
         unit_profit: unitProfit,
         margin: margin,
         total_cost: totalCost,
@@ -2960,9 +3800,10 @@ function calculateKPIs() {
   const expectedProfit = totalSale - totalCost;
   const avgMargin = totalCost > 0 ? ((expectedProfit / totalCost) * 100) : 0;
 
-  const lowStockCount = activeProducts.filter(p => p.stok > 0 && p.stok < 5).length;
+  const inStockCount = activeProducts.filter(p => p.stok > 0).length;
+  const lowStockCount = activeProducts.filter(p => p.stok > 0 && p.stok <= 3).length; // WPF ilə eyni: ≤ 3
   const zeroStockCount = activeProducts.filter(p => p.stok <= 0).length;
-  const deadProducts = activeProducts.filter(p => p.is_dead);
+  const deadProducts = activeProducts.filter(p => p.stok > 0 && p.is_dead_1m);
   const deadCost = deadProducts.reduce((sum, p) => sum + (p.total_cost > 0 ? p.total_cost : 0), 0);
 
   $('kpiTotalItems').textContent = nf0.format(PRODUCTS.length) + ' adda';
@@ -2977,12 +3818,16 @@ function calculateKPIs() {
   if ($('kpiDeadCost')) $('kpiDeadCost').textContent = money(deadCost);
   if ($('kpiDeadCount')) $('kpiDeadCount').textContent = nf0.format(deadProducts.length);
 
+  // Filtr Çiplərinin sayğacları
   $('chipAllCount').textContent = PRODUCTS.length;
-  $('chipCritCount').textContent = lowStockCount;
-  $('chipZeroCount').textContent = zeroStockCount;
+  if ($('chipInStockCount')) $('chipInStockCount').textContent = inStockCount;
+  if ($('chipCritCount')) $('chipCritCount').textContent = lowStockCount;
+  if ($('chipZeroCount')) $('chipZeroCount').textContent = zeroStockCount;
   if ($('chipDeadCount')) $('chipDeadCount').textContent = nf0.format(deadProducts.length);
-  const priceErrorProducts = activeProducts.filter(p => p.satis_qiymeti <= p.alis_qiymeti);
+  if ($('chipFavCount')) $('chipFavCount').textContent = PRODUCTS.filter(p => p.is_favorite).length;
+  const priceErrorProducts = PRODUCTS.filter(p => p.alis_qiymeti > p.satis_qiymeti);
   if ($('chipPriceErrorCount')) $('chipPriceErrorCount').textContent = priceErrorProducts.length;
+  if ($('chipDeactiveCount')) $('chipDeactiveCount').textContent = PRODUCTS.filter(p => !p.is_active).length;
 }
 
 /* ============ AÇILIB-BAĞLANAN BÖLMƏLƏRİN İDARƏSİ (COLLAPSE / TOGGLE) ============ */
@@ -3527,21 +4372,333 @@ function exportSimulatorExcel() {
 }
 
 /* ============ FİLTRLƏMƏ VƏ CƏDVƏL RENDERİ ============ */
-function setFilter(filter) {
-  currentFilter = filter;
-  document.querySelectorAll('#filterChips .chip').forEach(c => {
-    c.classList.toggle('active', c.dataset.filter === filter);
-  });
-  if (filter === 'dead-stock') {
-    currentSortKey = 'total_cost';
-    currentSortDir = -1;
-    document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
-    document.querySelectorAll('th .arw').forEach(a => a.textContent = '▼');
-    const costTh = $('arw_total_cost')?.parentElement;
-    if (costTh) costTh.classList.add('sorted');
+// Peşəkar Çoxölçülü Filtrlər (WPF ilə 1:1 eyni)
+let filterVahid = 'Hamisi'; // 'Hamisi' | 'Kilo' | 'Eded'
+let filterStok = 'Hamisi'; // 'Hamisi' | 'StokdaVar' | 'AzStok' | 'BitmisStok' | 'OluMallar1Ay' | 'OluMallar2Ay' | 'OluMallar3Ay'
+let filterSortOrder = 'created_desc'; // 'created_desc' | 'updated_desc' | 'name_asc' | 'name_desc' | 'price_asc' | 'price_desc' | 'stock_asc' | 'stock_desc'
+let filterDatePreset = 'Hamisi'; // 'Hamisi' | 'Bugun' | 'Dunen' | 'BuAy' | 'KecenAy' | 'Ferdi'
+let filterStartDate = null; // YYYY-MM-DD
+let filterEndDate = null; // YYYY-MM-DD
+let filterMinPrice = null;
+let filterMaxPrice = null;
+let filterMinStock = null;
+let filterMaxStock = null;
+let filterOnlyFavorites = false;
+let filterOnlyZiyanli = false;
+let filterShowDeactivated = false;
+
+function getAktivFiltrSayi() {
+  let count = 0;
+  if (filterVahid !== 'Hamisi') count++;
+  if (filterStok !== 'Hamisi') count++;
+  if (filterStartDate || filterEndDate) count++;
+  if (filterMinPrice !== null || filterMaxPrice !== null) count++;
+  if (filterMinStock !== null || filterMaxStock !== null) count++;
+  if (filterOnlyFavorites) count++;
+  if (filterOnlyZiyanli) count++;
+  if (filterShowDeactivated) count++;
+  if (filterSortOrder !== 'created_desc') count++;
+  return count;
+}
+
+function toggleFilterPanel() {
+  const panel = $('filterFlyoutPanel');
+  const backdrop = $('filterBackdrop');
+  const arrow = $('filterHubArrow');
+  if (!panel) return;
+  const isCurrentlyOpen = panel.style.display !== 'none' && panel.style.display !== '';
+  if (isCurrentlyOpen) {
+    closeFilterPanel();
+  } else {
+    panel.style.display = 'flex';
+    if (backdrop) backdrop.style.display = 'block';
+    if (arrow) arrow.className = 'fa-solid fa-chevron-up filter-hub-arrow';
   }
+}
+
+function closeFilterPanel() {
+  const panel = $('filterFlyoutPanel');
+  const backdrop = $('filterBackdrop');
+  const arrow = $('filterHubArrow');
+  if (panel) panel.style.display = 'none';
+  if (backdrop) backdrop.style.display = 'none';
+  if (arrow) arrow.className = 'fa-solid fa-chevron-down filter-hub-arrow';
+}
+
+function setVahidFilter(vahid) {
+  filterVahid = vahid;
+  filterAndRender();
+}
+
+function setStokFilter(stok) {
+  if (filterStok === stok && stok !== 'Hamisi') {
+    filterStok = 'Hamisi';
+  } else {
+    filterStok = stok;
+  }
+
+  if (filterStok === 'OluMallar1Ay' || filterStok === 'OluMallar2Ay' || filterStok === 'OluMallar3Ay') {
+    const days = filterStok === 'OluMallar1Ay' ? 30 : (filterStok === 'OluMallar2Ay' ? 60 : 90);
+    const months = days / 30;
+    const oluMallar = PRODUCTS.filter(p => p.stok > 0 && (!p.last_sold_time || p.last_sold_time < (Date.now() - days * 86400000)));
+    const donanMaya = oluMallar.reduce((sum, p) => sum + (p.total_cost > 0 ? p.total_cost : 0), 0);
+    showToast("🕒 Ölü Mallar Filtri", `Son ${months} ayda satılmayan ${oluMallar.length} ölü mal tapıldı (Dondurulmuş maya: ${money(donanMaya)}).`, "insert");
+  }
+
+  filterAndRender();
+}
+
+function setDatePreset(preset) {
+  filterDatePreset = preset;
+  const now = new Date();
+  const pad2 = n => String(n).padStart(2, '0');
+  const fmt = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+
+  switch (preset) {
+    case 'Hamisi':
+      filterStartDate = null;
+      filterEndDate = null;
+      break;
+    case 'Bugun': {
+      const today = fmt(now);
+      filterStartDate = today;
+      filterEndDate = today;
+      break;
+    }
+    case 'Dunen': {
+      const y = new Date(now);
+      y.setDate(y.getDate() - 1);
+      const yStr = fmt(y);
+      filterStartDate = yStr;
+      filterEndDate = yStr;
+      break;
+    }
+    case 'BuAy': {
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      filterStartDate = fmt(firstDay);
+      filterEndDate = fmt(now);
+      break;
+    }
+    case 'KecenAy': {
+      const firstDayOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastDayOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+      filterStartDate = fmt(firstDayOfPrevMonth);
+      filterEndDate = fmt(lastDayOfPrevMonth);
+      break;
+    }
+  }
+
+  const sInput = $('filterStartDate');
+  const eInput = $('filterEndDate');
+  if (sInput) sInput.value = filterStartDate || '';
+  if (eInput) eInput.value = filterEndDate || '';
+
+  filterAndRender();
+}
+
+function onCustomDateChange() {
+  filterStartDate = $('filterStartDate')?.value || null;
+  filterEndDate = $('filterEndDate')?.value || null;
+  filterDatePreset = (filterStartDate || filterEndDate) ? 'Ferdi' : 'Hamisi';
+  filterAndRender();
+}
+
+function onRangeFilterChange() {
+  const minPVal = $('filterMinPrice')?.value?.trim();
+  const maxPVal = $('filterMaxPrice')?.value?.trim();
+  filterMinPrice = (minPVal !== '' && !isNaN(Number(minPVal))) ? Number(minPVal) : null;
+  filterMaxPrice = (maxPVal !== '' && !isNaN(Number(maxPVal))) ? Number(maxPVal) : null;
+
+  const minSVal = $('filterMinStock')?.value?.trim();
+  const maxSVal = $('filterMaxStock')?.value?.trim();
+  filterMinStock = (minSVal !== '' && !isNaN(Number(minSVal))) ? Number(minSVal) : null;
+  filterMaxStock = (maxSVal !== '' && !isNaN(Number(maxSVal))) ? Number(maxSVal) : null;
+
+  filterAndRender();
+}
+
+function onSortOrderChange(val) {
+  filterSortOrder = val;
+
+  document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
+  document.querySelectorAll('th .arw').forEach(a => a.textContent = '▼');
+
+  if (val === 'name_asc') {
+    const th = $('arw_ad')?.parentElement;
+    if (th) { th.classList.add('sorted'); $('arw_ad').textContent = '▲'; }
+  } else if (val === 'name_desc') {
+    const th = $('arw_ad')?.parentElement;
+    if (th) { th.classList.add('sorted'); $('arw_ad').textContent = '▼'; }
+  } else if (val === 'price_asc') {
+    const th = $('arw_satis_qiymeti')?.parentElement;
+    if (th) { th.classList.add('sorted'); $('arw_satis_qiymeti').textContent = '▲'; }
+  } else if (val === 'price_desc') {
+    const th = $('arw_satis_qiymeti')?.parentElement;
+    if (th) { th.classList.add('sorted'); $('arw_satis_qiymeti').textContent = '▼'; }
+  } else if (val === 'stock_asc') {
+    const th = $('arw_stok')?.parentElement;
+    if (th) { th.classList.add('sorted'); $('arw_stok').textContent = '▲'; }
+  } else if (val === 'stock_desc') {
+    const th = $('arw_stok')?.parentElement;
+    if (th) { th.classList.add('sorted'); $('arw_stok').textContent = '▼'; }
+  }
+
+  filterAndRender();
+}
+
+function resetAllFilters() {
+  filterVahid = 'Hamisi';
+  filterStok = 'Hamisi';
+  filterSortOrder = 'created_desc';
+  filterDatePreset = 'Hamisi';
+  filterStartDate = null;
+  filterEndDate = null;
+  filterMinPrice = null;
+  filterMaxPrice = null;
+  filterMinStock = null;
+  filterMaxStock = null;
+  filterOnlyFavorites = false;
+  filterOnlyZiyanli = false;
+  filterShowDeactivated = false;
+  currentSortKey = 'total_profit';
+  currentSortDir = -1;
+
+  if ($('searchInput')) $('searchInput').value = '';
+  if ($('filterStartDate')) $('filterStartDate').value = '';
+  if ($('filterEndDate')) $('filterEndDate').value = '';
+  if ($('filterMinPrice')) $('filterMinPrice').value = '';
+  if ($('filterMaxPrice')) $('filterMaxPrice').value = '';
+  if ($('filterMinStock')) $('filterMinStock').value = '';
+  if ($('filterMaxStock')) $('filterMaxStock').value = '';
+  if ($('filterSortOrder')) $('filterSortOrder').value = 'created_desc';
+  if ($('chkOnlyFavorites')) $('chkOnlyFavorites').checked = false;
+  if ($('chkOnlyZiyanli')) $('chkOnlyZiyanli').checked = false;
+  if ($('chkShowDeactivated')) $('chkShowDeactivated').checked = false;
+
+  document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
+  document.querySelectorAll('th .arw').forEach(a => a.textContent = '▼');
+
   visibleLimit = 50;
   filterAndRender();
+  showToast("✕ Filtrlər Sıfırlandı", "Bütün filtrlər ilkin vəziyyətə qaytarıldı", "info");
+}
+
+function setQuickChipFilter(chip) {
+  if (chip === 'all') {
+    resetAllFilters();
+    return;
+  }
+  if (chip === 'stokda-var') {
+    setStokFilter(filterStok === 'StokdaVar' ? 'Hamisi' : 'StokdaVar');
+  } else if (chip === 'az-stok' || chip === 'critical') {
+    setStokFilter(filterStok === 'AzStok' ? 'Hamisi' : 'AzStok');
+  } else if (chip === 'zero') {
+    setStokFilter(filterStok === 'BitmisStok' ? 'Hamisi' : 'BitmisStok');
+  } else if (chip === 'dead-stock') {
+    setStokFilter(filterStok === 'OluMallar1Ay' ? 'Hamisi' : 'OluMallar1Ay');
+  } else if (chip === 'favorites') {
+    filterOnlyFavorites = !filterOnlyFavorites;
+    filterAndRender();
+  } else if (chip === 'ziyanli' || chip === 'price-error') {
+    filterOnlyZiyanli = !filterOnlyZiyanli;
+    filterAndRender();
+  } else if (chip === 'deactivated') {
+    filterShowDeactivated = !filterShowDeactivated;
+    filterAndRender();
+  } else if (chip === 'high-margin') {
+    currentFilter = (currentFilter === 'high-margin') ? 'all' : 'high-margin';
+    filterAndRender();
+  } else if (chip === 'kilo') {
+    setVahidFilter(filterVahid === 'Kilo' ? 'Hamisi' : 'Kilo');
+  }
+}
+
+function setFilter(filter) {
+  setQuickChipFilter(filter);
+}
+
+async function toggleProductFavorite(id, currentStatus, event) {
+  if (event) event.stopPropagation();
+  const newStatus = !currentStatus;
+  const prod = PRODUCTS.find(p => p.id === id);
+  if (prod) prod.is_favorite = newStatus;
+  filterAndRender();
+
+  try {
+    if (supabaseClient) {
+      await supabaseClient.from('mehsullar').update({
+        is_favorite: newStatus,
+        son_yenilenme_tarixi: new Date().toISOString()
+      }).eq('id', id);
+    }
+    showToast(newStatus ? "⭐ Ulduz Əlavə Edildi" : "Ulduz Çıxarıldı", "Məhsul statusu yeniləndi", "update");
+  } catch(err) {
+    console.warn("Favorit statusu saxlanılarkən qeyd:", err);
+  }
+}
+
+function updateFilterUIState() {
+  const activeCount = getAktivFiltrSayi();
+  const q = ($('searchInput')?.value || '').trim();
+  const hasActiveFilters = activeCount > 0 || Boolean(q);
+
+  const sClear = $('searchClearBtn');
+  if (sClear) sClear.style.display = q ? 'block' : 'none';
+
+  const badge = $('filterActiveBadge');
+  if (badge) {
+    badge.textContent = activeCount;
+    badge.style.display = activeCount > 0 ? 'inline-block' : 'none';
+  }
+
+  const flyoutBadge = $('flyoutActiveBadge');
+  if (flyoutBadge) {
+    flyoutBadge.textContent = `${activeCount} aktiv`;
+    flyoutBadge.style.display = activeCount > 0 ? 'inline-block' : 'none';
+  }
+
+  const resetBtn = $('btnResetFilters');
+  if (resetBtn) {
+    resetBtn.style.display = hasActiveFilters ? 'inline-flex' : 'none';
+  }
+
+  const clearDateBtn = $('btnClearDateFilter');
+  if (clearDateBtn) {
+    clearDateBtn.style.display = (filterStartDate || filterEndDate) ? 'inline-block' : 'none';
+  }
+
+  document.querySelectorAll('[data-vahid]').forEach(el => {
+    el.classList.toggle('active', el.dataset.vahid === filterVahid);
+  });
+
+  document.querySelectorAll('[data-date-preset]').forEach(el => {
+    el.classList.toggle('active', el.dataset.datePreset === filterDatePreset);
+  });
+
+  document.querySelectorAll('[data-stok-filter]').forEach(el => {
+    el.classList.toggle('active', el.dataset.stokFilter === filterStok);
+  });
+
+  if ($('chkOnlyFavorites')) $('chkOnlyFavorites').checked = filterOnlyFavorites;
+  if ($('chkOnlyZiyanli')) $('chkOnlyZiyanli').checked = filterOnlyZiyanli;
+  if ($('chkShowDeactivated')) $('chkShowDeactivated').checked = filterShowDeactivated;
+
+  if ($('filterSortOrder')) $('filterSortOrder').value = filterSortOrder;
+
+  document.querySelectorAll('#filterChips .chip').forEach(c => {
+    const f = c.dataset.filter;
+    let isActive = false;
+    if (f === 'all' && filterStok === 'Hamisi' && !filterOnlyFavorites && !filterOnlyZiyanli && !filterShowDeactivated && currentFilter !== 'high-margin') isActive = true;
+    else if (f === 'stokda-var' && filterStok === 'StokdaVar') isActive = true;
+    else if ((f === 'az-stok' || f === 'critical') && filterStok === 'AzStok') isActive = true;
+    else if (f === 'zero' && filterStok === 'BitmisStok') isActive = true;
+    else if (f === 'dead-stock' && (filterStok === 'OluMallar1Ay' || filterStok === 'OluMallar2Ay' || filterStok === 'OluMallar3Ay')) isActive = true;
+    else if (f === 'favorites' && filterOnlyFavorites) isActive = true;
+    else if ((f === 'ziyanli' || f === 'price-error') && filterOnlyZiyanli) isActive = true;
+    else if (f === 'deactivated' && filterShowDeactivated) isActive = true;
+    else if (f === 'high-margin' && currentFilter === 'high-margin') isActive = true;
+    c.classList.toggle('active', isActive);
+  });
 }
 
 function normalizeAz(str) {
@@ -3557,11 +4714,73 @@ function normalizeAz(str) {
 }
 
 function filterAndRender() {
-  const q = ($('searchInput').value || '').trim().toLowerCase();
+  const q = ($('searchInput')?.value || '').trim().toLowerCase();
   const normQ = normalizeAz(q);
 
   filteredProducts = PRODUCTS.filter(p => {
-    // Axtarış
+    // 1. Aktiv / Deaktiv məhsullar
+    if (filterShowDeactivated) {
+      if (p.is_active) return false;
+    } else {
+      if (!p.is_active) return false;
+    }
+
+    // 2. Vahid Növü: Kilo / Ədəd
+    if (filterVahid === 'Kilo') {
+      if (!p.is_kilo) return false;
+    } else if (filterVahid === 'Eded') {
+      if (p.is_kilo) return false;
+    }
+
+    // 3. Tarix Aralığı (Anbara daxil olma tarixi - yaradilma_tarixi üzrə)
+    if (filterStartDate || filterEndDate) {
+      const rawDate = p.yaradilma_tarixi || p.created_at || p.son_yenilenme_tarixi;
+      if (rawDate) {
+        try {
+          const prodDateStr = new Date(rawDate).toISOString().slice(0, 10);
+          if (filterStartDate && prodDateStr < filterStartDate) return false;
+          if (filterEndDate && prodDateStr > filterEndDate) return false;
+        } catch(e) {}
+      }
+    }
+
+    // 4. Qiymət Aralığı (Satış qiyməti üzrə)
+    if (filterMinPrice !== null && !isNaN(filterMinPrice)) {
+      if (p.satis_qiymeti < filterMinPrice) return false;
+    }
+    if (filterMaxPrice !== null && !isNaN(filterMaxPrice)) {
+      if (p.satis_qiymeti > filterMaxPrice) return false;
+    }
+
+    // 5. Stok Aralığı (Miqdar üzrə)
+    if (filterMinStock !== null && !isNaN(filterMinStock)) {
+      if (p.stok < filterMinStock) return false;
+    }
+    if (filterMaxStock !== null && !isNaN(filterMaxStock)) {
+      if (p.stok > filterMaxStock) return false;
+    }
+
+    // 6. Stok Vəziyyəti
+    if (filterStok === 'StokdaVar') {
+      if (p.stok <= 0) return false;
+    } else if (filterStok === 'AzStok') {
+      if (!(p.stok > 0 && p.stok <= 3)) return false;
+    } else if (filterStok === 'BitmisStok') {
+      if (p.stok > 0) return false;
+    } else if (filterStok === 'OluMallar1Ay') {
+      if (!p.is_dead_1m) return false;
+    } else if (filterStok === 'OluMallar2Ay') {
+      if (!p.is_dead_2m) return false;
+    } else if (filterStok === 'OluMallar3Ay') {
+      if (!p.is_dead_3m) return false;
+    }
+
+    // 7. Xüsusi Qruplar
+    if (filterOnlyFavorites && !p.is_favorite) return false;
+    if (filterOnlyZiyanli && !(p.alis_qiymeti > p.satis_qiymeti)) return false;
+    if (currentFilter === 'high-margin' && p.margin < 40) return false;
+
+    // 8. Axtarış mətni
     if (q) {
       const name = (p.ad || p.mehsul_adi || '').toLowerCase();
       const matchName = name.includes(q) || normalizeAz(name).includes(normQ);
@@ -3569,28 +4788,63 @@ function filterAndRender() {
       if (!matchName && !matchBarcode) return false;
     }
 
-    // Kateqoriya filtri
-    if (currentFilter === 'critical') return p.stok > 0 && p.stok < 5;
-    if (currentFilter === 'zero') return p.stok <= 0;
-    if (currentFilter === 'dead-stock') return p.is_dead;
-    if (currentFilter === 'price-error') return p.satis_qiymeti <= p.alis_qiymeti;
-    if (currentFilter === 'high-margin') return p.margin >= 40;
-    if (currentFilter === 'kilo') return p.is_kilo;
-
     return true;
   });
 
-  // Çeşidləmə
-  filteredProducts.sort((a, b) => {
-    let vA = a[currentSortKey];
-    let vB = b[currentSortKey];
-    if (typeof vA === 'string') {
-      return currentSortDir * vA.localeCompare(vB);
-    }
-    return currentSortDir * ((vA || 0) - (vB || 0));
-  });
+  // 9. Sıralama
+  sortFilteredProducts();
 
+  updateFilterUIState();
   renderTable();
+}
+
+function sortFilteredProducts() {
+  switch (filterSortOrder) {
+    case 'created_desc':
+      filteredProducts.sort((a, b) => {
+        const tA = new Date(a.yaradilma_tarixi || a.son_yenilenme_tarixi || 0).getTime();
+        const tB = new Date(b.yaradilma_tarixi || b.son_yenilenme_tarixi || 0).getTime();
+        return tB - tA;
+      });
+      break;
+    case 'updated_desc':
+      filteredProducts.sort((a, b) => {
+        const tA = new Date(a.son_yenilenme_tarixi || a.yaradilma_tarixi || 0).getTime();
+        const tB = new Date(b.son_yenilenme_tarixi || b.yaradilma_tarixi || 0).getTime();
+        return tB - tA;
+      });
+      break;
+    case 'name_asc':
+      filteredProducts.sort((a, b) => (a.ad || '').localeCompare(b.ad || '', 'az', { sensitivity: 'base' }));
+      break;
+    case 'name_desc':
+      filteredProducts.sort((a, b) => (b.ad || '').localeCompare(a.ad || '', 'az', { sensitivity: 'base' }));
+      break;
+    case 'price_asc':
+      filteredProducts.sort((a, b) => (a.satis_qiymeti || 0) - (b.satis_qiymeti || 0));
+      break;
+    case 'price_desc':
+      filteredProducts.sort((a, b) => (b.satis_qiymeti || 0) - (a.satis_qiymeti || 0));
+      break;
+    case 'stock_asc':
+      filteredProducts.sort((a, b) => (a.stok || 0) - (b.stok || 0));
+      break;
+    case 'stock_desc':
+      filteredProducts.sort((a, b) => (b.stok || 0) - (a.stok || 0));
+      break;
+    default:
+      if (currentSortKey) {
+        filteredProducts.sort((a, b) => {
+          let vA = a[currentSortKey];
+          let vB = b[currentSortKey];
+          if (typeof vA === 'string') {
+            return currentSortDir * vA.localeCompare(vB);
+          }
+          return currentSortDir * ((vA || 0) - (vB || 0));
+        });
+      }
+      break;
+  }
 }
 
 function sortTable(key) {
@@ -3598,10 +4852,19 @@ function sortTable(key) {
     currentSortDir = -currentSortDir;
   } else {
     currentSortKey = key;
-    currentSortDir = -1; // default olaraq böyükdən kiçiyə
+    currentSortDir = -1;
   }
 
-  // Ox ikonlarını yenilə
+  if (key === 'ad') {
+    filterSortOrder = currentSortDir === 1 ? 'name_asc' : 'name_desc';
+  } else if (key === 'satis_qiymeti') {
+    filterSortOrder = currentSortDir === 1 ? 'price_asc' : 'price_desc';
+  } else if (key === 'stok') {
+    filterSortOrder = currentSortDir === 1 ? 'stock_asc' : 'stock_desc';
+  } else {
+    filterSortOrder = 'custom';
+  }
+
   document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
   document.querySelectorAll('th .arw').forEach(a => a.textContent = '▼');
 
@@ -3610,6 +4873,8 @@ function sortTable(key) {
     activeTh.classList.add('sorted');
     $(`arw_${key}`).textContent = currentSortDir === 1 ? '▲' : '▼';
   }
+
+  if ($('filterSortOrder')) $('filterSortOrder').value = filterSortOrder;
 
   filterAndRender();
 }
@@ -3651,19 +4916,21 @@ function renderTable() {
   tbody.innerHTML = rowsToRender.map(p => {
     const unit = p.is_kilo ? 'kq' : 'əd';
     const prodName = p.ad || p.mehsul_adi || (p.raw && (p.raw.ad || p.raw.mehsul_adi || p.raw.name)) || 'Adsız məhsul';
+    const starBtnHtml = `<button type="button" class="btn-star ${p.is_favorite ? 'starred' : ''}" onclick="toggleProductFavorite('${p.id}', ${p.is_favorite}, event)" title="${p.is_favorite ? 'Ulduzlu (Sürətli) məhsul' : 'Ulduz əlavə et'}"><i class="${p.is_favorite ? 'fa-solid' : 'fa-regular'} fa-star"></i></button>`;
+    const deactiveBadgeHtml = !p.is_active ? `<span class="badge-deactive" style="margin-left:6px;font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(148,163,184,.15);color:#94a3b8;border:1px solid rgba(148,163,184,.3)"><i class="fa-solid fa-eye-slash"></i> Deaktiv</span>` : '';
 
     let statusHtml = '';
     let rowStatusCls = 'row-ok';
-    if (p.satis_qiymeti <= p.alis_qiymeti) {
-      statusHtml = '<span class="badge-stok stok-price-error" title="Alış qiyməti satışdan böyük və ya bərabərdir!"><i class="fa-solid fa-triangle-exclamation"></i> Qiymət Xətası</span>';
+    if (p.alis_qiymeti > p.satis_qiymeti) {
+      statusHtml = '<span class="badge-stok stok-price-error" title="Alış qiyməti satışdan böyükdür (Ziyanlı mal)!"><i class="fa-solid fa-triangle-exclamation"></i> Ziyanlı Mal</span>';
       rowStatusCls = 'row-dead';
-    } else if (p.is_dead) {
-      statusHtml = '<span class="badge-stok stok-dead" title="Stokda var, lakin heç vaxt satılmayıb"><i class="fa-solid fa-snowflake"></i> Donmuş</span>';
+    } else if (p.stok > 0 && p.is_dead_1m) {
+      statusHtml = '<span class="badge-stok stok-dead" title="Son 1 ayda satılmayıb (Ölü mal)"><i class="fa-solid fa-snowflake"></i> Donmuş</span>';
       rowStatusCls = 'row-dead';
     } else if (p.stok <= 0) {
       statusHtml = '<span class="badge-stok stok-zero"><i class="fa-solid fa-xmark"></i> Bitib</span>';
       rowStatusCls = 'row-zero';
-    } else if (p.stok < 5) {
+    } else if (p.stok <= 3) {
       statusHtml = `<span class="badge-stok stok-low"><i class="fa-solid fa-triangle-exclamation"></i> Az qalıb (${p.stok})</span>`;
       rowStatusCls = 'row-low';
     } else {
@@ -3680,8 +4947,14 @@ function renderTable() {
         <tr class="${rowStatusCls}">
           <td class="td-mal-adi" data-label="Məhsul">
             <div class="td-mal-wrap">
-              <span class="product-name">${escapeHtml(prodName)}</span>
-              ${p.barkod ? `<span class="mob-barcode-pill"><i class="fa-solid fa-barcode"></i> ${escapeHtml(p.barkod)}</span>` : ''}
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+                <span class="product-name">${escapeHtml(prodName)}</span>
+                ${starBtnHtml}
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px">
+                ${p.barkod ? `<span class="mob-barcode-pill"><i class="fa-solid fa-barcode"></i> ${escapeHtml(p.barkod)}</span>` : ''}
+                ${deactiveBadgeHtml}
+              </div>
             </div>
           </td>
           <td class="td-stok" data-label="Qalıq & Vəziyyət">
@@ -3718,8 +4991,16 @@ function renderTable() {
     const marginClass = p.margin >= 40 ? 'm-high' : (p.margin >= 20 ? 'm-mid' : 'm-low');
     return `
       <tr class="${rowStatusCls}">
-        <td class="td-barkod">${escapeHtml(p.barkod || '—')}</td>
-        <td class="td-mal-adi">${escapeHtml(prodName)}</td>
+        <td class="td-barkod">
+          <div style="display:flex;align-items:center;gap:6px">
+            ${starBtnHtml}
+            <span>${escapeHtml(p.barkod || '—')}</span>
+          </div>
+        </td>
+        <td class="td-mal-adi">
+          ${escapeHtml(prodName)}
+          ${deactiveBadgeHtml}
+        </td>
         <td class="td-maya">${money(p.alis_qiymeti)}</td>
         <td class="td-satis">${money(p.satis_qiymeti)}</td>
         <td class="td-unit-profit">+${money(p.unit_profit)}</td>
