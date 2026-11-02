@@ -563,6 +563,12 @@ body.light-theme .collapse-toggle-bar.is-open .toggle-pill-status {
   box-shadow: 0 6px 20px -3px rgba(251, 191, 36, .35);
   border-color: rgba(251, 191, 36, .6);
 }
+.btn-filter-hub.active {
+  background: linear-gradient(135deg, rgba(251, 191, 36, .3), rgba(99, 102, 241, .4));
+  border-color: #fbbf24;
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(251, 191, 36, .35);
+}
 .filter-badge {
   background: #ef4444;
   color: #fff;
@@ -619,43 +625,36 @@ body.light-theme .collapse-toggle-bar.is-open .toggle-pill-status {
   color: #fff;
 }
 
-/* Səffaf Backdrop */
+/* Səffaf Backdrop (Popup olmadığından gizlədildi) */
 .filter-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, .45);
-  backdrop-filter: blur(2px);
-  z-index: 998;
+  display: none !important;
 }
 
-/* Modern Üzən Panel (Floating Flyout Hub) */
+/* Modern Daxili Açılır Filtr Paneli (Inline Collapsible Panel — Əlavə popup açılmır) */
 .filter-flyout-panel {
-  position: absolute;
-  top: 58px;
-  right: 0;
-  width: 440px;
-  max-width: calc(100vw - 32px);
-  max-height: 85vh;
-  background: #0b1120;
-  border: 1px solid rgba(255, 255, 255, .15);
-  border-radius: 18px;
-  box-shadow: 0 20px 55px rgba(0, 0, 0, .85);
-  z-index: 999;
+  position: relative;
+  width: 100%;
+  margin: 0 0 18px 0;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .25);
+  z-index: 5;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: flyoutFadeIn .22s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: filterPanelSlideDown .2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-@keyframes flyoutFadeIn {
-  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes filterPanelSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .flyout-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
+  padding: 12px 18px;
   background: rgba(255, 255, 255, .03);
   border-bottom: 1px solid var(--line);
 }
@@ -677,42 +676,42 @@ body.light-theme .collapse-toggle-bar.is-open .toggle-pill-status {
   border-radius: 99px;
 }
 .flyout-close-btn {
-  width: 28px;
-  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
   border-radius: 8px;
-  border: none;
-  background: transparent;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .04);
   color: var(--muted);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  display: grid;
-  place-items: center;
   transition: all .15s ease;
+  font-family: inherit;
 }
 .flyout-close-btn:hover {
-  background: rgba(239, 68, 68, .2);
+  background: rgba(239, 68, 68, .15);
+  border-color: rgba(239, 68, 68, .3);
   color: #fb7185;
 }
 
 .flyout-body {
   padding: 16px 18px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-height: calc(85vh - 120px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  max-height: none;
+  overflow: visible;
 }
 .flyout-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--line-2);
-}
-.flyout-section:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+  gap: 10px;
+  padding: 14px;
+  background: rgba(255, 255, 255, .02);
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
 }
 .flyout-section-title-wrap {
   display: flex;
@@ -1548,10 +1547,15 @@ body.light-theme .btn-filter-reset:hover {
   background: #fecaca;
   color: #b91c1c;
 }
+body.light-theme .btn-filter-hub.active {
+  background: #fef3c7;
+  border-color: #d97706;
+  color: #b45309;
+}
 body.light-theme .filter-flyout-panel {
   background: #ffffff;
   border-color: #cbd5e1;
-  box-shadow: 0 20px 50px rgba(15, 23, 42, .22);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, .08);
 }
 body.light-theme .flyout-header {
   background: #f8fafc;
@@ -1560,8 +1564,22 @@ body.light-theme .flyout-header {
 body.light-theme .flyout-header-title {
   color: #0f172a;
 }
+body.light-theme .flyout-close-btn {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+body.light-theme .flyout-close-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+body.light-theme .flyout-section {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
 body.light-theme .flyout-section-title {
-  color: #64748b;
+  color: #475569;
 }
 body.light-theme .filter-select {
   background: #ffffff;
@@ -1854,20 +1872,98 @@ body.light-theme .sim-footer-info b{color:#0f172a}
     padding: 7px 4px !important;
     font-size: 11px !important;
   }
+  /* =========================================================================
+     AÇILIR FİLTR PANELİ — TELEFONDA DAXİLİ SƏLİQƏLİ KART (POPUP YOXDUR!)
+     ========================================================================= */
+  .filter-backdrop {
+    display: none !important;
+  }
   .filter-flyout-panel {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
     top: auto !important;
     width: 100% !important;
     max-width: 100% !important;
-    border-radius: 20px 20px 0 0 !important;
-    max-height: 85vh !important;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, .6) !important;
+    border-radius: 14px !important;
+    max-height: none !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .2) !important;
+    margin: 10px 0 16px 0 !important;
+    animation: filterPanelSlideDown .2s ease-out !important;
+  }
+  .flyout-header {
+    padding: 10px 14px !important;
   }
   .flyout-body {
-    max-height: calc(85vh - 125px) !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 12px 14px !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .flyout-section {
+    padding: 12px !important;
+    gap: 8px !important;
+    border-radius: 10px !important;
+  }
+  .flyout-section-title {
+    font-size: 11px !important;
+  }
+  .date-presets-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px !important;
+  }
+  .date-presets-grid .date-preset-btn {
+    padding: 8px 4px !important;
+    font-size: 11px !important;
+  }
+  .date-inputs-row {
+    flex-direction: row !important;
+    gap: 6px !important;
+  }
+  .filter-input-date {
+    font-size: 13px !important;
+    padding: 9px 8px !important;
+    min-height: 40px !important;
+  }
+  .flyout-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .range-inputs-row {
+    gap: 6px !important;
+  }
+  .filter-input-num {
+    font-size: 13px !important;
+    padding: 9px 8px !important;
+    height: 40px !important;
+  }
+  .stok-radio-grid {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+  .stok-radio-card {
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+    min-height: 40px !important;
+  }
+  .dead-stock-grid {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+  .flyout-footer {
+    flex-direction: column-reverse !important;
+    gap: 8px !important;
+    padding: 12px 14px !important;
+  }
+  .flyout-footer .btn-flyout-reset,
+  .flyout-footer .btn-flyout-apply {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 11px 14px !important;
+    font-size: 13px !important;
   }
 
   /* =========================================================================
@@ -2579,19 +2675,19 @@ body.light-theme .more-grid-btn {
       </button>
     </div>
 
-    <!-- Səffaf klik tutucu -->
-    <div id="filterBackdrop" class="filter-backdrop" onclick="closeFilterPanel()" style="display:none"></div>
-
-    <!-- ⭐ MODERN ÜZƏN PEŞƏKAR FİLTR VƏ SIRALAMA MƏRKƏZİ (Floating Flyout Hub — WPF ilə 1:1) -->
+    <!-- ⭐ DAXİLİ AÇILIR PEŞƏKAR FİLTR VƏ SIRALAMA MƏRKƏZİ (WPF ilə 1:1, Əlavə popup açılmır, mobil və masaüstü tam uyğun) -->
     <div id="filterFlyoutPanel" class="filter-flyout-panel" style="display:none">
-      <!-- 1. Başlıq və Bağla düyməsi -->
+      <!-- 1. Başlıq və Gizlət düyməsi -->
       <div class="flyout-header">
         <div class="flyout-header-title">
           <i class="fa-solid fa-bolt" style="color:#fbbf24;font-size:14px"></i>
           <span>FİLTRLƏR VƏ SIRALAMA</span>
           <span class="flyout-active-badge" id="flyoutActiveBadge" style="display:none">0 aktiv</span>
         </div>
-        <button type="button" class="flyout-close-btn" onclick="closeFilterPanel()" title="Bağla">✕</button>
+        <button type="button" class="flyout-close-btn" onclick="closeFilterPanel()" title="Paneli Gizlət">
+          <i class="fa-solid fa-chevron-up"></i>
+          <span>Gizlət</span>
+        </button>
       </div>
 
       <!-- 2. Bütün Filtrlər (Səliqəli Şaquli Sürüşmə) -->
@@ -2725,13 +2821,13 @@ body.light-theme .more-grid-btn {
         </div>
       </div>
 
-      <!-- 3. Alt Zolaq: Sıfırla və Bağla Düymələri -->
+      <!-- 3. Alt Zolaq: Sıfırla və Paneli Gizlət Düymələri -->
       <div class="flyout-footer">
         <button type="button" class="btn-flyout-reset" onclick="resetAllFilters()">
           <i class="fa-solid fa-xmark"></i> Bütün Filtrləri Sıfırla
         </button>
         <button type="button" class="btn-flyout-apply" onclick="closeFilterPanel()">
-          Tətbiq Et
+          <i class="fa-solid fa-check"></i> Filtrləri Tətbiq Et &amp; Gizlət
         </button>
       </div>
     </div>
@@ -4403,7 +4499,7 @@ function getAktivFiltrSayi() {
 
 function toggleFilterPanel() {
   const panel = $('filterFlyoutPanel');
-  const backdrop = $('filterBackdrop');
+  const btn = $('btnToggleFilterPanel');
   const arrow = $('filterHubArrow');
   if (!panel) return;
   const isCurrentlyOpen = panel.style.display !== 'none' && panel.style.display !== '';
@@ -4411,17 +4507,17 @@ function toggleFilterPanel() {
     closeFilterPanel();
   } else {
     panel.style.display = 'flex';
-    if (backdrop) backdrop.style.display = 'block';
+    if (btn) btn.classList.add('active');
     if (arrow) arrow.className = 'fa-solid fa-chevron-up filter-hub-arrow';
   }
 }
 
 function closeFilterPanel() {
   const panel = $('filterFlyoutPanel');
-  const backdrop = $('filterBackdrop');
+  const btn = $('btnToggleFilterPanel');
   const arrow = $('filterHubArrow');
   if (panel) panel.style.display = 'none';
-  if (backdrop) backdrop.style.display = 'none';
+  if (btn) btn.classList.remove('active');
   if (arrow) arrow.className = 'fa-solid fa-chevron-down filter-hub-arrow';
 }
 
