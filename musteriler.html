@@ -941,6 +941,11 @@ body.light-theme .more-grid-btn {
         <span class="notif-badge" id="notifBadge" style="display:none">0</span>
       </button>
 
+      <!-- Keşi və Yaddaşı Təmizlə Düyməsi -->
+      <button class="hdr-btn" onclick="forceClearAllCachesAndReload()" title="Keşi və Yaddaşı Təmizlə (Sıfırla)">
+        <i class="fa-solid fa-broom" style="color:#38bdf8"></i>
+      </button>
+
       <!-- Ayarlar Düyməsi -->
       <button class="hdr-btn" onclick="openSettingsModal()" title="Ayarlar">
         <i class="fa-solid fa-gear"></i>
@@ -1385,11 +1390,17 @@ let notifications = [];
 /* ============ SAAT VƏ SƏS SİSTEMİ ============ */
 function initClock() {
   const update = () => {
-    const d = new Date();
-    $('clock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    if (!document.hidden) {
+      const d = new Date();
+      const el = $('clock');
+      if (el) el.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    }
   };
   update();
   setInterval(update, 1000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) update();
+  });
 }
 
 function initSound() {
@@ -1666,6 +1677,7 @@ function initApp() {
   initSound();
   initTheme();
   loadNotifications();
+  initAutoSelfHeal();
 
   const url = getActiveSupabaseUrl();
   const key = getActiveSupabaseKey();
@@ -2345,6 +2357,88 @@ function closeMoreSheet() {
   document.getElementById('mobNavHome')?.classList.add('active');
 }
 
+/* =====================================================================
+   KEŞ VƏ YADDAŞ TƏMİZLƏYİCİSİ (CACHE & MEMORY CLEANER)
+   ===================================================================== */
+async function forceClearAllCachesAndReload(silent = false) {
+  if (!silent && typeof showToast === 'function') {
+    showToast("🧹 Keş Təmizlənir...", "Bütün köhnə keş və yaddaş sıfırlanır, zəhmət olmasa gözləyin", 'update');
+  }
+
+  try {
+    // 1. Service Worker-ləri ləğv et və keşləri dərhal silməsini əmr et
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const reg of registrations) {
+        try {
+          if (reg.active) {
+            reg.active.postMessage({ type: 'CLEAR_ALL_CACHES' });
+          }
+          await reg.unregister();
+        } catch(e) {}
+      }
+    }
+
+    // 2. Cache Storage-də olan bütün keşləri dərhal birdəfəlik sil
+    if ('caches' in window) {
+      try {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      } catch(e) {}
+    }
+
+    // 3. Lazımsız bildiriş və müvəqqəti sessiya zibillərini təmizlə (Şifrə və giriş saxlanılır!)
+    try {
+      localStorage.removeItem('kassa_notifications');
+      localStorage.removeItem('musteri_notifications');
+      sessionStorage.clear();
+    } catch(e) {}
+
+  } catch(e) {
+    console.warn("Keş təmizlənməsi zamanı xəbərdarlıq:", e);
+  }
+
+  // 4. Ən son versiyanı birbaşa serverdən oxumaq üçün vaxt damğası ilə tam yenilə
+  const cleanUrl = window.location.origin + window.location.pathname + '?reload=' + Date.now();
+  window.location.replace(cleanUrl);
+}
+
+/* =====================================================================
+   AVTOMATİK ÖZÜNÜ TƏMİZLƏMƏ VƏ YADDAŞ QORUYUCUSU (AUTO SELF-HEAL)
+   ===================================================================== */
+function initAutoSelfHeal() {
+  const PAGE_START_TIME = Date.now();
+  let lastUserActivity = Date.now();
+
+  const resetActivity = () => { lastUserActivity = Date.now(); };
+  ['click', 'keydown', 'touchstart', 'mousemove'].forEach(evt => {
+    window.addEventListener(evt, resetActivity, { passive: true });
+  });
+
+  // Hər 10 dəqiqədən bir vəziyyəti yoxlayırıq
+  setInterval(() => {
+    const now = new Date();
+    const hours = now.getHours();
+    const uptimeHours = (Date.now() - PAGE_START_TIME) / (1000 * 60 * 60);
+    const idleMinutes = (Date.now() - lastUserActivity) / (1000 * 60);
+
+    // Qayda: Səhifə 24 saatdan çox fasiləsiz açıq qalıbsa VƏ istifadəçi 30 dəqiqədir toxunmursa
+    // VƏ YA gecə saat 04:00 - 05:59 arasıdırsa, ən azı 6 saat açıqdırsa və 20 dəqiqədir heç kim toxunmayıbsa
+    const isNightTime = (hours >= 4 && hours < 6);
+    const isLongUptime = uptimeHours >= 24 && idleMinutes >= 30;
+    const isNightAutoHeal = isNightTime && uptimeHours >= 6 && idleMinutes >= 20;
+
+    const isModalOpen = document.querySelector('.modal:not(.hidden), .sheet:not(.hidden)');
+
+    if ((isLongUptime || isNightAutoHeal) && !isModalOpen) {
+      console.log('🔄 Auto Self-Heal: Yaddaş və keş avtomatik sıfırlanır...');
+      forceClearAllCachesAndReload(true);
+    }
+  }, 10 * 60 * 1000);
+}
+
+window.forceClearAllCachesAndReload = forceClearAllCachesAndReload;
+
 window.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initClock();
@@ -2427,6 +2521,12 @@ window.addEventListener('DOMContentLoaded', () => {
       <div class="more-grid-ico" style="background:rgba(99,102,241,.15);color:#818cf8"><i class="fa-solid fa-gear"></i></div>
       <div class="more-grid-label">Ayarlar</div>
       <div class="more-grid-sub">Baza parametrləri</div>
+    </button>
+
+    <button type="button" class="more-grid-btn" onclick="forceClearAllCachesAndReload(); closeMoreSheet();" style="border-color:rgba(56,189,248,.3)">
+      <div class="more-grid-ico" style="background:rgba(56,189,248,.15);color:#38bdf8"><i class="fa-solid fa-broom"></i></div>
+      <div class="more-grid-label" style="color:#38bdf8">Keşi Təmizlə</div>
+      <div class="more-grid-sub">Yaddaşı sıfırla</div>
     </button>
 
     <button type="button" class="more-grid-btn" onclick="logout(); closeMoreSheet();" style="border-color:rgba(251,113,133,.3)">

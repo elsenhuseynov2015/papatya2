@@ -1,13 +1,12 @@
 /* =====================================================================
    PAPATYA KASSA & SATIŞ PANELI — SERVICE WORKER (PWA)
-   Versiya: 2.1.0 (Modular & High-Speed Mobile Cache)
+   Versiya: 2.6.0 (High-Speed Cache & Memory Self-Heal)
    ===================================================================== */
 
-const CACHE_NAME = 'papatya-kassa-cache-v2-5-2';
+const CACHE_NAME = 'papatya-kassa-cache-v2-6-0';
 const STATIC_ASSETS = [
   './',
   './index.html',
-  './indexv2.html',
   './anbar.html',
   './musteriler.html',
   './css/style.css',
@@ -29,10 +28,20 @@ self.addEventListener('message', event => {
     dynamicPwaName = event.data.name || '';
     dynamicPwaShortName = event.data.shortName || '';
   }
+  // Keşi və köhnə resursları tam məhv etmək üçün əmr
+  if (event.data && event.data.type === 'CLEAR_ALL_CACHES') {
+    event.waitUntil(
+      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
+    );
+  }
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Quraşdırma (Install)
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       for (const asset of STATIC_ASSETS) {
@@ -42,18 +51,18 @@ self.addEventListener('install', event => {
           // Bir resurs olmasa belə digərlərini keşləyirik
         }
       }
-    }).then(() => self.skipWaiting())
+    })
   );
 });
 
-// Aktivasiya (Köhnə keşlərin təmizlənməsi)
+// Aktivasiya (Köhnə bütün keşlərin dərhal təmizlənməsi)
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
         keys.map(key => {
           if (key !== CACHE_NAME) {
-            console.log('Köhnə keş silindi:', key);
+            console.log('🧹 Köhnə keş silindi:', key);
             return caches.delete(key);
           }
         })
@@ -67,7 +76,7 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Brauzer daxili, uzantı (chrome-extension://, ya-browser:// və s.) və ya qeyri-http protokollarını burax
+  // Brauzer daxili, uzantı və ya qeyri-http protokollarını burax
   if (!url.protocol.startsWith('http')) {
     return;
   }
@@ -113,14 +122,14 @@ self.addEventListener('fetch', event => {
   }
 
   // 2. İkon və Şəkillər üçün: Cache-First ilə dərhal açılış
-  if (req.url.includes('/icons/') || req.url.includes('/css/')) {
+  if (req.url.includes('/icons/')) {
     event.respondWith(
       caches.match(req).then(cachedResponse => {
         if (cachedResponse) return cachedResponse;
         return fetch(req).then(networkResponse => {
           if (networkResponse && networkResponse.status === 200) {
             const clone = networkResponse.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+            caches.open(CACHE_NAME).then(cache => cache.put(req, clone)).catch(() => {});
           }
           return networkResponse;
         });
@@ -129,13 +138,14 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 3. HTML Səhifələri və JavaScript (app.js) üçün: Network-First (Şəbəkədən ən son yeniliyi dərhal gətir, oflayndırsa keşdən oxu)
+  // 3. HTML Səhifələri, CSS və JavaScript: Network-First (Şəbəkədən ən son yeniliyi dərhal gətir, oflayndırsa keşdən oxu)
   event.respondWith(
     fetch(req, { cache: 'no-cache' })
       .then(networkResponse => {
-        if (networkResponse && networkResponse.status === 200) {
+        // Yalnız uğurlu 200 statuslu və daimi faylları keşlə (təsadüfi reload query-lərini keşə yığma)
+        if (networkResponse && networkResponse.status === 200 && !url.searchParams.has('reload')) {
           const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+          caches.open(CACHE_NAME).then(cache => cache.put(req, clone)).catch(() => {});
         }
         return networkResponse;
       })
@@ -144,7 +154,8 @@ self.addEventListener('fetch', event => {
         if (cached) return cached;
         if (req.headers.get('accept') && req.headers.get('accept').includes('text/html')) {
           return (await caches.match('./index.html')) ||
-                 (await caches.match('./indexv2.html')) ||
+                 (await caches.match('./anbar.html')) ||
+                 (await caches.match('./musteriler.html')) ||
                  (await caches.match('./'));
         }
       })

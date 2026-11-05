@@ -3218,13 +3218,25 @@ function applyTheme(theme) {
 }
 
 /* =====================================================================
-   20) SAAT VƏ AÇILIŞ
+   20) SAAT VƏ AÇILIŞ (Yaddaş & Prosessor Optimizasiyalı)
    ===================================================================== */
 (function tick(){
-  const d = new Date();
-  $('clock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-  setTimeout(tick, 1000);
+  if (!document.hidden) {
+    const d = new Date();
+    const clk = $('clock');
+    if (clk) clk.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+  // Sekmə arxa planda olanda taymeri 10 saniyəyə qədər zəiflədirik (CPU və RAM qorunması)
+  setTimeout(tick, document.hidden ? 10000 : 1000);
 })();
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    const d = new Date();
+    const clk = $('clock');
+    if (clk) clk.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+});
 
 function startApplication() {
   initTheme();
@@ -3239,6 +3251,7 @@ function startApplication() {
   setRange(iso(first), iso(TODAY), '00:00', '23:59');
   checkAuth();
   initPwaFullscreen();
+  initAutoSelfHeal();
 }
 
 if (document.readyState === 'loading') {
@@ -3515,7 +3528,8 @@ const CMD_ITEMS = [
   { title: 'Kassa İtkisi Detalları', sub: 'Detallı itki analizi pəncərəsi', icon: 'fa-list-check', action: () => openLossModal() },
   { title: 'Anbar Paneli', sub: 'Məhsullar və qalıqlar bazası', icon: 'fa-boxes-stacked', action: () => { window.location.href = 'anbar.html'; } },
   { title: 'Müştərilər Paneli', sub: 'Müştərilər və borclar bazası', icon: 'fa-users', action: () => { window.location.href = 'musteriler.html'; } },
-  { title: 'Tam Ekran', sub: 'Ekranı böyüt və ya kiçilt', icon: 'fa-expand', action: () => toggleFullScreen() }
+  { title: 'Tam Ekran', sub: 'Ekranı böyüt və ya kiçilt', icon: 'fa-expand', action: () => toggleFullScreen() },
+  { title: 'Keşi və Yaddaşı Təmizlə', sub: 'Bütün köhnə keşləri sil və səhifəni tam sıfırla', icon: 'fa-broom', action: () => forceClearAllCachesAndReload() }
 ];
 
 function openCmdPalette() {
@@ -3718,3 +3732,84 @@ if (cmdOverlayEl) {
     if (e.target === cmdOverlayEl) closeCmdPalette();
   });
 }
+
+/* =====================================================================
+   28) KEŞ VƏ YADDAŞ TƏMİZLƏYİCİSİ (CACHE & MEMORY CLEANER)
+   ===================================================================== */
+async function forceClearAllCachesAndReload(silent = false) {
+  if (!silent && typeof showToast === 'function') {
+    showToast("🧹 Keş Təmizlənir...", "Bütün köhnə keş və yaddaş sıfırlanır, zəhmət olmasa gözləyin", true);
+  }
+
+  try {
+    // 1. Service Worker-ləri ləğv et və keşləri dərhal silməsini əmr et
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const reg of registrations) {
+        try {
+          if (reg.active) {
+            reg.active.postMessage({ type: 'CLEAR_ALL_CACHES' });
+          }
+          await reg.unregister();
+        } catch(e) {}
+      }
+    }
+
+    // 2. Cache Storage-də olan bütün keşləri dərhal birdəfəlik sil
+    if ('caches' in window) {
+      try {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      } catch(e) {}
+    }
+
+    // 3. Lazımsız köhnə bildiriş və müvəqqəti sessiya zibillərini təmizlə (Şifrə və giriş saxlanılır!)
+    try {
+      localStorage.removeItem('kassa_notifications');
+      sessionStorage.clear();
+    } catch(e) {}
+
+  } catch(e) {
+    console.warn("Keş təmizlənməsi zamanı xəbərdarlıq:", e);
+  }
+
+  // 4. Ən son versiyanı birbaşa serverdən oxumaq üçün vaxt damğası ilə tam yenilə
+  const cleanUrl = window.location.origin + window.location.pathname + '?reload=' + Date.now();
+  window.location.replace(cleanUrl);
+}
+
+/* =====================================================================
+   29) AVTOMATİK ÖZÜNÜ TƏMİZLƏMƏ VƏ YADDAŞ QORUYUCUSU (AUTO SELF-HEAL)
+   ===================================================================== */
+function initAutoSelfHeal() {
+  const PAGE_START_TIME = Date.now();
+  let lastUserActivity = Date.now();
+
+  const resetActivity = () => { lastUserActivity = Date.now(); };
+  ['click', 'keydown', 'touchstart', 'mousemove'].forEach(evt => {
+    window.addEventListener(evt, resetActivity, { passive: true });
+  });
+
+  // Hər 10 dəqiqədən bir vəziyyəti yoxlayırıq
+  setInterval(() => {
+    const now = new Date();
+    const hours = now.getHours();
+    const uptimeHours = (Date.now() - PAGE_START_TIME) / (1000 * 60 * 60);
+    const idleMinutes = (Date.now() - lastUserActivity) / (1000 * 60);
+
+    // Qayda: Səhifə 24 saatdan çox fasiləsiz açıq qalıbsa VƏ istifadəçi 30 dəqiqədir toxunmursa
+    // VƏ YA gecə saat 04:00 - 05:59 arasıdırsa, ən azı 6 saat açıqdırsa və 20 dəqiqədir heç kim toxunmayıbsa
+    const isNightTime = (hours >= 4 && hours < 6);
+    const isLongUptime = uptimeHours >= 24 && idleMinutes >= 30;
+    const isNightAutoHeal = isNightTime && uptimeHours >= 6 && idleMinutes >= 20;
+
+    const isModalOpen = document.querySelector('.modal:not(.hidden), .sheet:not(.hidden)');
+
+    if ((isLongUptime || isNightAutoHeal) && !isModalOpen) {
+      console.log('🔄 Auto Self-Heal: Yaddaş və keş avtomatik sıfırlanır...');
+      forceClearAllCachesAndReload(true);
+    }
+  }, 10 * 60 * 1000);
+}
+
+window.forceClearAllCachesAndReload = forceClearAllCachesAndReload;
