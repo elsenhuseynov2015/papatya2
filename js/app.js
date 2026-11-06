@@ -3529,7 +3529,8 @@ const CMD_ITEMS = [
   { title: 'Anbar Paneli', sub: 'Məhsullar və qalıqlar bazası', icon: 'fa-boxes-stacked', action: () => { window.location.href = 'anbar.html'; } },
   { title: 'Müştərilər Paneli', sub: 'Müştərilər və borclar bazası', icon: 'fa-users', action: () => { window.location.href = 'musteriler.html'; } },
   { title: 'Tam Ekran', sub: 'Ekranı böyüt və ya kiçilt', icon: 'fa-expand', action: () => toggleFullScreen() },
-  { title: 'Keşi və Yaddaşı Təmizlə', sub: 'Bütün köhnə keşləri sil və səhifəni tam sıfırla', icon: 'fa-broom', action: () => forceClearAllCachesAndReload() }
+  { title: 'Keşi və Yaddaşı Təmizlə', sub: 'Bütün köhnə keşləri sil və səhifəni tam sıfırla', icon: 'fa-broom', action: () => forceClearAllCachesAndReload() },
+  { title: 'Diaqnostika və Sürət Testi', sub: 'GPU, şəbəkə və brauzer xətalarını test et', icon: 'fa-stethoscope', action: () => { window.location.href = 'diaqnostika.html'; } }
 ];
 
 function openCmdPalette() {

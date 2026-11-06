@@ -9,6 +9,7 @@ const STATIC_ASSETS = [
   './index.html',
   './anbar.html',
   './musteriler.html',
+  './diaqnostika.html',
   './css/style.css',
   './css/mobile.css',
   './js/app.js',

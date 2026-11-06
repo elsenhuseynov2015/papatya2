@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistem & Brauzer Diaqnostikası — Sürət və Xəta Testi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root {
+  --bg: #070b14;
+  --panel: #0d1424;
+  --panel-2: #131b2e;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(34, 211, 238, 0.4);
+  --text: #e2e8f0;
+  --text-muted: #8492a6;
+  --cyan: #22d3ee;
+  --emerald: #10b981;
+  --rose: #f43f5e;
+  --amber: #f59e0b;
+  --indigo: #6366f1;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  padding: 24px 16px 60px;
+  line-height: 1.5;
+}
+
+.diag-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* HEADER */
+.diag-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  margin-bottom: 24px;
+}
+.diag-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.diag-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(34,211,238,0.2), rgba(99,102,241,0.2));
+  border: 1px solid rgba(34,211,238,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--cyan);
+}
+.diag-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+.diag-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.diag-nav-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.nav-pill:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  transform: translateY(-1px);
+}
+
+/* ACTION BAR */
+.action-card {
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.action-title {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: #fff;
+}
+.action-desc {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto 20px;
+}
+.btn-run-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(6,182,212,0.3);
+  transition: all 0.25s;
+}
+.btn-run-all:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(6,182,212,0.45);
+}
+.btn-run-all:active {
+  transform: translateY(0);
+}
+.btn-run-all:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.copy-box {
+  margin-top: 16px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btn-copy-report {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: var(--emerald);
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 10px 22px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-copy-report:hover {
+  background: rgba(16, 185, 129, 0.25);
+  transform: translateY(-1px);
+}
+.btn-clear-cache {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: var(--rose);
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 10px 22px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-clear-cache:hover {
+  background: rgba(244, 63, 94, 0.22);
+}
+
+/* VERDICT CARD */
+.verdict-box {
+  display: none;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  border: 1px solid;
+  animation: fadeIn 0.3s ease;
+}
+.verdict-box.crit {
+  background: rgba(244, 63, 94, 0.08);
+  border-color: rgba(244, 63, 94, 0.4);
+  color: #fda4af;
+}
+.verdict-box.warn {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fde68a;
+}
+.verdict-box.ok {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #a7f3d0;
+}
+.verdict-title {
+  font-size: 17px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.verdict-body {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.verdict-list {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+.verdict-list li {
+  margin-bottom: 6px;
+}
+
+/* SECTION GRIDS */
+.diag-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.diag-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 20px;
+}
+.diag-card-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.diag-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+}
+.diag-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.diag-badge.pending { background: rgba(132, 146, 166, 0.2); color: var(--text-muted); }
+.diag-badge.running { background: rgba(34, 211, 238, 0.2); color: var(--cyan); }
+.diag-badge.pass    { background: rgba(16, 185, 129, 0.2); color: var(--emerald); }
+.diag-badge.warn    { background: rgba(245, 158, 11, 0.2); color: var(--amber); }
+.diag-badge.fail    { background: rgba(244, 63, 94, 0.2); color: var(--rose); }
+
+.prop-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 6px 0;
+  font-size: 12.5px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.prop-row:last-child { border-bottom: none; }
+.prop-key { color: var(--text-muted); font-weight: 500; }
+.prop-val {
+  color: #fff;
+  font-weight: 600;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-all;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+}
+.prop-val.pass { color: var(--emerald); }
+.prop-val.warn { color: var(--amber); }
+.prop-val.fail { color: var(--rose); }
+
+/* RAW REPORT CODE */
+.report-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 24px;
+}
+.report-panel-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.report-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+.report-pre {
+  background: #05070d;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #94a3b8;
+  max-height: 280px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="diag-container">
+
+  <!-- HEADER -->
+  <header class="diag-hdr">
+    <div class="diag-title-wrap">
+      <div class="diag-logo"><i class="fa-solid fa-stethoscope"></i></div>
+      <div>
+        <h1 class="diag-title">Sistem & Brauzer Diaqnostikası</h1>
+        <p class="diag-sub">Donmanın dəqiq səbəbini 1 kliklə aşkarlayın</p>
+      </div>
+    </div>
+    <div class="diag-nav-links">
+      <a href="index.html" class="nav-pill"><i class="fa-solid fa-chart-pie"></i> Satış Paneli</a>
+      <a href="anbar.html" class="nav-pill"><i class="fa-solid fa-boxes-stacked"></i> Anbar Paneli</a>
+      <a href="musteriler.html" class="nav-pill"><i class="fa-solid fa-users"></i> Müştərilər</a>
+    </div>
+  </header>
+
+  <!-- ACTION CARD -->
+  <div class="action-card">
+    <div class="action-title">Donma və Performans Testini Başladın</div>
+    <div class="action-desc">
+      Bu alət brauzerinizin videokart (GPU) dəstəyini, canlı WebSocket əlaqəsini, yaddaş vəziyyətini və Yandex / Brave brauzer əngəllərini dərhal yoxlayır.
+    </div>
+    <button type="button" class="btn-run-all" id="btnRunTests" onclick="runAllDiagnostics()">
+      <i class="fa-solid fa-play"></i>
+      <span>🚀 Tam Diaqnostikanı Başlat</span>
+    </button>
+
+    <div class="copy-box" id="copyBox">
+      <button type="button" class="btn-copy-report" onclick="copyReportToClipboard()">
+        <i class="fa-solid fa-copy"></i>
+        <span>📋 Nəticələri Kopyala (Çata göndər)</span>
+      </button>
+      <button type="button" class="btn-clear-cache" onclick="forceClearAndReset()">
+        <i class="fa-solid fa-broom"></i>
+        <span>🧹 Bütün Keşləri və Service Worker-ləri Məhv Et</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- VERDICT / DIAGNOSIS BOX -->
+  <div class="verdict-box" id="verdictBox">
+    <div class="verdict-title" id="verdictTitle"></div>
+    <div class="verdict-body" id="verdictBody"></div>
+  </div>
+
+  <!-- DIAGNOSTIC CARDS GRID -->
+  <div class="diag-grid">
+
+    <!-- 1. BRAUZER VƏ SİSTEM -->
+    <div class="diag-card">
+      <div class="diag-card-hdr">
+        <span class="diag-card-title"><i class="fa-solid fa-window-maximize" style="color:var(--cyan)"></i> Brauzer & Mühit</span>
+        <span class="diag-badge pending" id="badgeBrowser">Gözləyir</span>
+      </div>
+      <div class="prop-row"><span class="prop-key">Brauzer</span><span class="prop-val" id="valBrowserName">—</span></div>
+      <div class="prop-row"><span class="prop-key">Chromium Versiyası</span><span class="prop-val" id="valChromeVer">—</span></div>
+      <div class="prop-row"><span class="prop-key">Əməliyyat Sistemi</span><span class="prop-val" id="valPlatform">—</span></div>
+      <div class="prop-row"><span class="prop-key">CPU Nüvə Sayı</span><span class="prop-val" id="valCores">—</span></div>
+      <div class="prop-row"><span class="prop-key">Cihaz RAM</span><span class="prop-val" id="valDeviceMemory">—</span></div>
+      <div class="prop-row"><span class="prop-key">Şəbəkə Vəziyyəti</span><span class="prop-val" id="valOnline">—</span></div>
+    </div>
+
+    <!-- 2. QRAFİK VƏ GPU (ƏN VACİB) -->
+    <div class="diag-card">
+      <div class="diag-card-hdr">
+        <span class="diag-card-title"><i class="fa-solid fa-microchip" style="color:var(--rose)"></i> GPU & Qrafik (Hardware Accel)</span>
+        <span class="diag-badge pending" id="badgeGpu">Gözləyir</span>
+      </div>
+      <div class="prop-row"><span class="prop-key">Təchizat Sürətləndirilməsi</span><span class="prop-val" id="valHwAccel">—</span></div>
+      <div class="prop-row"><span class="prop-key">Qrafik Prosessor (GPU)</span><span class="prop-val" id="valGpuRenderer">—</span></div>
+      <div class="prop-row"><span class="prop-key">WebGL Dəstəyi</span><span class="prop-val" id="valWebGl">—</span></div>
+      <div class="prop-row"><span class="prop-key">2D Canvas Sürəti (5000 obyekt)</span><span class="prop-val" id="valCanvasSpeed">—</span></div>
+      <div class="prop-row"><span class="prop-key">Real Vaxt FPS (Kadr Tezliyi)</span><span class="prop-val" id="valFps">—</span></div>
+      <div class="prop-row"><span class="prop-key">Kadr İtkisi / Ləngimə</span><span class="prop-val" id="valFrameDrops">—</span></div>
+    </div>
+
+    <!-- 3. ŞƏBƏKƏ VƏ SUPABASE CANLI ƏLAQƏ -->
+    <div class="diag-card">
+      <div class="diag-card-hdr">
+        <span class="diag-card-title"><i class="fa-solid fa-tower-broadcast" style="color:var(--emerald)"></i> Supabase & Şəbəkə</span>
+        <span class="diag-badge pending" id="badgeNetwork">Gözləyir</span>
+      </div>
+      <div class="prop-row"><span class="prop-key">Supabase URL</span><span class="prop-val" id="valSupabaseUrl">—</span></div>
+      <div class="prop-row"><span class="prop-key">REST API Sorğusu (Ping)</span><span class="prop-val" id="valRestPing">—</span></div>
+      <div class="prop-row"><span class="prop-key">Canlı WebSocket Əlaqəsi</span><span class="prop-val" id="valWsStatus">—</span></div>
+      <div class="prop-row"><span class="prop-key">WebSocket Qoşulma Müddəti</span><span class="prop-val" id="valWsLatency">—</span></div>
+      <div class="prop-row"><span class="prop-key">AdBlocker / Qalxan Əngəli</span><span class="prop-val" id="valAdBlocker">—</span></div>
+    </div>
+
+    <!-- 4. YADDAŞ VƏ KEŞ (CACHE STORAGE) -->
+    <div class="diag-card">
+      <div class="diag-card-hdr">
+        <span class="diag-card-title"><i class="fa-solid fa-database" style="color:var(--amber)"></i> Yaddaş & Keşlər</span>
+        <span class="diag-badge pending" id="badgeMemory">Gözləyir</span>
+      </div>
+      <div class="prop-row"><span class="prop-key">JS Heap RAM İstifadəsi</span><span class="prop-val" id="valJsHeap">—</span></div>
+      <div class="prop-row"><span class="prop-key">LocalStorage Həcmi</span><span class="prop-val" id="valLocalStorage">—</span></div>
+      <div class="prop-row"><span class="prop-key">Cache Storage Paketləri</span><span class="prop-val" id="valCacheCount">—</span></div>
+      <div class="prop-row"><span class="prop-key">Service Worker Vəziyyəti</span><span class="prop-val" id="valSwStatus">—</span></div>
+      <div class="prop-row"><span class="prop-key">Hadisə Dövrəsi (Event Loop Lag)</span><span class="prop-val" id="valEventLoopLag">—</span></div>
+    </div>
+
+    <!-- 5. DOM VƏ CƏDVƏL RENDERING GÜCÜ -->
+    <div class="diag-card">
+      <div class="diag-card-hdr">
+        <span class="diag-card-title"><i class="fa-solid fa-table" style="color:var(--indigo)"></i> DOM & Cədvəl Stress Testi</span>
+        <span class="diag-badge pending" id="badgeDom">Gözləyir</span>
+      </div>
+      <div class="prop-row"><span class="prop-key">500 Sətirli Cədvəl Qurulması</span><span class="prop-val" id="valDomCreate">—</span></div>
+      <div class="prop-row"><span class="prop-key">Layout Reflow / Paint Müddəti</span><span class="prop-val" id="valDomReflow">—</span></div>
+      <div class="prop-row"><span class="prop-key">Ümumi Cədvəl Render Sürəti</span><span class="prop-val" id="valDomTotal">—</span></div>
+      <div class="prop-row"><span class="prop-key">Performans Dərəcəsi</span><span class="prop-val" id="valDomRating">—</span></div>
+    </div>
+
+  </div>
+
+  <!-- HIDDEN BENCHMARK CONTAINER -->
+  <div id="benchmarkContainer" style="position:absolute;left:-9999px;top:-9999px;visibility:hidden;width:1200px"></div>
+
+  <!-- RAW REPORT PREVIEW -->
+  <div class="report-panel">
+    <div class="report-panel-hdr">
+      <span class="report-title"><i class="fa-solid fa-file-lines"></i> Detallı Texniki Hesabat (Avtomatik Generasiya)</span>
+      <span style="font-size:12px;color:var(--text-muted)">Kopyalayıb çatda göndərə bilərsiniz</span>
+    </div>
+    <pre class="report-pre" id="reportOutput">Diaqnostikanı başlatmaq üçün "🚀 Tam Diaqnostikanı Başlat" düyməsinə klikləyin...</pre>
+  </div>
+
+</div>
+
+<script>
+/* =====================================================================
+   SİSTEM & BRAUZER DİAQNOSTİKA MÜHƏRRİKİ
+   ===================================================================== */
+const REPORT = {
+  timestamp: '',
+  browser: {},
+  gpu: {},
+  network: {},
+  memory: {},
+  dom: {},
+  verdicts: [],
+  overallScore: 100
+};
+
+// Supabase məlumatları (hazır aktiv URL və Anon açar)
+const DEFAULT_SUPABASE_URL = 'https://zcjthobakvppowerkxmv.supabase.co';
+const DEFAULT_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjanRob2Jha3ZwcG93ZXJreG12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MTQyNzMsImV4cCI6MjEwNTI5MDI3M30.ZLaSVPvowhwv50cv6W6d8AFYmPpPZ7oS5eZAxZzHI1U';
+
+function getActiveUrl() {
+  try {
+    const saved = localStorage.getItem('kassa_supabase_url');
+    if (saved && saved.startsWith('http')) return saved.trim().replace(/\/+$/, '');
+  } catch(e) {}
+  return DEFAULT_SUPABASE_URL;
+}
+
+function getActiveKey() {
+  try {
+    const saved = localStorage.getItem('kassa_supabase_key');
+    if (saved && saved.length > 20) return saved.trim();
+  } catch(e) {}
+  return DEFAULT_SUPABASE_KEY;
+}
+
+/* =====================================================================
+   TEST 1: BRAUZER VƏ SİSTEM
+   ===================================================================== */
+function testBrowserAndSystem() {
+  const ua = navigator.userAgent;
+  let browserName = 'Naməlum Brauzer';
+  let isYandex = false;
+  let isBrave = false;
+  let isChrome = false;
+  let isEdge = false;
+
+  if (ua.includes('YaBrowser') || ua.includes('Yowser')) {
+    browserName = 'Yandex Browser';
+    isYandex = true;
+  } else if (navigator.brave && typeof navigator.brave.isBrave === 'function') {
+    browserName = 'Brave Browser';
+    isBrave = true;
+  } else if (ua.includes('Edg/')) {
+    browserName = 'Microsoft Edge';
+    isEdge = true;
+  } else if (ua.includes('Chrome/')) {
+    browserName = 'Google Chrome';
+    isChrome = true;
+  } else if (ua.includes('Firefox/')) {
+    browserName = 'Mozilla Firefox';
+  } else if (ua.includes('Safari/')) {
+    browserName = 'Apple Safari';
+  }
+
+  // Version extraction
+  let chromeVer = '—';
+  const cMatch = ua.match(/Chrome\/([\d.]+)/);
+  if (cMatch) chromeVer = cMatch[1];
+
+  let yandexVer = '';
+  const yMatch = ua.match(/YaBrowser\/([\d.]+)/);
+  if (yMatch) yandexVer = yMatch[1];
+
+  const cores = navigator.hardwareConcurrency || 'Naməlum';
+  const memoryGB = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'Məlumat yoxdur';
+  const platform = navigator.platform || navigator.userAgentData?.platform || 'Windows';
+  const isOnline = navigator.onLine ? 'Bəli (Online)' : 'Xeyr (Offline)';
+
+  REPORT.browser = {
+    name: browserName,
+    isYandex,
+    isBrave,
+    isChrome,
+    isEdge,
+    chromeVer,
+    yandexVer,
+    cores,
+    memoryGB,
+    platform,
+    isOnline,
+    ua
+  };
+
+  document.getElementById('valBrowserName').textContent = browserName + (yandexVer ? ` v${yandexVer}` : '');
+  document.getElementById('valChromeVer').textContent = chromeVer;
+  document.getElementById('valPlatform').textContent = platform;
+  document.getElementById('valCores').textContent = `${cores} nüvə`;
+  document.getElementById('valDeviceMemory').textContent = memoryGB;
+  document.getElementById('valOnline').textContent = isOnline;
+  document.getElementById('valOnline').className = 'prop-val ' + (navigator.onLine ? 'pass' : 'fail');
+
+  const badge = document.getElementById('badgeBrowser');
+  badge.className = 'diag-badge pass';
+  badge.textContent = 'Yoxlandı';
+}
+
+/* =====================================================================
+   TEST 2: GPU VƏ QRAFİK SÜRƏTLƏNDİRİLMƏSİ (HARDWARE ACCELERATION)
+   ===================================================================== */
+async function testGpuAndGraphics() {
+  const badge = document.getElementById('badgeGpu');
+  badge.className = 'diag-badge running';
+  badge.textContent = 'Ölçülür...';
+
+  let hasWebGl = false;
+  let renderer = 'Naməlum';
+  let vendor = 'Naməlum';
+  let isSoftwareRaster = false;
+
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (gl) {
+      hasWebGl = true;
+      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      if (debugInfo) {
+        vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || '';
+        renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '';
+      } else {
+        renderer = gl.getParameter(gl.RENDERER) || 'Generic WebGL';
+      }
+    }
+  } catch(e) {
+    renderer = 'Xəta: ' + e.message;
+  }
+
+  // SwiftShader / Software rendering detection
+  const lowerR = renderer.toLowerCase();
+  if (lowerR.includes('swiftshader') || lowerR.includes('llvmpipe') || lowerR.includes('software') || lowerR.includes('gdi generic') || !hasWebGl) {
+    isSoftwareRaster = true;
+  }
+
+  // 2D Canvas Benchmark (5000 shapes)
+  const cBenchStart = performance.now();
+  const cCanvas = document.createElement('canvas');
+  cCanvas.width = 600;
+  cCanvas.height = 400;
+  const ctx = cCanvas.getContext('2d');
+  for (let i = 0; i < 5000; i++) {
+    ctx.fillStyle = (i % 2 === 0) ? '#22d3ee' : '#f43f5e';
+    ctx.fillRect((i * 7) % 550, (i * 13) % 350, 40, 40);
+  }
+  const canvasTimeMs = Math.round(performance.now() - cBenchStart);
+
+  // FPS Test over 60 frames
+  const fpsData = await measureFps(60);
+
+  REPORT.gpu = {
+    hasWebGl,
+    vendor,
+    renderer,
+    isSoftwareRaster,
+    canvasTimeMs,
+    avgFps: fpsData.avgFps,
+    frameDrops: fpsData.drops
+  };
+
+  const valHw = document.getElementById('valHwAccel');
+  const valRen = document.getElementById('valGpuRenderer');
+  const valGl = document.getElementById('valWebGl');
+  const valCan = document.getElementById('valCanvasSpeed');
+  const valFps = document.getElementById('valFps');
+  const valDrop = document.getElementById('valFrameDrops');
+
+  valRen.textContent = renderer.length > 32 ? renderer.substring(0, 32) + '...' : renderer;
+  valRen.title = renderer;
+  valGl.textContent = hasWebGl ? 'Dəstəklənir' : 'Dəstəklənmir';
+  valGl.className = 'prop-val ' + (hasWebGl ? 'pass' : 'fail');
+
+  valCan.textContent = `${canvasTimeMs} ms`;
+  valCan.className = 'prop-val ' + (canvasTimeMs < 35 ? 'pass' : (canvasTimeMs < 80 ? 'warn' : 'fail'));
+
+  valFps.textContent = `${fpsData.avgFps} FPS`;
+  valFps.className = 'prop-val ' + (fpsData.avgFps >= 50 ? 'pass' : (fpsData.avgFps >= 30 ? 'warn' : 'fail'));
+
+  valDrop.textContent = `${fpsData.drops} kadr`;
+  valDrop.className = 'prop-val ' + (fpsData.drops < 5 ? 'pass' : 'warn');
+
+  if (isSoftwareRaster) {
+    valHw.textContent = '❌ SÖNÜLÜDÜR (CPU İLƏ ÇƏKİR!)';
+    valHw.className = 'prop-val fail';
+    badge.className = 'diag-badge fail';
+    badge.textContent = 'BÖHRAN';
+    REPORT.verdicts.push({
+      type: 'crit',
+      title: 'Təchizat Sürətləndirilməsi (GPU) Sönülüdür!',
+      desc: `Brauzer videokartdan yox, prosessordan (Software/SwiftShader) istifadə edir. Bütün cədvəllər və şüşə effektləri prosessoru 100% boğur və donma yaradır.`,
+      fix: 'Brauzerin tənzimləmələrinə daxil olub "Use graphics acceleration when available" (Аппаратное ускорение) seçimini AKTİV edin və brauzeri yenidən başladın.'
+    });
+  } else {
+    valHw.textContent = '✅ AKTİVDİR (Videokart)';
+    valHw.className = 'prop-val pass';
+    badge.className = 'diag-badge ' + (fpsData.avgFps >= 45 ? 'pass' : 'warn');
+    badge.textContent = fpsData.avgFps >= 45 ? 'ƏLA' : 'NORMAL';
+  }
+}
+
+function measureFps(framesToCount = 60) {
+  return new Promise(resolve => {
+    let frameTimes = [];
+    let lastTime = performance.now();
+    let drops = 0;
+
+    function onFrame(now) {
+      const delta = now - lastTime;
+      lastTime = now;
+      frameTimes.push(delta);
+      if (delta > 32) drops++; // 30 FPS-dən aşağı düşənlər
+
+      if (frameTimes.length < framesToCount) {
+        requestAnimationFrame(onFrame);
+      } else {
+        const avgDelta = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+        const avgFps = Math.min(144, Math.round(1000 / avgDelta));
+        resolve({ avgFps, drops });
+      }
+    }
+    requestAnimationFrame(onFrame);
+  });
+}
+
+/* =====================================================================
+   TEST 3: ŞƏBƏKƏ VƏ SUPABASE CANLI ƏLAQƏ
+   ===================================================================== */
+async function testNetworkAndSupabase() {
+  const badge = document.getElementById('badgeNetwork');
+  badge.className = 'diag-badge running';
+  badge.textContent = 'Yoxlanır...';
+
+  const url = getActiveUrl();
+  const key = getActiveKey();
+
+  document.getElementById('valSupabaseUrl').textContent = url.replace('https://', '');
+
+  // 1. REST API Ping Test
+  let restStatus = '—';
+  let pingMs = 0;
+  let isRestOk = false;
+  try {
+    const t0 = performance.now();
+    const resp = await fetch(`${url}/rest/v1/satislar?select=id&limit=1`, {
+      method: 'GET',
+      headers: {
+        'apikey': key,
+        'Authorization': `Bearer ${key}`
+      }
+    });
+    pingMs = Math.round(performance.now() - t0);
+    restStatus = `${resp.status} ${resp.statusText} (${pingMs} ms)`;
+    isRestOk = resp.ok;
+  } catch(e) {
+    restStatus = 'XƏTA: ' + (e.message || 'Bağlantı kəsildi');
+  }
+
+  const valRest = document.getElementById('valRestPing');
+  valRest.textContent = restStatus;
+  valRest.className = 'prop-val ' + (isRestOk ? 'pass' : 'fail');
+
+  // 2. Realtime WebSocket Test
+  const wsResult = await testSupabaseWebSocket(url, key);
+  const valWs = document.getElementById('valWsStatus');
+  const valWsLat = document.getElementById('valWsLatency');
+  valWs.textContent = wsResult.statusText;
+  valWs.className = 'prop-val ' + (wsResult.ok ? 'pass' : 'fail');
+  valWsLat.textContent = wsResult.latency ? `${wsResult.latency} ms` : '—';
+  valWsLat.className = 'prop-val ' + (wsResult.ok ? 'pass' : 'fail');
+
+  // 3. AdBlocker / Protect check
+  const valAd = document.getElementById('valAdBlocker');
+  if (!isRestOk || !wsResult.ok) {
+    valAd.textContent = '⚠️ ƏNGƏLLƏNMƏ EHTİMAL VAR!';
+    valAd.className = 'prop-val fail';
+    REPORT.verdicts.push({
+      type: 'crit',
+      title: 'Yandex Protect və ya AdBlocker Əlaqəni Bloklayır!',
+      desc: 'Brauzerin daxili təhlükəsizlik qalxanı (Yandex Protect / AdBlock) Supabase canlı serverinə çıxışı kəsir və ya gecikdirir.',
+      fix: 'Yandex ünvan sətrindəki qalxan ikonuna klikləyib sayt üçün mühafizəni söndürün və ya istisna siyahısına əlavə edin.'
+    });
+  } else {
+    valAd.textContent = 'Maneə yoxdur (Açıq)';
+    valAd.className = 'prop-val pass';
+  }
+
+  REPORT.network = {
+    url,
+    isRestOk,
+    pingMs,
+    wsOk: wsResult.ok,
+    wsLatency: wsResult.latency,
+    wsError: wsResult.error
+  };
+
+  badge.className = 'diag-badge ' + (isRestOk && wsResult.ok ? 'pass' : 'fail');
+  badge.textContent = isRestOk && wsResult.ok ? 'UĞURLU' : 'XƏTA';
+}
+
+function testSupabaseWebSocket(url, key) {
+  return new Promise(resolve => {
+    try {
+      const host = new URL(url).host;
+      const wsUrl = `wss://${host}/realtime/v1/websocket?apikey=${encodeURIComponent(key)}&vsn=1.0.0`;
+      const t0 = performance.now();
+      const ws = new WebSocket(wsUrl);
+
+      const timer = setTimeout(() => {
+        try { ws.close(); } catch(e){}
+        resolve({ ok: false, statusText: 'Timeout (Server cavab vermədi)', latency: null, error: 'Timeout' });
+      }, 5000);
+
+      ws.onopen = () => {
+        clearTimeout(timer);
+        const lat = Math.round(performance.now() - t0);
+        try { ws.close(); } catch(e){}
+        resolve({ ok: true, statusText: 'Canlı Əlaqə Açıldı (Uğurlu)', latency: lat, error: null });
+      };
+
+      ws.onerror = (err) => {
+        clearTimeout(timer);
+        resolve({ ok: false, statusText: 'WebSocket Bloklandı və ya Xəta', latency: null, error: 'Error' });
+      };
+    } catch(err) {
+      resolve({ ok: false, statusText: 'Xəta: ' + err.message, latency: null, error: err.message });
+    }
+  });
+}
+
+/* =====================================================================
+   TEST 4: YADDAŞ VƏ KEŞ (CACHE STORAGE & SERVICE WORKER)
+   ===================================================================== */
+async function testMemoryAndCaches() {
+  const badge = document.getElementById('badgeMemory');
+  badge.className = 'diag-badge running';
+  badge.textContent = 'Ölçülür...';
+
+  // JS Heap RAM (Chromium exclusive)
+  let jsHeapStr = 'Dəstəklənmir';
+  let jsHeapMB = 0;
+  if (performance && performance.memory) {
+    jsHeapMB = Math.round(performance.memory.usedJSHeapSize / (1024 * 1024));
+    const totalHeapMB = Math.round(performance.memory.totalJSHeapSize / (1024 * 1024));
+    jsHeapStr = `${jsHeapMB} MB / ${totalHeapMB} MB`;
+  }
+  const valHeap = document.getElementById('valJsHeap');
+  valHeap.textContent = jsHeapStr;
+  valHeap.className = 'prop-val ' + (jsHeapMB < 150 ? 'pass' : (jsHeapMB < 400 ? 'warn' : 'fail'));
+
+  // LocalStorage
+  let lsBytes = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      lsBytes += (k.length + (localStorage.getItem(k) || '').length) * 2;
+    }
+  } catch(e) {}
+  const lsKB = Math.round(lsBytes / 1024);
+  const valLs = document.getElementById('valLocalStorage');
+  valLs.textContent = `${localStorage.length} element (${lsKB} KB)`;
+  valLs.className = 'prop-val ' + (lsKB < 500 ? 'pass' : 'warn');
+
+  // Cache Storage
+  let cacheNames = [];
+  try {
+    if ('caches' in window) {
+      cacheNames = await caches.keys();
+    }
+  } catch(e) {}
+  const valCch = document.getElementById('valCacheCount');
+  valCch.textContent = cacheNames.length ? `${cacheNames.length} paket (${cacheNames.join(', ')})` : '0 paket (Təmiz)';
+  valCch.className = 'prop-val ' + (cacheNames.length <= 2 ? 'pass' : 'warn');
+
+  // Service Worker
+  let swStatus = 'Qeydiyyat yoxdur';
+  let isSwActive = false;
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      if (regs.length > 0) {
+        swStatus = `${regs.length} aktiv (${regs[0].active ? 'İşləyir' : 'Gözləyir'})`;
+        isSwActive = true;
+      }
+    }
+  } catch(e) {}
+  const valSw = document.getElementById('valSwStatus');
+  valSw.textContent = swStatus;
+  valSw.className = 'prop-val ' + (isSwActive ? 'pass' : '');
+
+  // Event Loop Lag (Lag test)
+  const loopLag = await measureEventLoopLag();
+  const valLag = document.getElementById('valEventLoopLag');
+  valLag.textContent = `${loopLag} ms`;
+  valLag.className = 'prop-val ' + (loopLag < 10 ? 'pass' : (loopLag < 30 ? 'warn' : 'fail'));
+
+  REPORT.memory = {
+    jsHeapMB,
+    lsKB,
+    cacheNames,
+    swStatus,
+    loopLag
+  };
+
+  badge.className = 'diag-badge ' + (loopLag < 25 ? 'pass' : 'warn');
+  badge.textContent = loopLag < 25 ? 'NORMAL' : 'YÜKLƏNMƏ';
+}
+
+function measureEventLoopLag() {
+  return new Promise(resolve => {
+    const t0 = performance.now();
+    setTimeout(() => {
+      const lag = Math.round(performance.now() - t0);
+      resolve(lag);
+    }, 0);
+  });
+}
+
+/* =====================================================================
+   TEST 5: DOM & CƏDVƏL RENDERING STRESS SINAĞI
+   ===================================================================== */
+async function testDomStress() {
+  const badge = document.getElementById('badgeDom');
+  badge.className = 'diag-badge running';
+  badge.textContent = 'Qurulur...';
+
+  const container = document.getElementById('benchmarkContainer');
+  container.innerHTML = '';
+
+  const tStart = performance.now();
+
+  // 1. Build 500 rows table in HTML
+  let rowsHtml = '';
+  for (let i = 0; i < 500; i++) {
+    rowsHtml += `
+      <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+        <td style="padding:6px;font-weight:600">Məhsul #${i + 1} — Test Məhsulu Adı</td>
+        <td style="padding:6px">1234567890${i}</td>
+        <td style="padding:6px;color:#22d3ee">15.50 ₼</td>
+        <td style="padding:6px;color:#10b981">22.00 ₼</td>
+        <td style="padding:6px;color:#f43f5e">+6.50 ₼</td>
+        <td style="padding:6px"><span style="background:rgba(34,211,238,0.2);padding:2px 8px;border-radius:4px">Normal</span></td>
+        <td style="padding:6px">45 ədəd</td>
+        <td style="padding:6px"><button style="padding:4px 8px;border-radius:6px;background:#1e293b;color:#fff">Bax</button></td>
+      </tr>`;
+  }
+  const createMs = Math.round(performance.now() - tStart);
+
+  // 2. DOM Injection
+  const tInject = performance.now();
+  container.innerHTML = `<table style="width:100%;border-collapse:collapse">${rowsHtml}</table>`;
+
+  // 3. Force Layout Reflow
+  const reflowHeight = container.offsetHeight;
+  const reflowMs = Math.round(performance.now() - tInject);
+  const totalMs = createMs + reflowMs;
+
+  // Cleanup
+  container.innerHTML = '';
+
+  document.getElementById('valDomCreate').textContent = `${createMs} ms`;
+  document.getElementById('valDomReflow').textContent = `${reflowMs} ms`;
+  document.getElementById('valDomTotal').textContent = `${totalMs} ms`;
+
+  const valRate = document.getElementById('valDomRating');
+  let ratingStr = 'Əla';
+  let rateCls = 'pass';
+  if (totalMs > 120) {
+    ratingStr = 'Çox Zəif (Donur)';
+    rateCls = 'fail';
+    REPORT.verdicts.push({
+      type: 'warn',
+      title: 'Brauzerin Cədvəl Renderi Həddindən Artıq Ağırdır!',
+      desc: `500 sətirlik test cədvəli ${totalMs} ms vaxt apardı (normalda 20-40 ms olmalıdır). Bu, videokartın işləmədiyini və ya arxa planda ağır uzantının olduğunu göstərir.`,
+      fix: 'Yandex brauzerində "Hardware Acceleration" aktiv edin və istifadə olunmayan əlavələri (extensions) söndürün.'
+    });
+  } else if (totalMs > 60) {
+    ratingStr = 'Orta (Gecikmə var)';
+    rateCls = 'warn';
+  }
+  valRate.textContent = ratingStr;
+  valRate.className = 'prop-val ' + rateCls;
+
+  badge.className = 'diag-badge ' + rateCls;
+  badge.textContent = ratingStr.toUpperCase();
+
+  REPORT.dom = {
+    createMs,
+    reflowMs,
+    totalMs,
+    ratingStr
+  };
+}
+
+/* =====================================================================
+   ÜMUMİ NƏTİCƏ VƏ DİAQNOSTİKA HESABATI
+   ===================================================================== */
+function generateDiagnosisSummary() {
+  const vBox = document.getElementById('verdictBox');
+  const vTitle = document.getElementById('verdictTitle');
+  const vBody = document.getElementById('verdictBody');
+
+  vBox.style.display = 'block';
+
+  if (REPORT.verdicts.length === 0) {
+    vBox.className = 'verdict-box ok';
+    vTitle.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--emerald)"></i> Bütün Testlər Uğurla Keçdi! Sistem Sağlamdır';
+    vBody.innerHTML = `Brauzerinizin qrafik sürətləndirilməsi, şəbəkə pingi və cədvəl render gücü normal standartlara tam uyğundur. Əgər səhifə yenə də donursa, bu yalnız arxa fonda çoxlu sekmənin açıq qalması və ya daxili brauzer uzantısı ilə bağlı ola bilər.`;
+  } else {
+    const isCrit = REPORT.verdicts.some(v => v.type === 'crit');
+    vBox.className = 'verdict-box ' + (isCrit ? 'crit' : 'warn');
+    vTitle.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:${isCrit ? 'var(--rose)' : 'var(--amber)'}"></i> ${isCrit ? 'Diqqət: Donmaya Səbəb Olan Kritik Xətalar Tapıldı!' : 'Xəbərdarlıq: Bəzi Parametrlər Zəifdir'}`;
+
+    let listHtml = '<ul class="verdict-list">';
+    REPORT.verdicts.forEach(v => {
+      listHtml += `<li><b>${v.title}</b> — ${v.desc}<br><span style="color:#38bdf8;font-size:12px">👉 Həlli: ${v.fix}</span></li>`;
+    });
+    listHtml += '</ul>';
+    vBody.innerHTML = listHtml;
+  }
+
+  // Generate plain markdown report for copy
+  const mdReport = `=== BRAUZER & SİSTEM DİAQNOSTİKA HESABATI ===
+Tarix: ${new Date().toLocaleString()}
+Brauzer: ${REPORT.browser.name} (Chromium ${REPORT.browser.chromeVer})
+Platforma: ${REPORT.browser.platform} | CPU: ${REPORT.browser.cores} nüvə | RAM: ${REPORT.browser.memoryGB}
+
+[1. GPU & Təchizat Sürətləndirilməsi]
+• Status: ${REPORT.gpu.isSoftwareRaster ? '❌ SÖNÜLÜDÜR (CPU/SwiftShader)' : '✅ AKTİVDİR (GPU)'}
+• Videokart Modeli: ${REPORT.gpu.renderer}
+• 2D Canvas Sürəti: ${REPORT.gpu.canvasTimeMs} ms
+• Real FPS: ${REPORT.gpu.avgFps} FPS (Kadr itkisi: ${REPORT.gpu.frameDrops})
+
+[2. Şəbəkə & Supabase]
+• URL: ${REPORT.network.url}
+• REST API: ${REPORT.network.isRestOk ? `✅ Uğurlu (${REPORT.network.pingMs} ms)` : '❌ XƏTA'}
+• Canlı WebSocket: ${REPORT.network.wsOk ? `✅ Qoşuldu (${REPORT.network.wsLatency} ms)` : '❌ XƏTA / BLOKLANDI'}
+
+[3. Yaddaş & Keşlər]
+• JS Heap RAM: ${REPORT.memory.jsHeapMB} MB
+• LocalStorage: ${REPORT.memory.lsKB} KB
+• Cache Storage: ${REPORT.memory.cacheNames.join(', ') || 'Təmiz'}
+• Service Worker: ${REPORT.memory.swStatus}
+• Event Loop Gecikməsi: ${REPORT.memory.loopLag} ms
+
+[4. Cədvəl DOM Stress Testi]
+• 500 sətir render: ${REPORT.dom.totalMs} ms (${REPORT.dom.ratingStr})
+
+[5. Əsas Tapılmış Problemlər]
+${REPORT.verdicts.length ? REPORT.verdicts.map(v => `- [${v.type.toUpperCase()}] ${v.title}: ${v.desc} -> Həlli: ${v.fix}`).join('\n') : 'Heç bir kritik problem tapılmadı.'}
+=============================================`;
+
+  document.getElementById('reportOutput').textContent = mdReport;
+  document.getElementById('copyBox').style.display = 'flex';
+}
+
+/* =====================================================================
+   BAŞLAT DÜYMƏSİ
+   ===================================================================== */
+async function runAllDiagnostics() {
+  const btn = document.getElementById('btnRunTests');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Diaqnostika Aparılır...</span>';
+
+  REPORT.verdicts = [];
+
+  try {
+    testBrowserAndSystem();
+    await testGpuAndGraphics();
+    await testNetworkAndSupabase();
+    await testMemoryAndCaches();
+    await testDomStress();
+    generateDiagnosisSummary();
+  } catch(e) {
+    console.error("Diaqnostika xətası:", e);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-rotate"></i> <span>Təkrar Yoxla</span>';
+  }
+}
+
+/* =====================================================================
+   KOPYALAMA VƏ TƏMİZLƏMƏ FUNKSİYALARI
+   ===================================================================== */
+function copyReportToClipboard() {
+  const text = document.getElementById('reportOutput').textContent;
+  if (!text) return;
+
+  navigator.clipboard.writeText(text).then(() => {
+    alert("✅ Hesabat uğurla kopyalandı!\nİndi çat pəncərəsinə keçib 'Ctrl + V' ilə mənə göndərə bilərsiniz.");
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert("✅ Hesabat kopyalandı! Çata yapışdıra bilərsiniz.");
+  });
+}
+
+async function forceClearAndReset() {
+  if (!confirm("Bütün keşlər, zombi Service Worker-lər və müvəqqəti məlumatlar birdəfəlik silinsin?")) return;
+
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const r of regs) await r.unregister();
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      for (const k of keys) await caches.delete(k);
+    }
+    sessionStorage.clear();
+    localStorage.removeItem('kassa_notifications');
+    localStorage.removeItem('musteri_notifications');
+    alert("🧹 Bütün keşlər uğurla məhv edildi! Səhifə yenilənir...");
+    window.location.reload(true);
+  } catch(e) {
+    alert("Xəta: " + e.message);
+  }
+}
+
+// Avtomatik açılışda dərhal ilkin brauzer məlumatlarını göstər
+window.addEventListener('DOMContentLoaded', () => {
+  testBrowserAndSystem();
+});
+</script>
+
+</body>
+</html>
