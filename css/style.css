@@ -42,8 +42,15 @@ body{
   box-shadow:0 0 12px rgba(99,102,241,.8);
 }
 
-/* ============ BACKGROUND (Animated Aurora) ============ */
-.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+/* ============ BACKGROUND (Hardware-Accelerated Clean Gradient) ============ */
+.bg{
+  position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 15% 15%, rgba(79,70,229,.18), transparent 45%),
+    radial-gradient(ellipse at 85% 20%, rgba(6,182,212,.14), transparent 45%),
+    radial-gradient(ellipse at 50% 90%, rgba(168,85,247,.14), transparent 50%),
+    var(--bg);
+}
 .bg::after{
   content:'';position:absolute;inset:0;
   background-image:
@@ -53,14 +60,7 @@ body{
   -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 30%,#000 30%,transparent 100%);
   mask-image:radial-gradient(ellipse 90% 70% at 50% 30%,#000 30%,transparent 100%);
 }
-.orb{position:absolute;border-radius:50%;filter:blur(130px);opacity:.5;will-change:transform}
-.o1{width:640px;height:640px;background:#4f46e5;top:-280px;left:-180px;animation:drift1 22s ease-in-out infinite}
-.o2{width:520px;height:520px;background:#06b6d4;top:-120px;right:-140px;animation:drift2 26s ease-in-out infinite;opacity:.38}
-.o3{width:600px;height:600px;background:#a855f7;bottom:-320px;left:35%;animation:drift3 30s ease-in-out infinite;opacity:.32}
-.o4{width:480px;height:480px;background:#f43f5e;top:45%;left:-10%;animation:drift2 34s ease-in-out infinite;opacity:.18}
-@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(120px,80px) scale(1.12)}}
-@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-100px,120px) scale(1.08)}}
-@keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(80px,-90px) scale(1.15)}}
+.orb{display:none !important;animation:none !important;}
 
 .wrap{position:relative;z-index:1;max-width:1680px;margin:0 auto;padding:26px 24px 90px}
 
